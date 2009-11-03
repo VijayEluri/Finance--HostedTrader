@@ -1,0 +1,250 @@
+=head1 NAME
+
+    Datasource - Read/Write access to a database
+
+=head1 SYNOPSIS
+
+    use Datasource;
+    my $db = Datasource->new('DBI:mysql:fx', 'root', undef);
+    my $data = $db->getOHLCPrices('EURUSD', 60, 10000);
+    ... do something with data ...
+    $db->setOHLCPrices('EURUSD', $data);
+
+=head1 DESCRIPTION
+
+This module provides the glue between a database and the OHLCTimeSeries object.
+
+=head2 Methods
+
+=over
+
+=item C<new>
+
+Returns a new Datasource object.
+Uses the same exact arguments as the DBI->connect method
+
+=item C<getOHLCPrices>
+
+Returns a new OHLCTimeSeries object for the given arguments.
+
+Arguments:
+    $symbol
+    $timeframe
+    $limit
+
+
+=item C<setOHLCPrices>
+
+Writes a given OHLCTimeSeries object back to the database.
+
+Arguments:
+    $symbol
+    $ohlc_ts
+
+=back
+
+=head1 CAVEATS
+
+The implementation of setOHLCPrices writes to the database one row at a time and needs to be optimized
+
+=head1 LICENSE
+
+This file is licensed under the MIT X11 License:
+
+http://www.opensource.org/licenses/mit-license.php
+
+=head1 AUTHOR
+
+Joao Costa - L<http://zonalivre.org/>
+
+=head1 SEE ALSO
+
+L<OHLCTimeSeries>
+
+=cut
+
+package Datasource;
+
+use strict;
+use warnings;
+use DBI;
+use OHLCTimeSeries;
+use POSIX qw( strftime );
+use Config::Any;
+use Data::Dumper;
+
+my %timeframes = (
+    'tick'  => 0,
+    'sec'   => 1,
+    '5sec'  => 5,
+    '15sec' => 15,
+    '30sec' => 30,
+    'min'   => 60,
+    '5min'  => 300,
+    '15min' => 900,
+    '30min' => 1800,
+    'hour'  => 3600,
+    '2hour' => 7200,
+    '3hour' => 10800,
+    '4hour' => 14400,
+    'day'   => 86400,
+    '2day'  => 172800,
+    'week'  => 604800
+);
+
+sub new {
+    my ($class) = @_;
+    my $cfg_all = Config::Any->load_files({ files => [qw(/etc/fx.yml ~/.fx.yml ./fx.yml)], use_ext => 1,  flatten_to_hash => 1});
+    my $cfg = {};
+    foreach my $file (qw(/etc/fx.yml ~/.fx.yml ./fx.yml)) {
+        next unless($cfg_all->{$file});
+        foreach my $key (keys %{$cfg_all->{$file}}) {
+            $cfg->{$key} = $cfg_all->{$file}->{$key};
+        }
+    }
+
+
+
+    my $dbh = DBI->connect(            'DBI:'.$cfg->{db}->{driver}.':'.$cfg->{db}->{dbname}.'', 
+            $cfg->{db}->{dbuser},
+            $cfg->{db}->{dbpasswd}
+    ) || die($DBI::errstr);
+    bless {
+        'dbh' => $dbh,
+        'cfg' => $cfg,
+    }, $class;
+}
+
+sub _parse {
+    my $exp = shift;
+
+while (1) {
+    if ($exp =~ s/macd\( *([^, ]+) *,? *([0-9]+)? *,? *([0-9]+)? *,? *([0-9]+)? *\)/ta_ema($1,$2) - ta_ema($1,$3)/g) {
+    } elsif ($exp =~ s/macdsig\( *([^, ]+) *,? *([0-9]+)? *,? *([0-9]+)? *,? *([0-9]+)? *\)/ta_ema(ta_ema($1,$2) - ta_ema($1,$3), $4)/g) {
+    } elsif ($exp =~ s/macddiff\( *([^, ]+) *,? *([0-9]+)? *,? *([0-9]+)? *,? *([0-9]+)? *\)/ta_ema($1,$2) - ta_ema($1,$3) - ta_ema(ta_ema($1,$2) - ta_ema($1,$3), $4)/g) {
+    } elsif ($exp =~ s/bolhigh\( *([^, ]+) *,? *([0-9]+)? *,? *([0-9]+)? *\)/ta_sma($1,$2) + $3*SQRT(ta_sum(POW($1 - ta_sma($1, $2), 2), $2)\/$2)/g) {
+    } elsif ($exp =~ s/bollow\( *([^, ]+) *,? *([0-9]+)? *,? *([0-9]+)? *\)/ta_sma($1,$2) - $3*SQRT(ta_sum(POW($1 - ta_sma($1, $2), 2), $2)\/$2)/g) {
+#    } elsif ($exp =~ s/trend\( *([0-9]+)? *\)/CAST(IF ( (bolhigh(close,$1,2) IS NULL), NULL,IF (close >= bolhigh(close,$1,2), 3, IF ( close >= bolhigh(close,$1,1), 2, IF (close>=bolhigh(close,$1,0),1, IF (close > bollow(close,$1,1), -1, IF(close>bollow(close,$1,2),-2,IF(close<=bollow(close,$1,2), -3, NULL))))))) AS DECIMAL(65))/g) {
+#    } elsif ($exp =~ s/trend\( *([0-9]+)? *\)/CAST( CASE WHEN bolhigh(close,$1,2) IS NULL THEN NULL WHEN close >= bolhigh(close,$1,2) THEN 3 WHEN close >= bolhigh(close,$1,1) THEN 2 WHEN close >= ta_sma(close,21) THEN 1 WHEN close >= bollow(close,$1,1) THEN -1 WHEN close >= bollow(close,$1,2) THEN -2 WHEN close < bollow(close,$1,2) THEN -3 ELSE NULL END AS DECIMAL(65))/g) {
+    } elsif ($exp =~ s/trend\( *([^, ]+) *,? *([0-9]+)? *\)/($1 - ta_sma($1, $2)) \/ (SQRT(ta_sum(POW($1 - ta_sma($1, $2), 2), $2)\/$2))/g) {
+    } else {
+		last;
+	}
+}
+
+#BOL(close, 14, 2)
+#BOLHIGH = sma(close, 14) + 2*SQRT(_sum(POW(close - sma(close, 14), 2), 14)/14)
+#BOLLOW  = sma(close, 14) - 2*SQRT(_sum(POW(close - sma(close, 14), 2), 14)/14)
+
+#trend
+
+
+
+    return $exp;
+}
+
+sub parseExpression {
+    my ($self, $expression, $symbol, $tf_s, $maxLoadedItems, $itemCount) = @_;
+    $maxLoadedItems = 10_000_000_000 if (!defined($maxLoadedItems) || $maxLoadedItems == -1);
+    my $tf = $timeframes{$tf_s} || die("Invalid timeframe: $tf_s");
+
+    my $parsed_expression = _parse($expression);
+#die($parsed_expression);
+    my $sql = qq|
+    SELECT datetime, $parsed_expression FROM (
+        SELECT * FROM (
+            SELECT * FROM $symbol\_$tf
+            WHERE dayofweek(datetime) <> 1
+            ORDER BY datetime DESC
+            LIMIT $maxLoadedItems
+        ) AS T_INNER2 ORDER BY datetime
+    ) AS T_INNER
+|;
+#die($sql);
+    my $sth = $self->{'dbh'}->prepare($sql) or die($DBI::errstr);
+    $sth->execute() or die($DBI::errstr);
+
+    my $data = $sth->fetchall_arrayref();
+    $sth->finish() or die($DBI::errstr);
+    my $lastItemIndex = scalar(@$data) - 1;
+    if (defined($itemCount) && ($lastItemIndex > $itemCount )) {
+        my @slice = @{$data}[$lastItemIndex - $itemCount + 1..$lastItemIndex];
+        return \@slice;
+    }
+    return $data;
+}
+
+sub convertOHLCTimeSeries {
+    my ($self, $symbol, $tf_src, $tf_dst, $start_date, $end_date) = @_;
+    my ($where_clause, $start, $end, $limit) = ('', '', '', -1);
+    die('Cannot convert to a smaller timeframe') if ( $tf_dst < $tf_src );
+
+    my ($date_select, $date_group);
+
+    if ($tf_dst == 3600) {
+        $date_select = "date_format(datetime, '%Y-%m-%d %H:00:00')";
+    } elsif ($tf_dst == 7200) {
+        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 2) * 2, ':00:00') AS DATETIME)";
+    } elsif ($tf_dst == 10800) {
+        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 3) * 3, ':00:00') AS DATETIME)";
+    } elsif ($tf_dst == 14400) {
+        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 4) * 4, ':00:00') AS DATETIME)";
+    } elsif ($tf_dst == 86400) {
+        $date_select = "date_format(datetime, '%Y-%m-%d 00:00:00')";
+    } elsif ($tf_dst == 604800) {
+        $date_select = "date_format(datetime, '%Y-%m-%d 00:00:00')";
+        $date_group = "date_format(datetime, '%x-%v')";
+    } else {
+        die("timeframe not supported ($tf_dst)");
+    }
+	$date_group = $date_select unless(defined($date_group));
+
+    my $sql = qq|
+INSERT INTO $symbol\_$tf_dst
+SELECT $date_select, real_First(open) as open, MIN(low) as low, MAX(high) as high, real_Last(close) as close
+FROM $symbol\_$tf_src
+WHERE datetime >= '$start_date' AND datetime < '$end_date'
+GROUP BY $date_group
+ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), close=values(close)
+|;
+
+    $self->{'dbh'}->do($sql);
+}
+
+sub getSymbols {
+    my $self = shift;
+
+    return $self->{cfg}->{symbols};
+}
+
+sub getSynthetics {
+    my $self = shift;
+
+    return $self->{cfg}->{synthetics};
+}
+
+sub getAllSymbols {
+	my $self = shift;
+
+	return [ @{$self->{cfg}->{symbols}}, @{$self->{cfg}->{synthetics}}];
+}
+
+sub getTimeframes {
+    my $self = shift;
+
+    my @sorted = sort { int($a) <=> int($b) } @{$self->{cfg}->{timeframes}};
+
+    return \@sorted;
+}
+
+sub getTimeframeID {
+	my ($self, $name) = @_;
+	return $timeframes{$name};
+}
+
+sub DESTROY {
+    my ($self) = @_;
+    $self->{'dbh'}->disconnect;
+}
+
+1;

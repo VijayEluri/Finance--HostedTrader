@@ -1,0 +1,61 @@
+sample data for mysql
+.tidyrc
+test mysql udfs
+more indicators: http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators
+convertTF UDF
+online code editor: (editarea?, also codepress, codemirror)
+optimize SMA, TR
+
+
+Fix FirstLast UDFs
+
+
+2009-09-12
+Fix weekly timeframe conversion (use mysql %x instead of %Y in group by clause)
+Fix string_First to not blow up, but it isn't needed anyway (i thought i needed it for timeframe conversion)
+
+2009-09-11
+Supress warnings in chart.pl when there is no data for certain time series
+Print timeframe being used in chart
+
+2009-09-06
+Basic price charting using amcharts.com
+
+2009-09-05
+Synthetics
+Overall score comparing 10 symbols
+
+2009-09-04 (Since last time)
+New indicators (previous, max, min
+Fixes to existing indicators to properly handle NULLs in middle of dataset
+New trend derived indicator which works and doesn't have NULLs in mid of dataset
+Uploaded UDF lib to mysqludf.org
+created sample SQL templates for detecting signals
+
+2009-08-01
+Fixed doing the ema of trend indicator (issue with ema not dealing with integers)
+
+2009-07-06
+create script to check macd signal
+SMA
+TR
+StandardDeviation, BOL
+
+2009-07-05
+Finished RSI
+
+2009-07-04
+Finished EMA AND MACD
+
+2009-07-03
+created mysql udfs: FIRST,LAST
+
+2009-07-01
+It's much better to convert timeframes using sql in the db.
+  - Need a FIRST,LAST aggregate function (to determine open and close)
+
+2009-06-28
+create script to update timeframes
+
+2009-06-27
+use config any to load cfg connection info and symbol list

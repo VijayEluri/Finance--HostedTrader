@@ -1,0 +1,60 @@
+symbols:
+    natural:
+        - AUDJPY
+        - AUDUSD
+        - CHFJPY
+        - EURCAD
+        - EURCHF
+        - EURGBP
+        - EURJPY
+        - EURUSD
+        - GBPCHF
+        - GBPJPY
+        - GBPUSD
+        - NZDJPY
+        - NZDUSD
+        - USDCAD
+        - USDCHF
+        - USDJPY
+        - XAUUSD
+        - XAGUSD
+    synthetic:
+        - AUDNZD
+        - EURAUD
+        - AUDCHF
+        - AUDGBP
+        - AUDCAD
+        - CADJPY
+        - GBPCAD
+        - NZDCAD
+        - NZDCHF
+        - EURNZD
+        - NZDGBP
+        - CADCHF
+        - XAUAUD
+        - XAUCAD
+        - XAUCHF
+        - XAUEUR
+        - XAUGBP
+        - XAUNZD
+        - XAUJPY
+        - XAUXAG
+        - XAGAUD
+        - XAGCAD
+        - XAGCHF
+        - XAGEUR
+        - XAGGBP
+        - XAGNZD
+        - XAGJPY
+timeframes:
+    natural:
+        - 60
+    synthetic:
+        - 3600
+        - 86400
+        - 604800
+db:
+    driver: mysql
+    dbname: fx
+    dbuser: fxhistor
+    dbpasswd:
