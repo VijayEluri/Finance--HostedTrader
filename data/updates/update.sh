@@ -18,7 +18,7 @@ die_if_error
 wget -q -N -i TO_DOWNLOAD -nH -c -r -l 1 -np -A.zip
 die_if_error
 
-find free_forex_quotes -name "*.zip" -exec unzip -o "{}" \;
+find free_forex_quotes -name "*.zip" -exec unzip -q -o "{}" \;
 die_if_error
 
 find ./ -name "*.txt" -exec ./process.forexite.sh "{}" \;
