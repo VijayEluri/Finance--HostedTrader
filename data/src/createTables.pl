@@ -5,12 +5,15 @@ use Getopt::Long;
 
 
 my $symbols_txt = 'AUDJPY,AUDNZD,AUDUSD,CADJPY,CHFJPY,EURAUD,EURCAD,EURCHF,EURGBP,EURJPY,EURUSD,GBPCHF,GBPJPY,GBPUSD,NZDJPY,NZDUSD,USDCAD,USDCHF,USDJPY,XAGUSD,XAUUSD,AUDCHF,AUDGBP,AUDCAD,GBPCAD,NZDCAD,NZDCHF,EURNZD,NZDGBP,CADCHF,XAUAUD,XAUCAD,XAUCHF,XAUEUR,XAUGBP,XAUNZD,XAUJPY,XAUXAG,XAGAUD,XAGCAD,XAGCHF,XAGEUR,XAGGBP,XAGNZD,XAGJPY';
+my $tfs_txt = '60,3600,7200,10800,14400,86400,604800';
+
+my $result = GetOptions(
+		"symbols=s", \$symbols_txt,
+		"timeframe=s", \$tfs_txt,
+		) or die($!);
 
 
-my $result = GetOptions("symbols=s", \$symbols_txt);
-
-
-my @tfs= qw (60 3600 86400 604800);
+my @tfs= split(',', $tfs_txt);
 my @symbols=split(',', $symbols_txt);
 
 
