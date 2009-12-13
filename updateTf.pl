@@ -23,7 +23,7 @@ my $result = GetOptions(
                         "symbols=s", \$symbols_txt,
                         "timeframe=s", \$timeframe_txt,
 						"available-timeframe=s", \$available_timeframe,
-                        );
+                        ) or die($!);
 
 $start_date = UnixDate($start_date, "%Y-%m-%d %H:%M:%S") or die("Cannot parse $start_date");
 $end_date = UnixDate($end_date, "%Y-%m-%d %H:%M:%S") or die("Cannot parse $end_date");
