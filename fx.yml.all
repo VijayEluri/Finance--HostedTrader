@@ -50,6 +50,9 @@ timeframes:
     natural:
         - 60
     synthetic:
+        - 300
+        - 900
+        - 1800
         - 3600
         - 7200
         - 14400
