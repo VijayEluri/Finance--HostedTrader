@@ -215,6 +215,8 @@ my $tf = $args->{tf} || 'day';
 $tf = $self->{_ds}->getTimeframeID($tf) || die("Could not understand timeframe " . ($args->{tf} || 'day'));
 my $expr = $args->{expr} || die("No expression set");
 my $symbol = $args->{symbol} || die("No symbol set");
+my $maxLoadedItems = $args->{maxLoadedItems};
+$maxLoadedItems = 10_000_000_000 if (!defined($args->{maxLoadedItems}) || $args->{maxLoadedItems} == -1);
 
 
 %INDICATORS = ();
@@ -232,9 +234,12 @@ my $sql = qq(
 SELECT datetime FROM (
 SELECT *$select_fields
 FROM (
-    SELECT *
-    FROM $args->{symbol}\_$tf
-    $WHERE_FILTER
+    SELECT * FROM (
+        SELECT * FROM $symbol\_$tf
+        $WHERE_FILTER
+        ORDER BY datetime desc
+        LIMIT $maxLoadedItems
+    ) AS T_LIMIT
     ORDER BY datetime
 ) AS T_INNER
 ) AS T_OUTER
