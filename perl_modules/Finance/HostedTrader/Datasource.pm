@@ -96,11 +96,11 @@ sub convertOHLCTimeSeries {
     my ($date_select, $date_group);
 
     if ($tf_dst == 300) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), floor(minute(datetime) / 5) * 5, ':00') AS DATETIME)";
+        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 5) * 5, ':00') AS DATETIME)";
     } elsif ($tf_dst == 900) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), floor(minute(datetime) / 15) * 15, ':00') AS DATETIME)";
+        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 15) * 15, ':00') AS DATETIME)";
     } elsif ($tf_dst == 1800) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), floor(minute(datetime) / 30) * 30, ':00') AS DATETIME)";
+        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 30) * 30, ':00') AS DATETIME)";
     } elsif ($tf_dst == 3600) {
         $date_select = "date_format(datetime, '%Y-%m-%d %H:00:00')";
     } elsif ($tf_dst == 7200) {
