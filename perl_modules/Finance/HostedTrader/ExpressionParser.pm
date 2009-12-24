@@ -71,6 +71,7 @@ function:
 		'max(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("ta_max($vals[0],$item[4])") } |
 		'min(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("ta_min($vals[0],$item[4])") } |
 		'tr(' ')'  { "T".Finance::HostedTrader::ExpressionParser::getID("round(ta_tr(high,low,close), 4)") } |
+		'atr(' number ')'  { "T".Finance::HostedTrader::ExpressionParser::getID("round(ta_ema(ta_tr(high,low,close),$item[2]), 4)") } |
 		'previous(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],$item[4])") } |
 		'bolhigh(' expression ',' number ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_sma($vals[0],$item[4])","ta_sum(POW(($vals[0]) - ta_sma($vals[0], $item[4]), 2), $item[4])"); "round(T$t1 + $item[6]*SQRT(T$t2/$item[4]), 4)" } |
 		'bollow(' expression ',' number ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_sma($vals[0],$item[4])","ta_sum(POW(($vals[0]) - ta_sma($vals[0], $item[4]), 2), $item[4])"); "round(T$t1 - $item[6]*SQRT(T$t2/$item[4]), 4)" } |
@@ -123,6 +124,7 @@ function:
 		'max(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("ta_max($vals[0],$item[4])") } |
 		'min(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("ta_min($vals[0],$item[4])") } |
 		'tr(' ')'  { "T".Finance::HostedTrader::ExpressionParser::getID("round(ta_tr(high,low,close), 4)") } |
+		'atr(' number ')'  { "T".Finance::HostedTrader::ExpressionParser::getID("round(ta_ema(ta_tr(high,low,close),$item[2]), 4)") } |
 		'previous(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],$item[4])") } |
 		'bolhigh(' expression ',' number ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_sma($vals[0],$item[4])","ta_sum(POW(($vals[0]) - ta_sma($vals[0], $item[4]), 2), $item[4])"); "round(T$t1 + $item[6]*SQRT(T$t2/$item[4]), 4)" } |
 		'bollow(' expression ',' number ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_sma($vals[0],$item[4])","ta_sum(POW(($vals[0]) - ta_sma($vals[0], $item[4]), 2), $item[4])"); "round(T$t1 - $item[6]*SQRT(T$t2/$item[4]), 4)" } |
