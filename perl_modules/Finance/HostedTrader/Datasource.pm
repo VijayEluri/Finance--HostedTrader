@@ -1,3 +1,4 @@
+
 =head1 NAME
 
     Finance::HostedTrader::Datasource - Database access for the HostedTrader platform
@@ -66,21 +67,23 @@ my %timeframes = (
 );
 
 sub new {
-    my $class = shift;
-    my @files = ("/etc/fx.yml","$ENV{HOME}/.fx.yml","./fx.yml");
-    my $cfg_all = Config::Any->load_files({ files => \@files, use_ext => 1, flatten_to_hash => 1 });
+    my $class   = shift;
+    my @files   = ( "/etc/fx.yml", "$ENV{HOME}/.fx.yml", "./fx.yml" );
+    my $cfg_all = Config::Any->load_files(
+        { files => \@files, use_ext => 1, flatten_to_hash => 1 } );
     my $cfg = {};
 
     foreach my $file (@files) {
-        next unless($cfg_all->{$file});
-        foreach my $key (keys %{$cfg_all->{$file}}) {
+        next unless ( $cfg_all->{$file} );
+        foreach my $key ( keys %{ $cfg_all->{$file} } ) {
             $cfg->{$key} = $cfg_all->{$file}->{$key};
         }
     }
 
-    my $dbh = DBI->connect(            'DBI:mysql:'.$cfg->{db}->{dbname}.';host='.$cfg->{db}->{dbhost}, 
-            $cfg->{db}->{dbuser},
-            $cfg->{db}->{dbpasswd}
+    my $dbh = DBI->connect(
+        'DBI:mysql:' . $cfg->{db}->{dbname} . ';host=' . $cfg->{db}->{dbhost},
+        $cfg->{db}->{dbuser},
+        $cfg->{db}->{dbpasswd}
     ) || die($DBI::errstr);
     bless {
         'dbh' => $dbh,
@@ -89,35 +92,51 @@ sub new {
 }
 
 sub convertOHLCTimeSeries {
-    my ($self, $symbol, $tf_src, $tf_dst, $start_date, $end_date) = @_;
-    my ($where_clause, $start, $end, $limit) = ('', '', '', -1);
+    my ( $self, $symbol, $tf_src, $tf_dst, $start_date, $end_date ) = @_;
+    my ( $where_clause, $start, $end, $limit ) = ( '', '', '', -1 );
     die('Cannot convert to a smaller timeframe') if ( $tf_dst < $tf_src );
 
-    my ($date_select, $date_group);
+    my ( $date_select, $date_group );
 
-    if ($tf_dst == 300) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 5) * 5, ':00') AS DATETIME)";
-    } elsif ($tf_dst == 900) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 15) * 15, ':00') AS DATETIME)";
-    } elsif ($tf_dst == 1800) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 30) * 30, ':00') AS DATETIME)";
-    } elsif ($tf_dst == 3600) {
+    if ( $tf_dst == 300 ) {
+        $date_select =
+"CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 5) * 5, ':00') AS DATETIME)";
+    }
+    elsif ( $tf_dst == 900 ) {
+        $date_select =
+"CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 15) * 15, ':00') AS DATETIME)";
+    }
+    elsif ( $tf_dst == 1800 ) {
+        $date_select =
+"CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 30) * 30, ':00') AS DATETIME)";
+    }
+    elsif ( $tf_dst == 3600 ) {
         $date_select = "date_format(datetime, '%Y-%m-%d %H:00:00')";
-    } elsif ($tf_dst == 7200) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 2) * 2, ':00:00') AS DATETIME)";
-    } elsif ($tf_dst == 10800) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 3) * 3, ':00:00') AS DATETIME)";
-    } elsif ($tf_dst == 14400) {
-        $date_select = "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 4) * 4, ':00:00') AS DATETIME)";
-    } elsif ($tf_dst == 86400) {
+    }
+    elsif ( $tf_dst == 7200 ) {
+        $date_select =
+"CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 2) * 2, ':00:00') AS DATETIME)";
+    }
+    elsif ( $tf_dst == 10800 ) {
+        $date_select =
+"CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 3) * 3, ':00:00') AS DATETIME)";
+    }
+    elsif ( $tf_dst == 14400 ) {
+        $date_select =
+"CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 4) * 4, ':00:00') AS DATETIME)";
+    }
+    elsif ( $tf_dst == 86400 ) {
         $date_select = "date_format(datetime, '%Y-%m-%d 00:00:00')";
-    } elsif ($tf_dst == 604800) {
-        $date_select = "date_format(date_sub(datetime, interval weekday(datetime)+1 DAY), '%Y-%m-%d 00:00:00')";
+    }
+    elsif ( $tf_dst == 604800 ) {
+        $date_select =
+"date_format(date_sub(datetime, interval weekday(datetime)+1 DAY), '%Y-%m-%d 00:00:00')";
         $date_group = "date_format(datetime, '%x-%v')";
-    } else {
+    }
+    else {
         die("timeframe not supported ($tf_dst)");
     }
-	$date_group = $date_select unless(defined($date_group));
+    $date_group = $date_select unless ( defined($date_group) );
 
     my $sql = qq|
 INSERT INTO $symbol\_$tf_dst
@@ -132,47 +151,63 @@ ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), c
 }
 
 sub createSynthetic {
-my ($self, $synthetic, $timeframe) = @_;
+    my ( $self, $synthetic, $timeframe ) = @_;
 
-my $symbols = $self->getNaturalSymbols;
-my $sym1 = substr($synthetic,0,3);
-my $sym2 = substr($synthetic,3,3);
-my $search1=$sym1.'USD';
-my $search2='USD'.$sym1;
-my @u1 = grep(/$search1|$search2/, @$symbols);
+    my $symbols = $self->getNaturalSymbols;
+    my $sym1    = substr( $synthetic, 0, 3 );
+    my $sym2    = substr( $synthetic, 3, 3 );
+    my $search1 = $sym1 . 'USD';
+    my $search2 = 'USD' . $sym1;
+    my @u1      = grep( /$search1|$search2/, @$symbols );
 
-$search1=$sym2.'USD';
-$search2='USD'.$sym2;
-my @u2 = grep(/$search1|$search2/, @$symbols);
-my $op;
-my ($low,$high);
-if ($u1[0] =~ /USD$/ && $u2[0] =~ /^USD/) {
-  $op = '*';
-  $low='low';$high='high';
-} elsif ($u1[0] =~ /USD$/ && $u2[0] =~ /USD$/) {
-  $op = '/';
-  $low='high';$high='low';
-} elsif ($u1[0] =~ /^USD/ && $u2[0] =~ /^USD/) {
-  $op = '/';
-  $low='high';$high='low';
-  my $tmp = $u1[0];
-  $u1[0] = $u2[0];
-  $u2[0] = $tmp;
-} else {
-  warn "Don't know how to handle $synthetic [] synthetic pair\n";
-  next;
-}
+    $search1 = $sym2 . 'USD';
+    $search2 = 'USD' . $sym2;
+    my @u2 = grep( /$search1|$search2/, @$symbols );
+    my $op;
+    my ( $low, $high );
+    if ( $u1[0] =~ /USD$/ && $u2[0] =~ /^USD/ ) {
+        $op   = '*';
+        $low  = 'low';
+        $high = 'high';
+    }
+    elsif ( $u1[0] =~ /USD$/ && $u2[0] =~ /USD$/ ) {
+        $op   = '/';
+        $low  = 'high';
+        $high = 'low';
+    }
+    elsif ( $u1[0] =~ /^USD/ && $u2[0] =~ /^USD/ ) {
+        $op   = '/';
+        $low  = 'high';
+        $high = 'low';
+        my $tmp = $u1[0];
+        $u1[0] = $u2[0];
+        $u2[0] = $tmp;
+    }
+    else {
+        warn "Don't know how to handle $synthetic [] synthetic pair\n";
+        next;
+    }
 
-my $filter = ' AND T1.datetime > DATE_SUB(NOW(), INTERVAL 2 WEEK)';
+    my $filter = ' AND T1.datetime > DATE_SUB(NOW(), INTERVAL 2 WEEK)';
 
-my $sql = "insert ignore into $synthetic\_$timeframe (select T1.datetime, round(T1.open".$op."T2.open,4) as open, round(T1.low".$op."T2.$low,4) as low, round(T1.high".$op."T2.$high,4) as high, round(T1.close".$op."T2.close,4) as close from $u1[0]\_$timeframe as T1, $u2[0]\_$timeframe as T2 WHERE T1.datetime = T2.datetime $filter)";
+    my $sql =
+"insert ignore into $synthetic\_$timeframe (select T1.datetime, round(T1.open"
+      . $op
+      . "T2.open,4) as open, round(T1.low"
+      . $op
+      . "T2.$low,4) as low, round(T1.high"
+      . $op
+      . "T2.$high,4) as high, round(T1.close"
+      . $op
+      . "T2.close,4) as close from $u1[0]\_$timeframe as T1, $u2[0]\_$timeframe as T2 WHERE T1.datetime = T2.datetime $filter)";
 
-$self->{dbh}->do($sql);
+    $self->{dbh}->do($sql);
 }
 
 sub getNaturalSymbols {
-    my $self = shift;
-    my $symbols= $self->{cfg}->{symbols}->{natural} || die('No symbols defined in config file');
+    my $self    = shift;
+    my $symbols = $self->{cfg}->{symbols}->{natural}
+      || die('No symbols defined in config file');
 
     return $symbols;
 }
@@ -185,22 +220,25 @@ sub getSyntheticSymbols {
 }
 
 sub getAllSymbols {
-	my $self = shift;
+    my $self = shift;
 
-	return [ @{$self->getNaturalSymbols}, @{$self->getSyntheticSymbols}];
+    return [ @{ $self->getNaturalSymbols }, @{ $self->getSyntheticSymbols } ];
 }
 
 sub getAllTimeframes {
     my $self = shift;
 
-    my @sorted = sort { int($a) <=> int($b) } ( @{$self->getNaturalTimeframes}, @{$self->getSyntheticTimeframes} );
+    my @sorted =
+      sort { int($a) <=> int($b) }
+      ( @{ $self->getNaturalTimeframes }, @{ $self->getSyntheticTimeframes } );
 
     return \@sorted;
 }
 
 sub getNaturalTimeframes {
-    my $self = shift;
-    my $timeframes = $self->{cfg}->{timeframes}->{natural} || die('No symbols defined in config file');
+    my $self       = shift;
+    my $timeframes = $self->{cfg}->{timeframes}->{natural}
+      || die('No symbols defined in config file');
 
     my @sorted = sort { int($a) <=> int($b) } @{$timeframes};
 
@@ -217,13 +255,13 @@ sub getSyntheticTimeframes {
 }
 
 sub getTimeframeName {
-       my ($self, $id) = @_;
-       grep { return $_ if $timeframes{$_} == $id } keys(%timeframes);
+    my ( $self, $id ) = @_;
+    grep { return $_ if $timeframes{$_} == $id } keys(%timeframes);
 }
 
 sub getTimeframeID {
-	my ($self, $name) = @_;
-	return $timeframes{$name};
+    my ( $self, $name ) = @_;
+    return $timeframes{$name};
 }
 
 sub DESTROY {
