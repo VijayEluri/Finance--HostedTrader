@@ -25,6 +25,7 @@ package Finance::HostedTrader::Config::Timeframes;
 use strict;
 use warnings;
 use Moose;
+use Moose::Util::TypeConstraints;
 
 #List of available timeframes this module understands
 my %timeframes = (
@@ -45,6 +46,8 @@ my %timeframes = (
     '2day'  => 172800,
     'week'  => 604800
 );
+
+enum 'TimeframeIDs' => qw(0 1 5 15 30 60 300 900 1800 3600 7200 10800 14400 86400 172800 604800);
 
 #These two subs are used to make sure timeframe data is returned sorted
 sub _around_timeframes {
@@ -83,7 +86,7 @@ Eg: The 2 hour timeframe can be derived from the 1 hour timeframe.
 =cut
 has natural => (
     is     => 'ro',
-    isa    => 'ArrayRef[Str]',
+    isa    => 'ArrayRef[TimeframeIDs]',
     required=>1,
 );
 #register method modifier so the passed timeframe values can be sorted
@@ -99,7 +102,7 @@ See the description for natural timeframes.
 
 has synthetic => (
     is     => 'ro',
-    isa    => 'Maybe[ArrayRef[Str]]',
+    isa    => 'Maybe[ArrayRef[TimeframeIDs]]',
     builder => '_build_synthetic',
     required=>0,
 );
@@ -148,6 +151,7 @@ sub getTimeframeName {
     grep { return $_ if $timeframes{$_} == $id } keys(%timeframes);
 }
 
+__PACKAGE__->meta->make_immutable;
 1;
 
 =back
