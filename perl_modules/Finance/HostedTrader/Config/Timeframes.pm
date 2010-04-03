@@ -123,6 +123,30 @@ sub all {
    return $self->_sort_timeframes( [ @{ $self->natural }, @{ $self->synthetic } ] );
 }
 
+=item C<getTimeframeID>
+
+Returns the numeric timeframe id from the stringified timeframe
+eg: 
+my $tf = $self->getTimeframeID('day');
+
+=cut
+sub getTimeframeID {
+    my ( $self, $name ) = @_;
+    return $timeframes{$name};
+}
+
+=item C<getTimeframeName>
+
+Returns the stringified timeframe name for the given
+timeframe ID
+
+eg:
+my $tf = $self->getTimeframeName(60);
+=cut
+sub getTimeframeName {
+    my ( $self, $id ) = @_;
+    grep { return $_ if $timeframes{$_} == $id } keys(%timeframes);
+}
 
 1;
 

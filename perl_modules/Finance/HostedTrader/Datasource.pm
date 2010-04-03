@@ -20,7 +20,7 @@ package Finance::HostedTrader::Datasource;
 use strict;
 use warnings;
 use DBI;
-use Config::Any;
+use Finance::HostedTrader::Config;
 use Data::Dumper;
 
 my %timeframes = (
@@ -49,27 +49,30 @@ Returns a new Finance::HostedTrader::Datasource object.
 =cut
 sub new {
     my $class   = shift;
-    my @files   = ( "/etc/fx.yml", "$ENV{HOME}/.fx.yml", "./fx.yml" );
-    my $cfg_all = Config::Any->load_files(
-        { files => \@files, use_ext => 1, flatten_to_hash => 1 } );
-    my $cfg = {};
-
-    foreach my $file (@files) {
-        next unless ( $cfg_all->{$file} );
-        foreach my $key ( keys %{ $cfg_all->{$file} } ) {
-            $cfg->{$key} = $cfg_all->{$file}->{$key};
-        }
-    }
+    my $cfg = Finance::HostedTrader::Config->new();
 
     my $dbh = DBI->connect(
-        'DBI:mysql:' . $cfg->{db}->{dbname} . ';host=' . $cfg->{db}->{dbhost},
-        $cfg->{db}->{dbuser},
-        $cfg->{db}->{dbpasswd}
+        'DBI:mysql:' . $cfg->db->dbname . ';host=' . $cfg->db->dbhost,
+        $cfg->db->dbuser,
+        $cfg->db->dbpasswd
     ) || die($DBI::errstr);
     bless {
         'dbh' => $dbh,
         'cfg' => $cfg,
     }, $class;
+}
+
+=item C<cfg>
+
+Returns the Finance::HostedTrader::Config object associated with this datasource.
+
+This object contains a list of available timeframes and symbols in this data source.
+
+=cut
+sub cfg {
+    my $self = shift;
+
+    return $self->{cfg};
 }
 
 =item C<convertOHLCTimeSeries>
@@ -140,7 +143,7 @@ ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), c
 sub createSynthetic {
     my ( $self, $synthetic, $timeframe ) = @_;
 
-    my $symbols = $self->getNaturalSymbols;
+    my $symbols = $self->{cfg}->symbols->natural;
     my $sym1    = substr( $synthetic, 0, 3 );
     my $sym2    = substr( $synthetic, 3, 3 );
     my $search1 = $sym1 . 'USD';
@@ -188,34 +191,6 @@ sub createSynthetic {
       . "T2.close,4) as close from $u1[0]\_$timeframe as T1, $u2[0]\_$timeframe as T2 WHERE T1.datetime = T2.datetime $filter)";
 
     $self->{dbh}->do($sql);
-}
-
-sub getNaturalSymbols {
-    my $self    = shift;
-    my $symbols = $self->{cfg}->{symbols}->{natural}
-      || die('No symbols defined in config file');
-
-    return $symbols;
-}
-
-sub getNaturalTimeframes {
-    my $self       = shift;
-    my $timeframes = $self->{cfg}->{timeframes}->{natural}
-      || die('No symbols defined in config file');
-
-    my @sorted = sort { int($a) <=> int($b) } @{$timeframes};
-
-    return \@sorted;
-}
-
-sub getTimeframeName {
-    my ( $self, $id ) = @_;
-    grep { return $_ if $timeframes{$_} == $id } keys(%timeframes);
-}
-
-sub getTimeframeID {
-    my ( $self, $name ) = @_;
-    return $timeframes{$name};
 }
 
 sub DESTROY {

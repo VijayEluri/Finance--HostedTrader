@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Finance::HostedTrader::Datasource;
-use Finance::HostedTrader::Config;
 
 use Data::Dumper;
 use Date::Manip;
@@ -31,8 +30,8 @@ $start_date = UnixDate( $start_date, "%Y-%m-%d %H:%M:%S" )
 $end_date = UnixDate( $end_date, "%Y-%m-%d %H:%M:%S" )
   or die("Cannot parse $end_date");
 
-my $cfg = Finance::HostedTrader::Config->new();
 my $db = Finance::HostedTrader::Datasource->new();
+my $cfg = $db->cfg;
 my $symbols;
 if ( !defined($symbols_txt) ) {
     $symbols = $cfg->symbols->all();
@@ -50,7 +49,7 @@ else {
 my $tfs = $cfg->timeframes->synthetic();
 $tfs = [ split( ',', $timeframe_txt ) ] if ($timeframe_txt);
 
-$available_timeframe = $db->getTimeframeID($available_timeframe);
+$available_timeframe = $cfg->getTimeframeID($available_timeframe);
 
 ##TODO: Bug - This won't work if it tries to convert from 2hour to 3hour timeframe
 #This code assumes timeframes are sorted (which is ok)

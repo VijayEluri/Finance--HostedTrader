@@ -152,7 +152,7 @@ sub getIndicatorData {
 
     #Handle arguments
     my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->getTimeframeID($tf)
+    $tf = $self->{_ds}->cfg->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
     my $maxLoadedItems = $args->{maxLoadedItems};
     $maxLoadedItems = 10_000_000_000
@@ -223,7 +223,7 @@ FROM (
 sub getSignalData {
     my ( $self, $args ) = @_;
     my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->getTimeframeID($tf)
+    $tf = $self->{_ds}->cfg->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
     my $expr   = $args->{expr}   || die("No expression set");
     my $symbol = $args->{symbol} || die("No symbol set");
