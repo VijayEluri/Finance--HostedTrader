@@ -28,7 +28,7 @@ isa_ok($symbols,'Finance::HostedTrader::Config::Symbols');
 my $timeframes = Finance::HostedTrader::Config::Timeframes->new(
 		'natural' => [ qw (300 60) ], #Make sure timeframes are unordered to test if the module returns them ordered
 	);
-isa_ok($symbols,'Finance::HostedTrader::Config::Symbols');
+isa_ok($timeframes,'Finance::HostedTrader::Config::Timeframes');
 
 my $config = Finance::HostedTrader::Config->new( 'db' => $db, 'symbols' => $symbols, 'timeframes' => $timeframes );
 is($config->db->dbhost, 'dbhost', 'db host');
