@@ -3,11 +3,11 @@
 use strict;
 use warnings;
 
-use Datasource;
+use Finance::HostedTrader::Datasource;
 use Data::Dumper;
 use Test::More qw(no_plan);
 
-my $ds = Datasource->new();
+my $ds = Finance::HostedTrader::Datasource->new();
 my $dbh = $ds->{dbh};
 
 my $BASE_SYMBOL = "EURUSD";
@@ -17,6 +17,11 @@ my $naturalTFs = $ds->getNaturalTimeframes;
 my $syntheticTFs = $ds->getSyntheticTimeframes;
 
 my %existingSymbols = map { $_ => 1} @{$ds->getAllSymbols};
+
+#This test will copy the EURUSD table in the smaller timeframe
+#then convert that copy into a larger timeframe
+#it then compares the end result with the original EURUSD table in the target timeframe
+#This assumes EURUSD data in all timeframes (as defined in the config file) exist
 
 foreach my $tf (@{$naturalTFs}) {
 	my $available_timeframe = $tf;
@@ -47,7 +52,7 @@ foreach my $tf (@{$naturalTFs}) {
                                   '0000-00-00',
                                   '9999-99-99' );
 
-		diag("Comparint $TEST_TABLE_ONE w $TEST_TABLE_TWO");
+		diag("Comparing $TEST_TABLE_ONE with $TEST_TABLE_TWO");
 		my @data;
 		foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
 		    my $sth = $dbh->prepare("SELECT * FROM $TEST_TABLE\_$stf ORDER BY datetime") or die($DBI::errstr);
@@ -59,3 +64,4 @@ foreach my $tf (@{$naturalTFs}) {
 		$available_timeframe = $stf;
 	}
 }
+done_testing();
