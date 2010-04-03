@@ -37,7 +37,7 @@ die_if_error
 die_if_error
 ~/fx/updateTf.pl --timeframe=604800 --available-timeframe=day
 die_if_error
-~/fx/dumpFiles.pl
+~/fx/data/updates/dumpFiles.pl --timeframes=3600,86400
 die_if_error
 
 mv TO_DOWNLOAD LAST_DOWNLOADED
