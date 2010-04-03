@@ -1,0 +1,37 @@
+=head1 NAME
+
+    Module::Name - Module short description
+
+=head1 SYNOPSIS
+
+    use Module::Name;
+    my $obj = $Module::Name->new();
+    $obj->method1();
+
+=head1 DESCRIPTION
+
+
+=head2 METHODS
+
+=over 12
+
+=item C<new>
+
+=item C<method1>
+
+=back
+
+
+=head1 LICENSE
+
+This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
+
+=head1 AUTHOR
+
+Joao Costa - L<http://zonalivre.org/>
+
+=head1 SEE ALSO
+
+L<Related::Module>
+
+=cut
