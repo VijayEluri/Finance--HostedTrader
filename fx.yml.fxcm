@@ -1,0 +1,25 @@
+symbols:
+    natural:
+        - AUDUSD
+        - EURCHF
+        - EURGBP
+        - EURJPY
+        - EURUSD
+        - GBPCHF
+        - GBPJPY
+        - GBPUSD
+        - NZDUSD
+        - USDCAD
+        - USDCHF
+        - USDJPY
+    synthetic:
+timeframes:
+    natural:
+        - 300
+        - 3600
+    synthetic:
+db:
+    dbhost: fxhistoricaldata.com
+    dbname: fxcm
+    dbuser: fxcm
+    dbpasswd:
