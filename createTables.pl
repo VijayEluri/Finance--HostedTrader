@@ -2,17 +2,17 @@
 
 use strict;
 use Getopt::Long;
-use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 
 my ( $symbols_txt, $tfs_txt );
-my $db = Finance::HostedTrader::Datasource->new();
+my $cfg = Finance::HostedTrader::Config->new();
 
 my $result = GetOptions( "symbols=s", \$symbols_txt, "timeframe=s", \$tfs_txt, )
   or die($!);
 
-my $tfs = $db->getAllTimeframes();
+my $tfs = $cfg->timeframes->all();
 $tfs = [ split( ',', $tfs_txt ) ] if ($tfs_txt);
-my $symbols = $db->getAllSymbols;
+my $symbols = $cfg->symbols->all();
 $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 
 foreach my $symbol (@$symbols) {

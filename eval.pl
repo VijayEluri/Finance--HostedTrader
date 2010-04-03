@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 use Finance::HostedTrader::ExpressionParser;
 
 use Data::Dumper;
@@ -20,10 +20,10 @@ GetOptions(
     "max-display-items=i" => \$max_display_items,
 ) || exit(1);
 
-my $db               = Finance::HostedTrader::Datasource->new();
-my $signal_processor = Finance::HostedTrader::ExpressionParser->new($db);
+my $cfg               = Finance::HostedTrader::Config->new();
+my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
-my $symbols = $db->getAllSymbols;
+my $symbols = $cfg->symbols->all;
 
 $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 foreach my $symbol ( @{$symbols} ) {

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 use Finance::HostedTrader::ExpressionParser;
 
 use Data::Dumper;
@@ -14,13 +14,12 @@ my ( $timeframe, $max_loaded_items, $verbose ) = ( 'week', 1000, 0 );
 my $result = GetOptions( "timeframe=s", \$timeframe, "max-loaded-items=i",
     \$max_loaded_items, "verbose", \$verbose, ) || exit(1);
 
-my $db               = Finance::HostedTrader::Datasource->new();
-my $signal_processor = Finance::HostedTrader::ExpressionParser->new($db);
+my $cfg               = Finance::HostedTrader::Config->new();
+my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 my %scores;
 
-my $symbols    = $db->getNaturalSymbols;
-my $synthetics = $db->getSyntheticSymbols;
-foreach my $symbol ( @{$symbols}, @{$synthetics} ) {
+my $symbols    = $cfg->symbols->all;
+foreach my $symbol ( @{$symbols} ) {
     my $data = $signal_processor->getIndicatorData(
         {
             'expr'            => 'ema(trend(close,21),13)',

@@ -4,19 +4,21 @@ use strict;
 use warnings;
 
 use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 use Data::Dumper;
 use Test::More qw(no_plan);
 
+my $cfg= Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
 my $dbh = $ds->{dbh};
 
 my $BASE_SYMBOL = "EURUSD";
 my $TEST_TABLE_ONE = "T2_ONE";
 my $TEST_TABLE_TWO = "T2_TWO";
-my $naturalTFs = $ds->getNaturalTimeframes;
-my $syntheticTFs = $ds->getSyntheticTimeframes;
+my $naturalTFs = $cfg->timeframes->natural;
+my $syntheticTFs = $cfg->timeframes->synthetic;
 
-my %existingSymbols = map { $_ => 1} @{$ds->getAllSymbols};
+my %existingSymbols = map { $_ => 1} @{$cfg->symbols->all};
 
 #This test will copy the EURUSD table in the smaller timeframe
 #then convert that copy into a larger timeframe
@@ -64,4 +66,3 @@ foreach my $tf (@{$naturalTFs}) {
 		$available_timeframe = $stf;
 	}
 }
-done_testing();

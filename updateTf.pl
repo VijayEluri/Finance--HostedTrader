@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 
 use Data::Dumper;
 use Date::Manip;
@@ -30,22 +31,23 @@ $start_date = UnixDate( $start_date, "%Y-%m-%d %H:%M:%S" )
 $end_date = UnixDate( $end_date, "%Y-%m-%d %H:%M:%S" )
   or die("Cannot parse $end_date");
 
+my $cfg = Finance::HostedTrader::Config->new();
 my $db = Finance::HostedTrader::Datasource->new();
 my $symbols;
 if ( !defined($symbols_txt) ) {
-    $symbols = $db->getAllSymbols;
+    $symbols = $cfg->symbols->all();
 }
 elsif ( $symbols_txt eq 'natural' ) {
-    $symbols = $db->getNaturalSymbols;
+    $symbols = $cfg->symbols->natural();
 }
 elsif ( $symbols_txt eq 'synthetics' ) {
-    $symbols = $db->getSyntheticSymbols;
+    $symbols = $cfg->symbols->synthetics();
 }
 else {
     $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 }
 
-my $tfs = $db->getSyntheticTimeframes();
+my $tfs = $cfg->timeframes->synthetic();
 $tfs = [ split( ',', $timeframe_txt ) ] if ($timeframe_txt);
 
 $available_timeframe = $db->getTimeframeID($available_timeframe);

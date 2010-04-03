@@ -2,7 +2,7 @@
 
 use strict;
 use Getopt::Long;
-use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 use Data::Dumper;
 
 my ( $timeframes_txt, $symbols_txt );
@@ -10,17 +10,17 @@ my ( $timeframes_txt, $symbols_txt );
 my $result =
   GetOptions( "timeframes=s", \$timeframes_txt, "symbols=s", \$symbols_txt, );
 
-my $db = Finance::HostedTrader::Datasource->new();
+my $cfg = Finance::HostedTrader::Config->new();
 
 my $symbols;
 if ( !defined($symbols_txt) ) {
-    $symbols = $db->getAllSymbols;
+    $symbols = $cfg->symbols->all;
 }
 elsif ( $symbols_txt eq 'natural' ) {
-    $symbols = $db->getNaturalSymbols;
+    $symbols = $cfg->symbols->natural;
 }
 elsif ( $symbols_txt eq 'synthetics' ) {
-    $symbols = $db->getSyntheticSymbols;
+    $symbols = $cfg->symbols->synthetic;
 }
 else {
     $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);

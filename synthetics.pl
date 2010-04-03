@@ -63,11 +63,13 @@ use Data::Dumper;
 use Getopt::Long;
 use Pod::Usage;
 use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 
 my ( $timeframe, $verbose, $help );
 
+my $cfg         = Finance::HostedTrader::Config->new();
 my $db         = Finance::HostedTrader::Datasource->new();
-my $synthetics = $db->getSyntheticSymbols;
+my $synthetics = $cfg->symbols->synthetic;
 
 my $symbols_txt;
 my $result = GetOptions(

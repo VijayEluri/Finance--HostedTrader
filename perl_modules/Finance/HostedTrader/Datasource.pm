@@ -198,42 +198,10 @@ sub getNaturalSymbols {
     return $symbols;
 }
 
-sub getSyntheticSymbols {
-    my $self = shift;
-    my $symbols = $self->{cfg}->{symbols}->{synthetic} || [];
-
-    return $symbols;
-}
-
-sub getAllSymbols {
-    my $self = shift;
-
-    return [ @{ $self->getNaturalSymbols }, @{ $self->getSyntheticSymbols } ];
-}
-
-sub getAllTimeframes {
-    my $self = shift;
-
-    my @sorted =
-      sort { int($a) <=> int($b) }
-      ( @{ $self->getNaturalTimeframes }, @{ $self->getSyntheticTimeframes } );
-
-    return \@sorted;
-}
-
 sub getNaturalTimeframes {
     my $self       = shift;
     my $timeframes = $self->{cfg}->{timeframes}->{natural}
       || die('No symbols defined in config file');
-
-    my @sorted = sort { int($a) <=> int($b) } @{$timeframes};
-
-    return \@sorted;
-}
-
-sub getSyntheticTimeframes {
-    my $self = shift;
-    my $timeframes = $self->{cfg}->{timeframes}->{synthetic} || [];
 
     my @sorted = sort { int($a) <=> int($b) } @{$timeframes};
 

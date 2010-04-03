@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 use Finance::HostedTrader::ExpressionParser;
 
 use Data::Dumper;
@@ -15,9 +16,10 @@ my ( $verbose, $timeframes_txt ) = ( 0, '' );
 my $result =
   GetOptions( "verbose", \$verbose, "timeframes=s", \$timeframes_txt, );
 
+my $cfg              = Finance::HostedTrader::Config->new();
 my $db               = Finance::HostedTrader::Datasource->new();
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new($db);
-my $symbols          = $db->getAllSymbols;
+my $symbols          = $cfg->symbols->all();
 
 die("No timeframes specified") unless ($timeframes_txt);
 my $tfs = [ split( ',', $timeframes_txt ) ];

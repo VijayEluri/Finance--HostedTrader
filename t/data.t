@@ -3,15 +3,17 @@
 use strict;
 use warnings;
 
+use Finance::HostedTrader::Config;
 use Finance::HostedTrader::Datasource;
 use Data::Dumper;
 use Test::More qw(no_plan);
 
+my $cfg = Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
 my $dbh = $ds->{dbh};
 
-my $symbols = $ds->getAllSymbols;
-my $timeframes = $ds->getSyntheticTimeframes;
+my $symbols = $cfg->symbols->all;
+my $timeframes = $cfg->timeframes->all;
 
 
 foreach my $tf (@$timeframes) {
