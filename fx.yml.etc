@@ -1,5 +1,5 @@
 db:
-    driver: mysql
+    dbhost: localhost
     dbname: fx
     dbuser: root
     dbpasswd:

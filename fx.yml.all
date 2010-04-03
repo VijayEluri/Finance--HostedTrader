@@ -59,7 +59,7 @@ timeframes:
         - 86400
         - 604800
 db:
-    driver: mysql
+    dbhost: localhost
     dbname: fx
     dbuser: fxhistor
     dbpasswd:
