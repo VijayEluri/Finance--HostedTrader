@@ -1,4 +1,4 @@
-
+package Finance::HostedTrader::Datasource;
 =head1 NAME
 
     Finance::HostedTrader::Datasource - Database access for the HostedTrader platform
@@ -15,31 +15,7 @@
 
 =over
 
-=item C<new>
-
-Returns a new Finance::HostedTrader::Datasource object.
-
-=back
-
-=head1 CAVEATS
-
-
-=head1 LICENSE
-
-This file is licensed under the MIT X11 License:
-
-http://www.opensource.org/licenses/mit-license.php
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
-
-=head1 SEE ALSO
-
-
 =cut
-
-package Finance::HostedTrader::Datasource;
 
 use strict;
 use warnings;
@@ -66,6 +42,11 @@ my %timeframes = (
     'week'  => 604800
 );
 
+=item C<new>
+
+Returns a new Finance::HostedTrader::Datasource object.
+
+=cut
 sub new {
     my $class   = shift;
     my @files   = ( "/etc/fx.yml", "$ENV{HOME}/.fx.yml", "./fx.yml" );
@@ -91,6 +72,9 @@ sub new {
     }, $class;
 }
 
+=item C<convertOHLCTimeSeries>
+
+=cut
 sub convertOHLCTimeSeries {
     my ( $self, $symbol, $tf_src, $tf_dst, $start_date, $end_date ) = @_;
     my ( $where_clause, $start, $end, $limit ) = ( '', '', '', -1 );
@@ -150,6 +134,9 @@ ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), c
     $self->{'dbh'}->do($sql);
 }
 
+=item C<createSynthetic>
+
+=cut
 sub createSynthetic {
     my ( $self, $synthetic, $timeframe ) = @_;
 
@@ -184,8 +171,7 @@ sub createSynthetic {
         $u2[0] = $tmp;
     }
     else {
-        warn "Don't know how to handle $synthetic [] synthetic pair\n";
-        next;
+        die("Don't know how to handle $synthetic [] synthetic pair");
     }
 
     my $filter = ' AND T1.datetime > DATE_SUB(NOW(), INTERVAL 2 WEEK)';
@@ -270,3 +256,21 @@ sub DESTROY {
 }
 
 1;
+
+=back
+
+=head1 LICENSE
+
+This file is licensed under the MIT X11 License:
+
+This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
+
+=head1 AUTHOR
+
+Joao Costa - L<http://zonalivre.org/>
+
+=head1 SEE ALSO
+
+L<Finance::HostedTrader::Config>
+
+=cut
