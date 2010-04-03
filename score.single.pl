@@ -12,7 +12,7 @@ use Getopt::Long;
 my ( $timeframe, $max_loaded_items, $verbose ) = ( 'week', 1000, 0 );
 
 my $result = GetOptions( "timeframe=s", \$timeframe, "max-loaded-items=i",
-    \$max_loaded_items, "verbose", \$verbose, );
+    \$max_loaded_items, "verbose", \$verbose, ) || exit(1);
 
 my $db               = Finance::HostedTrader::Datasource->new();
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new($db);

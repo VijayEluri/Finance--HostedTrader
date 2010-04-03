@@ -18,7 +18,7 @@ GetOptions(
     "symbols=s"           => \$symbols_txt,
     "max-loaded-items=i"  => \$max_loaded_items,
     "max-display-items=i" => \$max_display_items,
-);
+) || exit(1);
 
 my $db               = Finance::HostedTrader::Datasource->new();
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new($db);
