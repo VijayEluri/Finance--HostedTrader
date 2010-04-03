@@ -2,23 +2,24 @@
 
 use strict;
 use Getopt::Long;
+use Finance::HostedTrader::Datasource;
 
-
-my $symbols_txt = 'AUDJPY,AUDNZD,AUDUSD,CADJPY,CHFJPY,EURAUD,EURCAD,EURCHF,EURGBP,EURJPY,EURUSD,GBPCHF,GBPJPY,GBPUSD,NZDJPY,NZDUSD,USDCAD,USDCHF,USDJPY,XAGUSD,XAUUSD,AUDCHF,AUDGBP,AUDCAD,GBPCAD,NZDCAD,NZDCHF,EURNZD,NZDGBP,CADCHF,XAUAUD,XAUCAD,XAUCHF,XAUEUR,XAUGBP,XAUNZD,XAUJPY,XAUXAG,XAGAUD,XAGCAD,XAGCHF,XAGEUR,XAGGBP,XAGNZD,XAGJPY';
-my $tfs_txt = '60,3600,7200,10800,14400,86400,604800';
+my ($symbols_txt,$tfs_txt);
+my $db = Finance::HostedTrader::Datasource->new();
 
 my $result = GetOptions(
 		"symbols=s", \$symbols_txt,
 		"timeframe=s", \$tfs_txt,
 		) or die($!);
 
+my $tfs = $db->getAllTimeframes();
+$tfs = [ split(',', $tfs_txt) ] if ($tfs_txt);
+my $symbols = $db->getAllSymbols;
+$symbols=[split(',', $symbols_txt)] if ($symbols_txt);
 
-my @tfs= split(',', $tfs_txt);
-my @symbols=split(',', $symbols_txt);
 
-
-foreach my $symbol (@symbols) {
-foreach my $tf (@tfs) {
+foreach my $symbol (@$symbols) {
+foreach my $tf (@$tfs) {
 print qq /
 CREATE TABLE IF NOT EXISTS `$symbol\_$tf` (
 `datetime` DATETIME NOT NULL ,
