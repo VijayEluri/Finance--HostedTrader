@@ -29,7 +29,7 @@ die_if_error
 
 rm -Rf *.txt *.1min free_forex_quotes
 
-~/fx/synthetics.pl
+~/fx/synthetics.pl --timeframe=60
 die_if_error
 ~/fx/updateTf.pl --start="4 days ago at midnight"
 die_if_error

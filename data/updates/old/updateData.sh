@@ -11,7 +11,7 @@ mysqlimport --local --fields-terminated-by=, -u root fx *.1min
 #echo REMOVE SOME TEMPORARY FILES
 rm -f *.1min
 #echo CREATING SYNTHETIC PAIRS
-../synthetics.pl
+../synthetics.pl --timeframe=60
 find ./free_forex_quotes/ -name "*.txt" -exec rm {} \;
 #echo MOVE NEWLY DOWNLOADED DATA INTO STORAGE DIRECTORY
 mv free_forex_quotes data_done

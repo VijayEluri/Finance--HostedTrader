@@ -13,7 +13,7 @@ rm -f *.1min
 
 
 #echo CREATING SYNTHETIC PAIRS
-#../synthetics.pl
+#../synthetics.pl --timeframe=60
 #find ./free_forex_quotes/ -name "*.txt" -exec rm {} \;
 #echo MOVE NEWLY DOWNLOADED DATA INTO STORAGE DIRECTORY
 #find ./free_forex_quotes/ -name "*.zip" -exec mv {} data_done/ \;
