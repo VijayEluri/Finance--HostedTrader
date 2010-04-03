@@ -3,11 +3,11 @@
 use strict;
 use warnings;
 
-use Datasource;
+use Finance::HostedTrader::Datasource;
 use Data::Dumper;
 use Test::More qw(no_plan);
 
-my $ds = Datasource->new();
+my $ds = Finance::HostedTrader::Datasource->new();
 my $dbh = $ds->{dbh};
 
 my $symbols = $ds->getAllSymbols;
