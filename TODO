@@ -1,14 +1,14 @@
+fix unit tests
+either make consistent or give up timeframe name->id mapping and just use IDs
 sample data for mysql
 .tidyrc
 test mysql udfs
 more indicators: http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators
-convertTF UDF
 online code editor: (editarea?, also codepress, codemirror)
-optimize SMA, TR
 
 
-Fix FirstLast UDFs
-
+2010-04-03
+refactor synthetic.pl into Datasource module (but no tests yet)
 
 2009-09-12
 Fix weekly timeframe conversion (use mysql %x instead of %Y in group by clause)
