@@ -1,8 +1,10 @@
 Creating a new timeframe
 
+#Update config file
+vi ~/.fx.yml
+
 #Create MySQL tables
-~/fx/data/src/createTables.pl --timeframe=7200,14400 | mysql -u root fx
-vi ~/fx/fx.yml.all /etc/fx.yml
+~/fx/createTables.pl | mysql -u root fx
 
 #Populate by deriving data from existing timeframes
 ~/fx/updateTf.pl --verbose --timeframe=7200 --available-timeframe=hour
