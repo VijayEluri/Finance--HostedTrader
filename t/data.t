@@ -10,7 +10,7 @@ use Test::More qw(no_plan);
 
 my $cfg = Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
-my $dbh = $ds->{dbh};
+my $dbh = $ds->dbh;
 
 my $symbols = $cfg->symbols->all;
 my $timeframes = $cfg->timeframes->all;

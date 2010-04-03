@@ -152,7 +152,7 @@ sub getIndicatorData {
 
     #Handle arguments
     my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->cfg->getTimeframeID($tf)
+    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
     my $maxLoadedItems = $args->{maxLoadedItems};
     $maxLoadedItems = 10_000_000_000
@@ -206,7 +206,7 @@ FROM (
 ) AS T_OUTER
 );
 
-    my $dbh = $self->{_ds}->{dbh};
+    my $dbh = $self->{_ds}->dbh;
     my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
     $sth->execute() or die( $DBI::errstr . $sql );
     my $data = $sth->fetchall_arrayref;
@@ -223,7 +223,7 @@ FROM (
 sub getSignalData {
     my ( $self, $args ) = @_;
     my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->cfg->getTimeframeID($tf)
+    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
     my $expr   = $args->{expr}   || die("No expression set");
     my $symbol = $args->{symbol} || die("No symbol set");
@@ -259,7 +259,7 @@ FROM (
 WHERE $result
 );
 
-    my $dbh = $self->{_ds}->{dbh};
+    my $dbh = $self->{_ds}->dbh;
     my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
     $sth->execute() or die( $DBI::errstr . $sql );
     my $data = $sth->fetchall_arrayref;

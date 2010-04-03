@@ -10,7 +10,7 @@ use Test::More qw(no_plan);
 
 my $cfg= Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
-my $dbh = $ds->{dbh};
+my $dbh = $ds->dbh;
 
 my $BASE_SYMBOL = "EURUSD";
 my $TEST_TABLE_ONE = "T2_ONE";

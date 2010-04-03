@@ -22,6 +22,7 @@ use warnings;
 use DBI;
 use Finance::HostedTrader::Config;
 use Data::Dumper;
+use Moose;
 
 my %timeframes = (
     'tick'  => 0,
@@ -42,38 +43,55 @@ my %timeframes = (
     'week'  => 604800
 );
 
-=item C<new>
+=item C<dbh>
 
-Returns a new Finance::HostedTrader::Datasource object.
+Optional DBI handle to the MySQL datasource.
 
+If not present, a new DBI handle is created from the settings in the config file.
 =cut
-sub new {
-    my $class   = shift;
-    my $cfg = Finance::HostedTrader::Config->new();
+has dbh => (
+    is       => 'ro',
+    isa      => 'DBI::db',
+    builder  => '_build_dbh',
+    lazy     => 1,
+    required => 1,
+);
 
+sub _build_dbh {
+    my $self = shift;
+    my $cfg = $self->cfg;;
     my $dbh = DBI->connect(
         'DBI:mysql:' . $cfg->db->dbname . ';host=' . $cfg->db->dbhost,
         $cfg->db->dbuser,
         $cfg->db->dbpasswd
     ) || die($DBI::errstr);
-    bless {
-        'dbh' => $dbh,
-        'cfg' => $cfg,
-    }, $class;
+
+    return $dbh;
 }
+
 
 =item C<cfg>
 
 Returns the Finance::HostedTrader::Config object associated with this datasource.
 
 This object contains a list of available timeframes and symbols in this data source.
+=cut
+has cfg => (
+    is       => 'ro',
+    isa      => 'Finance::HostedTrader::Config',
+    builder  => '_build_cfg',
+    required => 1,
+);
+
+sub _build_cfg {
+    return Finance::HostedTrader::Config->new();
+}
+
+=item C<new>
+
+Returns a new Finance::HostedTrader::Datasource object.
 
 =cut
-sub cfg {
-    my $self = shift;
-
-    return $self->{cfg};
-}
 
 =item C<convertOHLCTimeSeries>
 
