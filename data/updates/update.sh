@@ -33,7 +33,7 @@ rm -Rf *.txt *.1min free_forex_quotes
 die_if_error
 ~/fx/updateTf.pl --start="4 days ago at midnight"
 die_if_error
-~/fx/TruncateWeekly.pl | mysql -u root fx
+~/fx/data/updates/TruncateWeekly.pl | mysql -u root fx
 die_if_error
 ~/fx/updateTf.pl --timeframe=604800 --available-timeframe=day
 die_if_error
