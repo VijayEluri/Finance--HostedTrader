@@ -114,6 +114,7 @@ around BUILDARGS => sub {
     return $class->$orig($class_args);
 };
 
+__PACKAGE__->meta->make_immutable;
 1;
 
 =back
