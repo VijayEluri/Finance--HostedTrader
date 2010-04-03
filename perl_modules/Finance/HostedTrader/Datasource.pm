@@ -67,18 +67,18 @@ my %timeframes = (
 
 sub new {
     my $class = shift;
-
-    my $cfg_all = Config::Any->load_files({ files => [qw(/etc/fx.yml ~/.fx.yml ./fx.yml)], use_ext => 1,  flatten_to_hash => 1});
+    my @files = ("/etc/fx.yml","$ENV{HOME}/.fx.yml","./fx.yml");
+    my $cfg_all = Config::Any->load_files({ files => \@files, use_ext => 1, flatten_to_hash => 1 });
     my $cfg = {};
 
-    foreach my $file (qw(/etc/fx.yml ~/.fx.yml ./fx.yml)) {
+    foreach my $file (@files) {
         next unless($cfg_all->{$file});
         foreach my $key (keys %{$cfg_all->{$file}}) {
             $cfg->{$key} = $cfg_all->{$file}->{$key};
         }
     }
 
-    my $dbh = DBI->connect(            'DBI:'.$cfg->{db}->{driver}.':'.$cfg->{db}->{dbname}.'', 
+    my $dbh = DBI->connect(            'DBI:mysql:'.$cfg->{db}->{dbname}.';host='.$cfg->{db}->{dbhost}, 
             $cfg->{db}->{dbuser},
             $cfg->{db}->{dbpasswd}
     ) || die($DBI::errstr);
@@ -133,42 +133,46 @@ ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), c
 
 sub getNaturalSymbols {
     my $self = shift;
+    my $symbols= $self->{cfg}->{symbols}->{natural} || die('No symbols defined in config file');
 
-    return $self->{cfg}->{symbols}->{natural};
+    return $symbols;
 }
 
 sub getSyntheticSymbols {
     my $self = shift;
+    my $symbols = $self->{cfg}->{symbols}->{synthetic} || [];
 
-    return $self->{cfg}->{symbols}->{synthetic};
+    return $symbols;
 }
 
 sub getAllSymbols {
 	my $self = shift;
 
-	return [ @{$self->{cfg}->{symbols}->{natural}}, @{$self->{cfg}->{symbols}->{synthetic}}];
+	return [ @{$self->getNaturalSymbols}, @{$self->getSyntheticSymbols}];
 }
 
 sub getAllTimeframes {
     my $self = shift;
 
-    my @sorted = sort { int($a) <=> int($b) } ( @{$self->{cfg}->{timeframes}->{natural}}, @{$self->{cfg}->{timeframes}->{synthetic}});
+    my @sorted = sort { int($a) <=> int($b) } ( @{$self->getNaturalTimeframes}, @{$self->getSyntheticTimeframes} );
 
     return \@sorted;
 }
 
 sub getNaturalTimeframes {
     my $self = shift;
+    my $timeframes = $self->{cfg}->{timeframes}->{natural} || die('No symbols defined in config file');
 
-    my @sorted = sort { int($a) <=> int($b) } @{$self->{cfg}->{timeframes}->{natural}};
+    my @sorted = sort { int($a) <=> int($b) } @{$timeframes};
 
     return \@sorted;
 }
 
 sub getSyntheticTimeframes {
     my $self = shift;
+    my $timeframes = $self->{cfg}->{timeframes}->{synthetic} || [];
 
-    my @sorted = sort { int($a) <=> int($b) } @{$self->{cfg}->{timeframes}->{synthetic}};
+    my @sorted = sort { int($a) <=> int($b) } @{$timeframes};
 
     return \@sorted;
 }
