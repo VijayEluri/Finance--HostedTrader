@@ -45,6 +45,9 @@ $tfs = [split(',',$timeframe_txt)] if ($timeframe_txt);
 
 $available_timeframe = $db->getTimeframeID($available_timeframe);
 
+##TODO: Bug - This won't work if it tries to convert from 2hour to 3hour timeframe
+#This code assumes timeframes are sorted (which is ok) 
+#and the previous timeframe can build the current one (which is not always the case)
 foreach my $tf (@{$tfs}) {
     next if ($tf == $available_timeframe);
     foreach my $symbol (@{$symbols}) {
