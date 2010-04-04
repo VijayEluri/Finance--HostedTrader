@@ -1,0 +1,13 @@
+#These settings will override the standard config file
+#Settings not present in this file (eg: db and timeframes) will be read from the standard file instead.
+symbols:
+    natural:
+        - AAAUSD
+        - EEEUSD
+        - GGGUSD
+        - USDJJJ
+        - USDCCC
+    synthetic:
+        - AAAJJJ
+        - GGGEEE
+        - CCCJJJ
