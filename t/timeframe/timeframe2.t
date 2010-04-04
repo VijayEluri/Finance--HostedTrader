@@ -6,7 +6,7 @@ use warnings;
 use Finance::HostedTrader::Datasource;
 use Finance::HostedTrader::Config;
 use Data::Dumper;
-use Test::More tests=> 2;
+use Test::More qw(no_plan);
 
 my $cfg= Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
