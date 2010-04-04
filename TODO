@@ -1,13 +1,14 @@
-fix unit tests
-either make consistent or give up timeframe name->id mapping and just use IDs
-sample data for mysql
 .tidyrc
 test mysql udfs
 more indicators: http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators
 online code editor: (editarea?, also codepress, codemirror)
 
-
 2010-04-03
+moose
+fix unit tests
+either make consistent or give up timeframe name->id mapping and just use IDs
+
+2010-04-02
 refactor synthetic.pl into Datasource module (but no tests yet)
 
 2009-09-12
