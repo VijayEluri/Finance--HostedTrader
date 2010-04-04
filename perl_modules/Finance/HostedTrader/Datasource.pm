@@ -152,7 +152,7 @@ GROUP BY $date_group
 ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), close=values(close)
 |;
 
-    $self->{'dbh'}->do($sql);
+    $self->dbh->do($sql);
 }
 
 =item C<createSynthetic>
@@ -167,10 +167,12 @@ sub createSynthetic {
     my $search1 = $sym1 . 'USD';
     my $search2 = 'USD' . $sym1;
     my @u1      = grep( /$search1|$search2/, @$symbols );
+    $u1[0] = '' if (!defined($u1[0]));
 
     $search1 = $sym2 . 'USD';
     $search2 = 'USD' . $sym2;
     my @u2 = grep( /$search1|$search2/, @$symbols );
+    $u2[0] = '' if (!defined($u1[0]));
     my $op;
     my ( $low, $high );
     if ( $u1[0] =~ /USD$/ && $u2[0] =~ /^USD/ ) {
@@ -192,10 +194,8 @@ sub createSynthetic {
         $u2[0] = $tmp;
     }
     else {
-        die("Don't know how to handle $synthetic [] synthetic pair");
+        die("Don't know how to handle $synthetic synthetic pair");
     }
-
-    my $filter = ' AND T1.datetime > DATE_SUB(NOW(), INTERVAL 2 WEEK)';
 
     my $sql =
 "insert ignore into $synthetic\_$timeframe (select T1.datetime, round(T1.open"
@@ -206,14 +206,14 @@ sub createSynthetic {
       . $op
       . "T2.$high,4) as high, round(T1.close"
       . $op
-      . "T2.close,4) as close from $u1[0]\_$timeframe as T1, $u2[0]\_$timeframe as T2 WHERE T1.datetime = T2.datetime $filter)";
-
-    $self->{dbh}->do($sql);
+      . "T2.close,4) as close from $u1[0]\_$timeframe as T1, $u2[0]\_$timeframe as T2 WHERE T1.datetime = T2.datetime)";
+#AND T1.datetime > DATE_SUB(NOW(), INTERVAL 2 WEEK))
+    $self->dbh->do($sql);
 }
 
 sub DESTROY {
     my ($self) = @_;
-    $self->{'dbh'}->disconnect;
+    $self->dbh->disconnect;
 }
 
 1;

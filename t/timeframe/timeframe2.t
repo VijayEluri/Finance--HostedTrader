@@ -6,7 +6,7 @@ use warnings;
 use Finance::HostedTrader::Datasource;
 use Finance::HostedTrader::Config;
 use Data::Dumper;
-use Test::More qw(no_plan);
+use Test::More tests=> 2;
 
 my $cfg= Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
@@ -28,7 +28,6 @@ my %existingSymbols = map { $_ => 1} @{$cfg->symbols->all};
 foreach my $tf (@{$naturalTFs}) {
 	my $available_timeframe = $tf;
 	foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
-		diag("Creating $TEST_TABLE");
 		$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$tf");
 		$dbh->do("CREATE TABLE $TEST_TABLE\_$tf LIKE $BASE_SYMBOL\_$tf");
 		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf");
@@ -40,21 +39,18 @@ foreach my $tf (@{$naturalTFs}) {
 			$dbh->do("CREATE TABLE $TEST_TABLE\_$stf LIKE $BASE_SYMBOL\_$stf");
 		}
 
-		diag("Converting $TEST_TABLE_ONE $stf");
         $ds->convertOHLCTimeSeries($TEST_TABLE_ONE,
                                   $tf,
                                   $stf,
                                   '0000-00-00',
                                   '9999-99-99' );
 
-		diag("Converting $TEST_TABLE_TWO $stf");
         $ds->convertOHLCTimeSeries($TEST_TABLE_TWO,
                                   $available_timeframe,
                                   $stf,
                                   '0000-00-00',
                                   '9999-99-99' );
 
-		diag("Comparing $TEST_TABLE_ONE with $TEST_TABLE_TWO");
 		my @data;
 		foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
 		    my $sth = $dbh->prepare("SELECT * FROM $TEST_TABLE\_$stf ORDER BY datetime") or die($DBI::errstr);

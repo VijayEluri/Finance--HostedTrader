@@ -29,6 +29,6 @@ WHERE high < low OR high < close OR low > close OR high < open OR low > open
     my $data = $sth->fetchall_arrayref();
     $sth->finish() or die($DBI::errstr);
 
-    is(scalar(@$data), 0, "$symbol\_$tf");
+    is(scalar(@$data), 0, "Invalid records in $symbol\_$tf");
     }
 }

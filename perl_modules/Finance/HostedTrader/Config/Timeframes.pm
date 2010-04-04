@@ -35,6 +35,7 @@ my %timeframes = (
     '15sec' => 15,
     '30sec' => 30,
     'min'   => 60,
+    '2min'  => 120,
     '5min'  => 300,
     '15min' => 900,
     '30min' => 1800,
@@ -47,14 +48,14 @@ my %timeframes = (
     'week'  => 604800
 );
 
-enum 'TimeframeIDs' => qw(0 1 5 15 30 60 300 900 1800 3600 7200 10800 14400 86400 172800 604800);
+enum 'TimeframeIDs' => qw(0 1 5 15 30 60 120 300 900 1800 3600 7200 10800 14400 86400 172800 604800);
 
 #These two subs are used to make sure timeframe data is returned sorted
 sub _around_timeframes {
     my $orig = shift;
     my $self = shift;
 
-    return $self->$orig() if @_; #Call the Moose generated setter if this is a set call
+    return $self->$orig() if @_; #Call the Moose generated setter if this is a set call (actually because the attributes are read-only we'll never have a set call, but just in case it changes later)
 
     # If it is a get call, call the Moose generated getter and sort the items
     return $self->_sort_timeframes($self->$orig());

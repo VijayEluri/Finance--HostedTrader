@@ -6,7 +6,8 @@ use warnings;
 use Finance::HostedTrader::Datasource;
 
 use Data::Dumper;
-use Test::More tests=>3;
+use Test::More tests=>4;
+use Test::Exception;
 
 my $ds = Finance::HostedTrader::Datasource->new();
 my $cfg = $ds->cfg;
@@ -73,3 +74,5 @@ foreach my $test (@$testcases) {
 	$sth->finish or die($DBI::errstr);
 	is_deeply($data, $test->{s}->{data}, $test->{name});
 }
+
+throws_ok { $ds->createSynthetic('BADBAD', $tf) } qr /Don't know how to handle/, 'Unrecognized pair';
