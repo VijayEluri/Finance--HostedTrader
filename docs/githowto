@@ -1,3 +1,5 @@
 Download repository from origin server: git clone git@github.com:joaocosta/Finance--HostedTrader.git
 Push changes to origin server: git push origin
 Pull changes from origin server to local master branch: git pull origin master
+
+To ignore files, create a .gitignore file in the relevant directory

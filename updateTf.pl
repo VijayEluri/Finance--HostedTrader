@@ -49,7 +49,7 @@ else {
 my $tfs = $cfg->timeframes->synthetic();
 $tfs = [ split( ',', $timeframe_txt ) ] if ($timeframe_txt);
 
-$available_timeframe = $cfg->getTimeframeID($available_timeframe);
+$available_timeframe = $cfg->timeframes->getTimeframeID($available_timeframe);
 
 ##TODO: Bug - This won't work if it tries to convert from 2hour to 3hour timeframe
 #This code assumes timeframes are sorted (which is ok)
