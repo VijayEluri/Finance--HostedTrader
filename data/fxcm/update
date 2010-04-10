@@ -1,6 +1,30 @@
 #!/bin/sh
 set -e
 
+case $1 in
+  "0")
+    TF=t ;;
+  "60")
+    TF=m1 ;;
+  "300")
+    TF=m5 ;;
+  "900")
+    TF=m15 ;;
+  "1800")
+    TF=m30 ;;
+  "3600")
+    TF=H1 ;;
+  "86400")
+    TF=D1 ;;
+  "604800")
+    TF=W1 ;;
+  "2592000")
+    TF=M1 ;;
+  * )
+    echo Bad timeframe
+    exit 1 ;;
+esac
+
 #RatePrinter will write data in the $1 timeframe to individual files
 #The other two arguments are the login details to the API account
-wine ./RatePrinter.exe FX1125841001 3151 $1 2> /dev/null
+wine ./RatePrinter.exe FX1125841001 3151 $TF #2> /dev/null
