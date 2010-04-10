@@ -6,7 +6,7 @@ exit 1
 fi
 }
 
-wine ./RatePrinter.exe 2> /dev/null
+#RatePrinter will write data in the $1 timeframe to individual files
+#The other two arguments are the login details to the API account
+wine ./RatePrinter.exe FX1125841001 3151 $1 2> /dev/null
 die_if_error
-
-echo Success
