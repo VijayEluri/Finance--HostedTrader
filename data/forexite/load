@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+# Load natural timeframes
+mysqlimport --local --fields-terminated-by=, --lines-terminated-by='\r\n' -s -u root fx *_60
+rm -Rf *_60
+
+# Create synthetic pairs
+~/fx/synthetics.pl --timeframe=60
+
+# Create synthetic timeframes
+~/fx/updateTf.pl --start="4 days ago at midnight"
+./TruncateWeekly.pl | mysql -u root fx
+~/fx/updateTf.pl --timeframe=604800 --available-timeframe=day
+
+# Dump downloadable rates
+./dumpFiles.pl --timeframes=3600,86400
+
