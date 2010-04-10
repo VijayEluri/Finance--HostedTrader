@@ -1,12 +1,13 @@
 #!/bin/sh
 set -e
 
+TF=$1
 # Load natural timeframes
-mysqlimport --local --fields-terminated-by=	 --lines-terminated-by='\r\n' -s -u root fxcm *_300
-rm -Rf *_300
+mysqlimport --local --fields-terminated-by=	 --lines-terminated-by='\r\n' -s -u root fxcm *.$TF
+rm -Rf *.$TF
 
 # Create synthetic pairs
-~/fx/synthetics.pl --timeframe=300
+~/fx/synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
 ~/fx/updateTf.pl --start="4 days ago at midnight"
