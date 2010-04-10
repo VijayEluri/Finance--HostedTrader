@@ -4,13 +4,13 @@ ERROR_FILE=/tmp/fx.errors.log
 
 function die_if_error {
 if [ $? -ne 0 ]; then
-exit
+exit 1
 fi
 }
 
 if [ ! -f LAST_DOWNLOADED ]; then
 echo "Don't know what to download"
-exit
+exit 1
 fi
 
 cat LAST_DOWNLOADED | ./missingDates.pl > TO_DOWNLOAD
@@ -33,11 +33,11 @@ rm -Rf *.txt *.1min free_forex_quotes
 die_if_error
 ~/fx/updateTf.pl --start="4 days ago at midnight"
 die_if_error
-~/fx/data/updates/TruncateWeekly.pl | mysql -u root fx
+./TruncateWeekly.pl | mysql -u root fx
 die_if_error
 ~/fx/updateTf.pl --timeframe=604800 --available-timeframe=day
 die_if_error
-~/fx/data/updates/dumpFiles.pl --timeframes=3600,86400
+./dumpFiles.pl --timeframes=3600,86400
 die_if_error
 
 mv TO_DOWNLOAD LAST_DOWNLOADED

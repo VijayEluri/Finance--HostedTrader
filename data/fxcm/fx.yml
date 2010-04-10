@@ -1,0 +1,29 @@
+symbols:
+    natural:
+        - AUDUSD
+        - EURCHF
+        - EURGBP
+        - EURJPY
+        - EURUSD
+        - GBPCHF
+        - GBPJPY
+        - GBPUSD
+        - NZDUSD
+        - USDCAD
+        - USDCHF
+        - USDJPY
+    synthetic:
+timeframes:
+    natural:
+        - 300
+    synthetic:
+        - 3600
+        - 7200
+        - 10800
+        - 14400
+        - 86400
+        - 604800
+db:
+    dbname: fxcm
+    dbuser: fxcm
+    dbpasswd:
