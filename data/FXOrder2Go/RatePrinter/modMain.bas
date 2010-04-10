@@ -43,7 +43,7 @@ Function PrintRateHistory(ByVal symbol As String, ByVal period As String, Option
     Set fso = New Scripting.FileSystemObject
     dateFrom = "2004-01-01"
     Set rates = oTradeDesk.GetPriceHistoryUTC(symbol, period, dateFrom, dateTo, ItemCount, False, True)
-    Set file = fso.CreateTextFile(symbol, True, False)
+    Set file = fso.CreateTextFile(Replace(symbol, "/", ""), True, False)
     For Each rate In rates
         file.Write Format(rate.StartDate, "YYYY-MM-DD hh:mm:ss") & vbTab & _
                     CStr(rate.AskOpen) & vbTab & _
