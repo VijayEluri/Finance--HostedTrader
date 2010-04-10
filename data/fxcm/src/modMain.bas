@@ -10,11 +10,17 @@ Public Sub Main()
     Dim password As String
     Dim Symbols As Variant
     Dim symbol As Variant
+    Dim Args() As String
+    
+    Args = Split(Command$, " ")
+    
+    If UBound(Args) <> 2 Then End
+    
     
     Symbols = Array("EUR/USD", "USD/JPY", "GBP/USD", "USD/CHF", "EUR/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "GBP/CHF")
 
-    username = "FX1125841001"
-    password = "3151"
+    username = Args(0)
+    password = Args(1)
 
     Set oCore = New FXCore.CoreAut
     Set oTradeDesk = oCore.CreateTradeDesk("trader")
@@ -22,7 +28,7 @@ Public Sub Main()
     Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/", "Demo")
     
     For Each symbol In Symbols
-    Call PrintRateHistory(CStr(symbol), "m5")
+    Call PrintRateHistory(CStr(symbol), Args(2))
     Next
     Call oTradeDesk.Logout
     
@@ -43,7 +49,7 @@ Function PrintRateHistory(ByVal symbol As String, ByVal period As String, Option
     Set fso = New Scripting.FileSystemObject
     dateFrom = "2004-01-01"
     Set rates = oTradeDesk.GetPriceHistoryUTC(symbol, period, dateFrom, dateTo, ItemCount, False, True)
-    Set file = fso.CreateTextFile(Replace(symbol, "/", ""), True, False)
+    Set file = fso.CreateTextFile(Replace(symbol, "/", "") & "." & MapTimeframe(period), True, False)
     For Each rate In rates
         file.Write Format(rate.StartDate, "YYYY-MM-DD hh:mm:ss") & vbTab & _
                     CStr(rate.AskOpen) & vbTab & _
