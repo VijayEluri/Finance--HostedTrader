@@ -79,6 +79,7 @@ my $result = GetOptions(
 pod2usage(1) if ($help || !$timeframe);
 $synthetics = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 
+print "Config file defines " . scalar(@$synthetics) . " synthetic pairs\n" if ($verbose);
 foreach my $synthetic (@$synthetics) {
     print "$synthetic [$timeframe]" if ($verbose);
     $db->createSynthetic( $synthetic, $timeframe );
