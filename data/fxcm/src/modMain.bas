@@ -7,6 +7,7 @@ Private Declare Function GetTickCount Lib "kernel32" () As Long
 
 Dim oCore As FXCore.CoreAut
 Dim oTradeDesk As FXCore.TradeDeskAut
+Dim oLog As Logger
 
 Type TimeframeInfoType
     SleepInterval As Long
@@ -23,16 +24,27 @@ Public Sub Main()
     Dim TfInfo() As TimeframeInfoType
     Dim numTimeframes As Long
     Dim i As Long, numTicks As Long
+    Dim oTerminator As Terminator
     
+    Set oLog = New Logger
+    Call oLog.log(vbCrLf)
+    Call oLog.log("---------------------")
+    Call oLog.log("App init")
+    
+    On Error GoTo ErrorHandler
     FreeConsole
     
     Args = Split(Command$, " ")
     
-    If UBound(Args) < 2 Then End
+    If UBound(Args) < 2 Then
+        Call oLog.log("Invalid arguments")
+        End
+    End If
     numTimeframes = UBound(Args) - 1
     ReDim TfInfo(numTimeframes - 1)
     For i = 0 To numTimeframes - 1
         TfInfo(i).SleepInterval = CLng(Args(2 + i)) * 1000
+        TfInfo(i).LastTimeDownloaded = TfInfo(i).SleepInterval * (-2) ' This is necessary because in Wine, GetTickCount starts at 0 when the application starts
         TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(2 + i))
     Next
     
@@ -46,25 +58,44 @@ Public Sub Main()
     Set oTradeDesk = oCore.CreateTradeDesk("trader")
     
     Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/", "Demo")
+    Call oLog.log("Login successfull")
     numTicks = 300
+    
+    Set oTerminator = New Terminator
     Do While (1)
 
     For i = 0 To numTimeframes - 1
         If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
+            oLog.log ("Fetching " & numTicks & " data items in timeframe " & TfInfo(i).FXCore2GO_Code)
             TfInfo(i).LastTimeDownloaded = GetTickCount()
             For Each symbol In Symbols
                 Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks)
+            
             Next
+            oLog.log ("Fetching done")
         End If
     Next
+    If oTerminator.isTerminate() Then
+        Call oLog.log("Terminator signal invoked, exiting")
+        Exit Do
+    End If
     Sleep 5000
     numTicks = 10
     Loop
     
-    Call oTradeDesk.Logout
+    GoTo CleanUp
     
+ErrorHandler:
+    Call oLog.log("FATAL EXCEPTION: " & Err.Source & " - " & Err.Description)
+
+CleanUp:
+On Error Resume Next
+    Call oTradeDesk.Logout
+    On Error GoTo 0
     Set oTradeDesk = Nothing
     Set oCore = Nothing
+    Set oTerminator = Nothing
+    Call oLog.log("App End")
 End Sub
 
 
