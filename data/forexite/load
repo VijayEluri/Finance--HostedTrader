@@ -12,7 +12,7 @@ rm -Rf *_$TF
 # Create synthetic timeframes
 ~/fx/updateTf.pl --start="4 days ago at midnight"
 ./TruncateWeekly.pl | mysql -u root fx
-~/fx/updateTf.pl --timeframe=604800 --available-timeframe=day
+~/fx/updateTf.pl --timeframes=604800 --available-timeframe=day
 
 # Dump downloadable rates
 ./dumpFiles.pl --timeframes=3600,86400

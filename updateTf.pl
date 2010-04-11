@@ -95,7 +95,7 @@ my $result = GetOptions(
     "start=s",               \$start_date,
     "end=s",                 \$end_date,
     "symbols=s",             \$symbols_txt,
-    "timeframe=s",           \$timeframe_txt,
+    "timeframes=s",           \$timeframe_txt,
     "available-timeframe=s", \$available_timeframe,
     "verbose",               \$verbose,
     "help",               \$help,

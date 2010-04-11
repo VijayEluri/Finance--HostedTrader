@@ -7,8 +7,8 @@ vi ~/.fx.yml
 ~/fx/createTables.pl | mysql -u root fx
 
 #Populate by deriving data from existing timeframes
-~/fx/updateTf.pl --verbose --timeframe=7200 --available-timeframe=hour
-~/fx/updateTf.pl --verbose --timeframe=14400 --available-timeframe=2hour
+~/fx/updateTf.pl --verbose --timeframes=7200 --available-timeframe=hour
+~/fx/updateTf.pl --verbose --timeframes=14400 --available-timeframe=2hour
 
 #if updateTf.pl fails with die in Datasource.pm
 #update Datasource.pm to deal with new timeframe
