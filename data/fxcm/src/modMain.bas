@@ -1,9 +1,18 @@
 Attribute VB_Name = "modMain"
 Option Explicit
 
+Private Declare Function FreeConsole Lib "kernel32" () As Long
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Private Declare Function GetTickCount Lib "kernel32" () As Long
+
 Dim oCore As FXCore.CoreAut
 Dim oTradeDesk As FXCore.TradeDeskAut
 
+Type TimeframeInfoType
+    SleepInterval As Long
+    LastTimeDownloaded As Long
+    FXCore2GO_Code As String
+End Type
 
 Public Sub Main()
     Dim username As String
@@ -11,10 +20,21 @@ Public Sub Main()
     Dim Symbols As Variant
     Dim symbol As Variant
     Dim Args() As String
+    Dim TfInfo() As TimeframeInfoType
+    Dim numTimeframes As Long
+    Dim i As Long, numTicks As Long
+    
+    FreeConsole
     
     Args = Split(Command$, " ")
     
-    If UBound(Args) <> 2 Then End
+    If UBound(Args) < 2 Then End
+    numTimeframes = UBound(Args) - 1
+    ReDim TfInfo(numTimeframes - 1)
+    For i = 0 To numTimeframes - 1
+        TfInfo(i).SleepInterval = CLng(Args(2 + i)) * 1000
+        TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(2 + i))
+    Next
     
     
     Symbols = Array("EUR/USD", "USD/JPY", "GBP/USD", "USD/CHF", "EUR/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "GBP/CHF")
@@ -26,10 +46,21 @@ Public Sub Main()
     Set oTradeDesk = oCore.CreateTradeDesk("trader")
     
     Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/", "Demo")
-    
-    For Each symbol In Symbols
-    Call PrintRateHistory(CStr(symbol), Args(2))
+    numTicks = 300
+    Do While (1)
+
+    For i = 0 To numTimeframes - 1
+        If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
+            TfInfo(i).LastTimeDownloaded = GetTickCount()
+            For Each symbol In Symbols
+                Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks)
+            Next
+        End If
     Next
+    Sleep 5000
+    numTicks = 10
+    Loop
+    
     Call oTradeDesk.Logout
     
     Set oTradeDesk = Nothing
@@ -49,12 +80,12 @@ Function PrintRateHistory(ByVal symbol As String, ByVal period As String, Option
     Set fso = New Scripting.FileSystemObject
     dateFrom = "2004-01-01"
     Set rates = oTradeDesk.GetPriceHistoryUTC(symbol, period, dateFrom, dateTo, ItemCount, False, True)
-    Set file = fso.CreateTextFile(Replace(symbol, "/", "") & "." & MapTimeframe(period), True, False)
+    Set file = fso.CreateTextFile(Replace(symbol, "/", "") & "_" & MapTimeframe(period), True, False)
     For Each rate In rates
         file.Write Format(rate.StartDate, "YYYY-MM-DD hh:mm:ss") & vbTab & _
                     CStr(rate.AskOpen) & vbTab & _
-                    CStr(rate.AskHigh) & vbTab & _
                     CStr(rate.AskLow) & vbTab & _
+                    CStr(rate.AskHigh) & vbTab & _
                     CStr(rate.AskClose) & vbCrLf
     Next
     file.Close
@@ -85,3 +116,28 @@ End Function
             End
         End If
     End Function
+
+    Private Function UnmapTimeframe(ByVal tf As String) As String
+        If tf = "0" Then
+            UnmapTimeframe = "t"
+        ElseIf tf = "60" Then
+            UnmapTimeframe = "m1"
+        ElseIf tf = "300" Then
+            UnmapTimeframe = "m5"
+        ElseIf tf = "90" Then
+            UnmapTimeframe = "m15"
+        ElseIf tf = "1800" Then
+            UnmapTimeframe = "m30"
+        ElseIf tf = "3600" Then
+            UnmapTimeframe = "H!"
+        ElseIf tf = "86400" Then
+            UnmapTimeframe = "D1"
+        ElseIf tf = "604800" Then
+            UnmapTimeframe = "W1"
+        ElseIf tf = "2592000" Then
+            UnmapTimeframe = "M1"
+        Else
+            End
+        End If
+    End Function
+

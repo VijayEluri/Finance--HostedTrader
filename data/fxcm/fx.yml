@@ -16,13 +16,13 @@ symbols:
 timeframes:
     natural:
         - 300
-    synthetic:
         - 3600
+        - 86400
+        - 604800
+    synthetic:
         - 7200
         - 10800
         - 14400
-        - 86400
-        - 604800
 db:
     dbname: fxcm
     dbuser: fxcm
