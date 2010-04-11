@@ -3,8 +3,8 @@ set -e
 
 TF=$1
 # Load natural timeframes
-mysqlimport --local --fields-terminated-by=, --lines-terminated-by='\r\n' -s -u root fx *.$TF
-rm -Rf *.$TF
+mysqlimport --local --fields-terminated-by=, --lines-terminated-by='\r\n' -s -u root fx *_$TF
+rm -Rf *_$TF
 
 # Create synthetic pairs
 ~/fx/synthetics.pl --timeframe=$TF
