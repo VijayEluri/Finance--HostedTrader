@@ -160,7 +160,7 @@ End Function
         ElseIf tf = "1800" Then
             UnmapTimeframe = "m30"
         ElseIf tf = "3600" Then
-            UnmapTimeframe = "H!"
+            UnmapTimeframe = "H1"
         ElseIf tf = "86400" Then
             UnmapTimeframe = "D1"
         ElseIf tf = "604800" Then
