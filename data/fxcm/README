@@ -1,0 +1,10 @@
+To start the datafeed:
+./RatePrinter start
+
+To see what's going on
+
+tail -f log.txt
+
+
+To stop it (might have delays if there is work going on):
+./RatePrinter stop

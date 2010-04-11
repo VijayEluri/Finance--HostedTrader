@@ -1,0 +1,28 @@
+#!/bin/sh
+TIMEFRAMES="300 3600 86400 604800"
+
+
+# This does two things
+
+# 1
+# RatePrinter.exe is a windows binary running with wine which uses the FXOrder2Go FXCM API 
+# and writes data files to disk
+
+echo $$ > /tmp/RatePrinter.exe.pid
+#RatePrinter.exe will write data in each timeframe to individual files
+#The other two arguments are the login details to the API account
+wine ./RatePrinter.exe FX1125841001 3151 $TIMEFRAMES &> /dev/null < /dev/null &
+
+
+# 2
+# This waits for data files written by RatePrinter.exe and loads them into MySQL
+# There are probably race conditions lurking around
+# Not sure if RatePrinter locks the files exclusively while writting to them
+while [ 1 ]; do
+  for tf in $TIMEFRAMES; do
+    if ls *_$tf &> /dev/null; then
+      ./load $tf
+    fi
+  done
+  sleep 5
+done

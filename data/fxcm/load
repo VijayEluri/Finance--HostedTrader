@@ -9,7 +9,9 @@ rm -Rf *_$TF
 # Create synthetic pairs
 ~/fx/synthetics.pl --timeframe=$TF
 
+if [[ "$TF" == "7200" ]]; then
 # Create synthetic timeframes
-~/fx/updateTf.pl --start="4 days ago at midnight"
-./TruncateWeekly.pl | mysql -u root fxcm
-~/fx/updateTf.pl --timeframe=604800 --available-timeframe=day
+~/fx/updateTf.pl --start="5 days ago" --timeframes=7200 --available-timeframe=hour
+~/fx/updateTf.pl --start="5 days ago" --timeframes=10800 --available-timeframe=hour
+~/fx/updateTf.pl --start="5 days ago" --timeframes=14400 --available-timeframe=2hour
+fi

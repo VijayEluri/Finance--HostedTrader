@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-TF=$1
-
-#RatePrinter will write data in the $1 timeframe to individual files
-#The other two arguments are the login details to the API account
-wine ./RatePrinter.exe FX1125841001 3151 $TF &> /dev/null < /dev/null &

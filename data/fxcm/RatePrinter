@@ -1,0 +1,74 @@
+#!/bin/sh
+
+. /etc/init.d/functions
+
+prog="FXCM RatePrinter"
+
+start() {
+	echo -n $"Starting $prog: "	
+	if [ -e /tmp/var_lock_subsys_RatePrinter ]; then
+		if [ -e /tmp/RatePrinter.exe.pid ] && [ -e /proc/`cat /tmp/RatePrinter.exe.pid` ]; then
+			echo -n $"cannot start $prog: already running.";
+			failure $"cannot start $prog: already running.";
+			echo
+			return 1
+		fi
+	fi
+	./datafeed &
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /tmp/var_lock_subsys_RatePrinter;
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping $prog: "
+        if [ ! -e /tmp/var_lock_subsys_RatePrinter ]; then
+	    echo -n $"cannot stop $prog: not running."
+	    failure $"cannot stop $prog: not running."
+	    echo
+	    return 1;
+	fi
+
+	touch ~/.wine/drive_c/RatePrinter.kill
+	while ps aux | grep RatePrinter.exe | grep -v grep > /dev/null; do
+	#TODO: A timeout here would be nice
+		sleep 1
+	done
+
+	kill `cat /tmp/RatePrinter.exe.pid`
+	RETVAL=$?
+	echo
+        [ $RETVAL -eq 0 ] && rm -f /tmp/var_lock_subsys_RatePrinter /tmp/RatePrinter.exe.pid;
+	return $RETVAL
+}
+
+restart() {
+  	stop
+	start
+}	
+
+rhstatus() {
+	status -p /tmp/RatePrinter.exe.pid RatePrinter
+}
+	
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart)
+  	restart
+	;;
+  status)
+  	rhstatus
+	;;
+  condrestart)
+  	[ -f /tmp/var_lock_subsys_RatePrinter ] && restart || :
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|condrestart}"
+	exit 1
+esac
