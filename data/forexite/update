@@ -6,6 +6,8 @@ echo "Don't know what to download"
 exit 1
 fi
 
+TF=$1
+
 cat LAST_DOWNLOADED | ./missingDates.pl > TO_DOWNLOAD
 wget -q -N -i TO_DOWNLOAD -nH -c -r -l 1 -np -A.zip
 
@@ -16,3 +18,4 @@ find ./ -name "*.txt" -exec ./process.forexite.sh "{}" \;
 rm -Rf *.txt free_forex_quotes
 
 mv TO_DOWNLOAD LAST_DOWNLOADED
+./load $TF
