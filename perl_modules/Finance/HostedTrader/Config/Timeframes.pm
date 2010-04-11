@@ -108,7 +108,7 @@ has synthetic => (
     builder => '_build_synthetic',
     required=>0,
 );
-#register method modifier so the passed timeframe values can be sorted
+#register method modifier so the passed timeframe values can be sorted and undef values converted to empty lists
 around 'synthetic' => \&_around_timeframes;
 
 sub _build_synthetic {

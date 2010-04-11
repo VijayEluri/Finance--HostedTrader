@@ -47,12 +47,27 @@ See the description for natural symbols.
 
 =cut
 
+
+sub _around_symbols {
+    my $orig = shift;
+    my $self = shift;
+
+    return $self->$orig() if @_; #Call the Moose generated setter if this is a set call (actually because the attributes are read-only we'll never have a set call, but just in case it changes later)
+
+    # If it is a get call, call the Moose generated getter and sort the items
+    my $value = $self->$orig();
+    return $value if (defined($value));
+    return [];
+}
+
 has synthetic => (
     is     => 'ro',
     isa    => 'Maybe[ArrayRef[Str]]',
     builder => '_build_synthetic',
     required=>0,
 );
+#register method modifier so that undef values can be converted to empty lists
+around 'synthetic' => \&_around_symbols;
 
 sub _build_synthetic {
     return [];
