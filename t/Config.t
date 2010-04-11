@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 17;
+use Test::More tests => 25;
 use Data::Dumper;
 
 BEGIN {
@@ -11,6 +11,20 @@ use_ok ('Finance::HostedTrader::Config::DB');
 use_ok ('Finance::HostedTrader::Config::Symbols');
 use_ok ('Finance::HostedTrader::Config::Timeframes');
 }
+
+my $merge_files = Finance::HostedTrader::Config->new(
+		'files' => [
+			'cfg1.yml',
+			'cfg2.yml', ]);
+
+isa_ok($merge_files,'Finance::HostedTrader::Config');
+is($merge_files->db->dbhost, 'dbhost', 'Key missing in file cfg2');
+is($merge_files->db->dbname, 'dbname2', 'Key present in both files');
+is($merge_files->db->dbpasswd, undef, 'Key present in both files but undefined in cfg2');
+is_deeply($merge_files->symbols->synthetic, ['XAGJPY'], 'Key missing in file cfg2');
+is_deeply($merge_files->symbols->natural, ['XAGUSD2'], 'Key missing in file cfg1');
+is_deeply($merge_files->timeframes->synthetic, [], 'Key present in both files but empty list in cfg2');
+is_deeply($merge_files->timeframes->natural, [300], 'Key present in both files as list reference');
 
 my $db = Finance::HostedTrader::Config::DB->new(
 		'dbhost' => 'dbhost',

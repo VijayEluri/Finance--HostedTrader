@@ -1,0 +1,13 @@
+symbols:
+    synthetic:
+        - XAGJPY
+timeframes:
+    natural:
+        - 60
+    synthetic:
+        - 300
+db:
+    dbhost: dbhost
+    dbname: dbname
+    dbuser: dbuser
+    dbpasswd: dbpasswd

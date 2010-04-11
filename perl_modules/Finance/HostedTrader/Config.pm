@@ -6,7 +6,14 @@ package Finance::HostedTrader::Config;
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Config;
-    my $obj = $Finance::HostedTrader::Config->new(); #Builds from config file(s) (eg: /etc/fx.yml ~/.fx.yml fx.yml)
+    my $obj = $Finance::HostedTrader::Config->new(); #Builds from merged config file(s) (eg: /etc/fx.yml ~/.fx.yml fx.yml)
+
+    ... OR ...
+
+    my $merge_files = Finance::HostedTrader::Config->new( #Builds from specified config files
+		'files' => [
+			'cfg1.yml',
+			'cfg2.yml', ]);
 
     ... OR ...
 
@@ -44,11 +51,36 @@ use strict;
 use warnings;
 use Config::Any;
 use Data::Dumper;
+use Hash::Merge;
+use Moose;
 
 use Finance::HostedTrader::Config::DB;
 use Finance::HostedTrader::Config::Symbols;
 use Finance::HostedTrader::Config::Timeframes;
-use Moose;
+
+BEGIN {
+               Hash::Merge::specify_behavior(
+                   {
+                               'SCALAR' => {
+                                       'SCALAR' => sub { $_[0] },
+                                       'ARRAY'  => sub { $_[0] },
+                                       'HASH'   => sub { $_[0] },
+                               },
+                               'ARRAY' => {
+                                       'SCALAR' => sub { $_[0] },
+                                       'ARRAY'  => sub { $_[0] },
+                                       'HASH'   => sub { $_[0] },
+                               },
+                               'HASH' => {
+                                       'SCALAR' => sub { $_[0] },
+                                       'ARRAY'  => sub { $_[0] },
+                                       'HASH'   => sub { Hash::Merge::_merge_hashes( $_[0], $_[1] ) },
+                               },
+                       },
+                       'custom_merge',
+               );
+}
+
 
 =item C<db>
 <L><Finance::HostedTrader::Config::DB> object containing db config information
@@ -85,24 +117,31 @@ Constructor. See SYNOPSIS for available options.
 around BUILDARGS => sub {
     my $orig = shift;
     my $class = shift;
+    my @files   = ( "/etc/fx.yml", "$ENV{HOME}/.fx.yml", "./fx.yml", @_ );
 
-    if ( scalar(@_) > 1 || ref $_[0] ) {
+    if ( scalar(@_) > 1 ) {
+	if ( $_[0] eq 'files' ) {
+		@files = @{$_[1]};
+	} else {
 # Direct constructor without reading any configuration file 
          return $class->$orig(@_);
+	}
     }
 
 
-    my @files   = ( "/etc/fx.yml", "$ENV{HOME}/.fx.yml", "./fx.yml", @_ );
 
     my $cfg_all = Config::Any->load_files(
         { files => \@files, use_ext => 1, flatten_to_hash => 1 } );
     my $cfg = {};
 
+
+
+	my $merge = Hash::Merge->new('custom_merge');
+
     foreach my $file (@files) {
         next unless ( $cfg_all->{$file} );
-        foreach my $key ( keys %{ $cfg_all->{$file} } ) {
-            $cfg->{$key} = $cfg_all->{$file}->{$key};
-        }
+	my $new_cfg = $merge->merge($cfg_all->{$file}, $cfg);
+	$cfg=$new_cfg;
     }
 
     my $class_args = {
