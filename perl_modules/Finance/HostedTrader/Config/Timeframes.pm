@@ -70,6 +70,7 @@ my $self = shift;
 my $values =shift;
 use Data::Dumper;
 
+return [] if (!defined($values));
     my @sorted =
       sort { int($a) <=> int($b) }
       ( @{ $values } );
@@ -95,7 +96,7 @@ around 'natural' => \&_around_timeframes;
 
 =item C<synthetic>
 
-Returns a list of synthetic timeframes.
+Returns a list of synthetic timeframes.  If not defined (either by omission or by explicitly setting it to undef), returns an empty list when accessed.
 
 See the description for natural timeframes.
 

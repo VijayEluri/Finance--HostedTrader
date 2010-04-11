@@ -2,13 +2,22 @@
 
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More tests => 12;
 use Test::Exception;
 use Data::Dumper;
 
 BEGIN {
 use_ok ('Finance::HostedTrader::Config::Timeframes');
 }
+
+my $empty_tfs = Finance::HostedTrader::Config::Timeframes->new(
+	'natural' => [],
+	'synthetic' => undef,
+	);
+
+is_deeply($empty_tfs->natural, [], 'Natural timeframes empty');
+is_deeply($empty_tfs->synthetic, [], 'Synthetic timeframes empty');
+is_deeply($empty_tfs->all, [], 'All timeframes empty');
 
 my $tfs = Finance::HostedTrader::Config::Timeframes->new(
 	'natural' => [ qw (300 60) ], #Make sure timeframes are unordered to test if the module returns them ordered
