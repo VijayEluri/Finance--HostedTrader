@@ -117,7 +117,7 @@ Function PrintRateHistory(ByVal symbol As String, ByVal period As String, Option
                     CStr(rate.AskOpen) & vbTab & _
                     CStr(rate.AskLow) & vbTab & _
                     CStr(rate.AskHigh) & vbTab & _
-                    CStr(rate.AskClose) & vbCrLf
+                    CStr(rate.AskClose) & Chr$(10)
     Next
     file.Close
     Set file = Nothing
