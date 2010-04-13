@@ -206,6 +206,8 @@ FROM (
 ) AS T_OUTER
 );
 
+    print $sql if ($args->{debug});
+
     my $dbh = $self->{_ds}->dbh;
     my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
     $sth->execute() or die( $DBI::errstr . $sql );
@@ -258,6 +260,7 @@ FROM (
 ) AS T_OUTER
 WHERE $result
 );
+    print $sql if ($args->{debug});
 
     my $dbh = $self->{_ds}->dbh;
     my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
