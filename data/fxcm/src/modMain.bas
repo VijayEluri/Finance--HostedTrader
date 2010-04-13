@@ -43,7 +43,7 @@ Public Sub Main()
     numTimeframes = UBound(Args) - 1
     ReDim TfInfo(numTimeframes - 1)
     For i = 0 To numTimeframes - 1
-        TfInfo(i).SleepInterval = CLng(Args(2 + i)) * 1000
+        TfInfo(i).SleepInterval = CLng(Args(2 + i)) * 250
         TfInfo(i).LastTimeDownloaded = TfInfo(i).SleepInterval * (-2) ' This is necessary because in Wine, GetTickCount starts at 0 when the application starts
         TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(2 + i))
     Next
