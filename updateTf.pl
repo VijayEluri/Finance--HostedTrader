@@ -17,10 +17,12 @@ Generates synthetic timeframes
 =item C<--start=s>
 
 The starting date to convert from. See L<Date::Manip> for acceptable date formats.
+Defaults to 0001-01-01.
 
 =item C<--end=s>
 
 The ending date to convert to. See L<Date::Manip> for acceptable date formats.
+Defaults to 9998-12-31.
 
 =item C<--symbols=s>
 
