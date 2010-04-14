@@ -9,7 +9,7 @@ rm -Rf *_$TF
 # Create synthetic pairs
 ~/fx/synthetics.pl --timeframe=$TF
 
-if [[ "$TF" == "7200" ]]; then
+if [[ "$TF" == "3600" ]]; then
 # Create synthetic timeframes
 ~/fx/updateTf.pl --start="5 days ago" --timeframes=7200 --available-timeframe=hour
 ~/fx/updateTf.pl --start="5 days ago" --timeframes=10800 --available-timeframe=hour
