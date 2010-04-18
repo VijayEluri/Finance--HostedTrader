@@ -29,6 +29,8 @@ stop() {
 	    echo
 	    return 1;
 	fi
+	kill `cat /tmp/RatePrinter.exe.pid`
+	RETVAL=$?
 
 	touch ~/.wine/drive_c/RatePrinter.kill
 	while ps aux | grep RatePrinter.exe | grep -v grep > /dev/null; do
@@ -36,8 +38,6 @@ stop() {
 		sleep 1
 	done
 
-	kill `cat /tmp/RatePrinter.exe.pid`
-	RETVAL=$?
 	echo
         [ $RETVAL -eq 0 ] && rm -f /tmp/var_lock_subsys_RatePrinter /tmp/RatePrinter.exe.pid;
 	return $RETVAL
