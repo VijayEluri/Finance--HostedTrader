@@ -43,6 +43,19 @@ my %timeframes = (
     'week'  => 604800
 );
 
+=item C<debug>
+
+Optional If set to a true value, prints SQL queries to stdout.
+
+Defaults to false.
+=cut
+has debug => (
+    is       => 'ro',
+    isa      => 'Bool',
+    default  => 0,
+    required => 0,
+);
+
 =item C<dbh>
 
 Optional DBI handle to the MySQL datasource.
@@ -152,6 +165,7 @@ GROUP BY $date_group
 ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), close=values(close)
 |;
 
+    print "\n----------\n$sql\n----------\n" if ($self->debug);
     $self->dbh->do($sql);
 }
 

@@ -56,6 +56,10 @@ Display usage information.
 
 Verbose output.
 
+=item C<--debug>
+
+Sets the debug flag in the Finance::HostedTrader::Datasource object which causes it to output sql queries to STDOUT.
+
 
 =back
 
@@ -91,6 +95,7 @@ my ( $start_date, $end_date ) = ( '0001-01-01', '9998-12-31' );
 my ( $symbols_txt, $timeframe_txt );
 my $available_timeframe = 'min';
 my $verbose             = 0;
+my $debug             = 0;
 my $help             = 0;
 
 my $result = GetOptions(
@@ -100,6 +105,7 @@ my $result = GetOptions(
     "timeframes=s",           \$timeframe_txt,
     "available-timeframe=s", \$available_timeframe,
     "verbose",               \$verbose,
+    "debug",               \$debug,
     "help",               \$help,
 ) || pod2usage(2);
 pod2usage(1) if ($help);
@@ -109,7 +115,7 @@ $start_date = UnixDate( $start_date, "%Y-%m-%d %H:%M:%S" )
 $end_date = UnixDate( $end_date, "%Y-%m-%d %H:%M:%S" )
   or die("Cannot parse $end_date");
 
-my $db = Finance::HostedTrader::Datasource->new();
+my $db = Finance::HostedTrader::Datasource->new(debug => $debug);
 my $cfg = $db->cfg;
 my $symbols;
 if ( !defined($symbols_txt) ) {
