@@ -96,6 +96,7 @@ On Error Resume Next
     Set oCore = Nothing
     Set oTerminator = Nothing
     Call oLog.log("App End")
+    End
 End Sub
 
 
