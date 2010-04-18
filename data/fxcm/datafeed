@@ -1,23 +1,30 @@
 #!/bin/sh
 TIMEFRAMES=`perl -MData::Dumper -MConfig::Any -e 'my $cfg_all = Config::Any->load_files({ files => [qw(fx.yml)], use_ext => 1, flatten_to_hash => 1 } );print join(" ", @{$cfg_all->{"fx.yml"}->{timeframes}->{natural}})'`
 
+echo $$ > /tmp/RatePrinter.exe.pid
+
 # This does two things
 
 # 1
 # RatePrinter.exe is a windows binary running with wine which uses the FXOrder2Go FXCM API 
 # and writes data files to disk
-
-echo $$ > /tmp/RatePrinter.exe.pid
-#RatePrinter.exe will write data in each timeframe to individual files
-#The other two arguments are the login details to the API account
 wine ./RatePrinter.exe FX1125841001 3151 $TIMEFRAMES &> /dev/null < /dev/null &
+sleep 2
+
+while [ 1 ]; do
+  while ( ! ps aux | grep RatePrinter.exe | grep -v grep > /dev/null ); do
+      # If RatePrinter.exe stops running, sleep 30 seconds
+      # and try to restart it
+      sleep 30
+      wine ./RatePrinter.exe FX1125841001 3151 $TIMEFRAMES &> /dev/null < /dev/null &
+  done
+
 
 
 # 2
 # This waits for data files written by RatePrinter.exe and loads them into MySQL
 # There are probably race conditions lurking around
 # Not sure if RatePrinter locks the files exclusively while writting to them
-while [ 1 ]; do
   for tf in $TIMEFRAMES; do
     if ls *_$tf &> /dev/null; then
       ./load $tf
