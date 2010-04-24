@@ -25,6 +25,7 @@ Public Sub Main()
     Dim numTimeframes As Long
     Dim i As Long, numTicks As Long
     Dim oTerminator As Terminator
+    Dim dateFrom As Date, dateTo As Date
     
     Set oLog = New Logger
     Call oLog.log(vbCrLf)
@@ -36,16 +37,16 @@ Public Sub Main()
     
     Args = Split(Command$, " ")
     
-    If UBound(Args) < 2 Then
+    If UBound(Args) < 4 Then
         Call oLog.log("Invalid arguments")
         End
     End If
-    numTimeframes = UBound(Args) - 1
+    numTimeframes = UBound(Args) - 3
     ReDim TfInfo(numTimeframes - 1)
     For i = 0 To numTimeframes - 1
-        TfInfo(i).SleepInterval = CLng(Args(2 + i)) * 250
+        TfInfo(i).SleepInterval = CLng(Args(4 + i)) * 250
         TfInfo(i).LastTimeDownloaded = TfInfo(i).SleepInterval * (-2) ' This is necessary because in Wine, GetTickCount starts at 0 when the application starts
-        TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(2 + i))
+        TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(4 + i))
     Next
     
     
@@ -53,12 +54,16 @@ Public Sub Main()
 
     username = Args(0)
     password = Args(1)
+    dateFrom = CDate(Replace(Args(2), "_", " "))
+    dateTo = CDate(Replace(Args(3), "_", " "))
 
     Set oCore = New FXCore.CoreAut
     Set oTradeDesk = oCore.CreateTradeDesk("trader")
     
     Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/", "Demo")
     Call oLog.log("Login successfull")
+    Call oLog.log("Start date: " & Args(2))
+    Call oLog.log("Final date: " & Args(3))
     numTicks = 300
     
     Set oTerminator = New Terminator
@@ -69,8 +74,7 @@ Public Sub Main()
             oLog.log ("Fetching " & numTicks & " data items in timeframe " & TfInfo(i).FXCore2GO_Code)
             TfInfo(i).LastTimeDownloaded = GetTickCount()
             For Each symbol In Symbols
-                Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks)
-            
+                Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks, CDate(dateFrom), CDate(dateTo))
             Next
             oLog.log ("Fetching done")
         End If
@@ -99,18 +103,15 @@ On Error Resume Next
     End
 End Sub
 
-
-Function PrintRateHistory(ByVal symbol As String, ByVal period As String, Optional ByVal ItemCount As Integer = 300)
+Function PrintRateHistory(ByVal symbol As String, ByVal period As String, ByVal ItemCount As Integer, dateFrom As Date, dateTo As Date)
     Dim rates As FXCore.MarketRateEnumAut
     Dim rate As FXCore.MarketRateAut
-    Dim dateFrom As Date, dateTo As Date
     Dim sql As String
     
     Dim fso As Scripting.FileSystemObject
     Dim file As Scripting.TextStream
 
     Set fso = New Scripting.FileSystemObject
-    dateFrom = "2004-01-01"
     Set rates = oTradeDesk.GetPriceHistoryUTC(symbol, period, dateFrom, dateTo, ItemCount, False, True)
     Set file = fso.CreateTextFile(Replace(symbol, "/", "") & "_" & MapTimeframe(period), True, False)
     For Each rate In rates

@@ -8,7 +8,7 @@ echo $$ > /tmp/RatePrinter.exe.pid
 # 1
 # RatePrinter.exe is a windows binary running with wine which uses the FXOrder2Go FXCM API 
 # and writes data files to disk
-wine ./RatePrinter.exe FX1125841001 3151 $TIMEFRAMES &> /dev/null < /dev/null &
+wine ./RatePrinter.exe FX1125841001 3151 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
 sleep 2
 
 while [ 1 ]; do
@@ -16,7 +16,7 @@ while [ 1 ]; do
       # If RatePrinter.exe stops running, sleep 30 seconds
       # and try to restart it
       sleep 30
-      wine ./RatePrinter.exe FX1125841001 3151 $TIMEFRAMES &> /dev/null < /dev/null &
+      wine ./RatePrinter.exe FX1125841001 3151 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
   done
 
 
