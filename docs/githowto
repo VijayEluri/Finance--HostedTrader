@@ -3,3 +3,5 @@ Push changes to origin server: git push origin
 Pull changes from origin server to local master branch: git pull origin master
 
 To ignore files, create a .gitignore file in the relevant directory
+
+git checkout file #retrieve file
