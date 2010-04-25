@@ -4,12 +4,20 @@ use strict;
 use warnings;
 
 use Finance::HostedTrader::Datasource;
+use Finance::HostedTrader::Config;
 
 use Data::Dumper;
 use Test::More tests=>4;
 use Test::Exception;
 
-my $ds = Finance::HostedTrader::Datasource->new();
+my $ds = Finance::HostedTrader::Datasource->new(
+	cfg => Finance::HostedTrader::Config->new(
+		files => [
+			'/etc/fx.yml',
+			$ENV{HOME} . '/fx/t/synthetics/fx.yml'
+		]
+	)
+);
 my $cfg = $ds->cfg;
 my $dbh = $ds->dbh;
 
