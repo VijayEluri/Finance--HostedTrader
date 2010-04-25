@@ -85,7 +85,7 @@ sub _build_dbh {
 
 =item C<cfg>
 
-Returns the Finance::HostedTrader::Config object associated with this datasource.
+Returns the L<Finance::HostedTrader::Config> object associated with this datasource.
 
 This object contains a list of available timeframes and symbols in this data source.
 =cut
