@@ -20,10 +20,10 @@ foreach my $symbol (@$symbols) {
         print qq /
 CREATE TABLE IF NOT EXISTS `$symbol\_$tf` (
 `datetime` DATETIME NOT NULL ,
-`open` FLOAT NOT NULL ,
-`low` FLOAT NOT NULL ,
-`high` FLOAT NOT NULL ,
-`close` FLOAT NOT NULL ,
+`open` DECIMAL(9,4) NOT NULL ,
+`low` DECIMAL(9,4) NOT NULL ,
+`high` DECIMAL(9,4) NOT NULL ,
+`close` DECIMAL(9,4) NOT NULL ,
 PRIMARY KEY ( `datetime` )
 ) TYPE = MYISAM ;
 /;
