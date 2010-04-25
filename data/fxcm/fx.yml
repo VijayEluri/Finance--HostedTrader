@@ -13,6 +13,7 @@ symbols:
         - USDCHF
         - USDJPY
     synthetic:
+        - AUDJPY
 timeframes:
     natural:
         - 300
