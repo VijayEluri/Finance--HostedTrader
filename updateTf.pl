@@ -5,7 +5,7 @@ Generates synthetic timeframes
 
 =head1 SYNOPSIS
 
-    updateTf.pl [--start="5 years ago"] [--end=today] [--symbols=s] [--timeframes=tf] [--available-timeframe=s] [--verbose]
+    updateTf.pl [--start="5 years ago"] [--end=today] [--symbols=s] [--timeframes=tf] [--verbose] --available-timeframe=s
 
 =head1 DESCRIPTION
 
@@ -38,13 +38,7 @@ tf can be a valid integer timeframe as defined in L<Finance::HostedTrader::Datas
 
 =item C<--available-timeframes=s>
 
-The base timeframe to use for conversion. Defaults to one minute timeframe which is crap.
-
-TODO: Make this default to the highest natural timeframe which is smaller than the target timeframe.
-
-TODO: Or maybe even use existing synthetic timeframes if they have already been converted here
-
-if converting to multiple timeframes the code will try to use newly converted tfs
+The base timeframe to use for conversion.
 
 Use timeframe name instead of numeric code
 
@@ -93,7 +87,7 @@ my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
   localtime( time - 24 * 60 * 60 );
 my ( $start_date, $end_date ) = ( '0001-01-01', '9998-12-31' );
 my ( $symbols_txt, $timeframe_txt );
-my $available_timeframe = 'min';
+my $available_timeframe = '';
 my $verbose             = 0;
 my $debug             = 0;
 my $help             = 0;
@@ -108,6 +102,8 @@ my $result = GetOptions(
     "debug",               \$debug,
     "help",               \$help,
 ) || pod2usage(2);
+
+pod2usage(2) if (!$available_timeframe);
 pod2usage(1) if ($help);
 
 $start_date = UnixDate( $start_date, "%Y-%m-%d %H:%M:%S" )
@@ -136,9 +132,6 @@ $tfs = [ split( ',', $timeframe_txt ) ] if ($timeframe_txt);
 
 $available_timeframe = $cfg->timeframes->getTimeframeID($available_timeframe);
 
-##TODO: Bug - This won't work if it tries to convert from 2hour to 3hour timeframe
-#This code assumes timeframes are sorted (which is ok)
-#and the previous timeframe can build the current one (which is not always the case)
 foreach my $tf ( @{$tfs} ) {
     next if ( $tf == $available_timeframe );
     foreach my $symbol ( @{$symbols} ) {
@@ -147,5 +140,5 @@ foreach my $tf ( @{$tfs} ) {
         $db->convertOHLCTimeSeries( $symbol, $available_timeframe, $tf,
             $start_date, $end_date );
     }
-    $available_timeframe = $tf;
+#    $available_timeframe = $tf; #This won't work in some cases, eg: if timeframes = 7200,10800
 }
