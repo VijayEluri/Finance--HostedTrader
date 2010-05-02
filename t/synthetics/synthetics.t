@@ -39,19 +39,19 @@ my $testcases = [
 		name => 'Synthetic AAAJJJ = AAAUSD * JJJUSD',
 		n1 => { symbol => 'AAAUSD', data => [['0001-01-01 00:00:00', 2, 1, 3, 2]]},
 		n2 => { symbol => 'USDJJJ', data => [['0001-01-01 00:00:00', 2, 1, 3, 2]]},
-		s  => { symbol => 'AAAJJJ', data => [['0001-01-01 00:00:00', 4, 1, 9, 4]]},
+		s  => { symbol => 'AAAJJJ', data => [['0001-01-01 00:00:00', '4.0000', '1.0000', '9.0000', '4.0000']]},
 	},
         {
 		name => 'Synthetic GGGEEE = GGGUSD / EEEUSD',
 		n1 => { symbol => 'GGGUSD', data => [['0001-01-01 00:00:00', 2, 1, 3, 2]]},
 		n2 => { symbol => 'EEEUSD', data => [['0001-01-01 00:00:00', 2, 1, 3, 2]]},
-		s  => { symbol => 'GGGEEE', data => [['0001-01-01 00:00:00', '1', '0.3333', '3', '1']]},
+		s  => { symbol => 'GGGEEE', data => [['0001-01-01 00:00:00', '1.0000', '0.3333', '3.0000', '1.0000']]},
 	},
         {
 		name => 'Synthetic CCCJJJ = USDCCC / USDJJJ',
 		n1 => { symbol => 'USDCCC', data => [['0001-01-01 00:00:00', 2, 1, 3, 2]]},
 		n2 => { symbol => 'USDJJJ', data => [['0001-01-01 00:00:00', 2, 1, 3, 2]]},
-		s  => { symbol => 'CCCJJJ', data => [['0001-01-01 00:00:00', '1', '0.3333', '3', '1']]},
+		s  => { symbol => 'CCCJJJ', data => [['0001-01-01 00:00:00', '1.0000', '0.3333', '3.0000', '1.0000']]},
 	},
 
 ];
