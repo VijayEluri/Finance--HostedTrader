@@ -10,7 +10,7 @@ rm -Rf *_$TF
 ~/fx/synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
-~/fx/updateTf.pl --start="4 days ago at midnight"
+~/fx/updateTf.pl --start="4 days ago at midnight" --available-timeframe=min
 ./TruncateWeekly.pl | mysql -u root fx
 ~/fx/updateTf.pl --timeframes=604800 --available-timeframe=day
 
