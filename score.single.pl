@@ -10,9 +10,15 @@ use Data::Dumper;
 use Getopt::Long;
 
 my ( $timeframe, $max_loaded_items, $verbose ) = ( 'week', 1000, 0 );
+my @item_exclude;
 
-my $result = GetOptions( "timeframe=s", \$timeframe, "max-loaded-items=i",
-    \$max_loaded_items, "verbose", \$verbose, ) || exit(1);
+my $result = GetOptions(
+"timeframe=s", \$timeframe, 
+"max-loaded-items=i",    \$max_loaded_items, 
+"verbose", \$verbose, 
+"exclude=s", \@item_exclude,
+) || exit(1);
+
 
 my $cfg               = Finance::HostedTrader::Config->new();
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
@@ -33,6 +39,12 @@ foreach my $symbol ( @{$symbols} ) {
 }
 
 my @items = qw(AUD CAD CHF EUR GBP NZD JPY USD XAU XAG);
+my %i = map {$_ => 1 } @items;
+
+foreach my $item (@item_exclude) {
+delete $i{$item};
+}
+@items = keys(%i);
 
 foreach my $item (@items) {
     print $item, "\t", getScore($item), "\n";
