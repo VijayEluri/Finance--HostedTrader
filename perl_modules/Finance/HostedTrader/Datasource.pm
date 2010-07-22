@@ -226,8 +226,8 @@ sub createSynthetic {
 }
 
 sub DESTROY {
-    my ($self) = @_;
-    $self->dbh->disconnect;
+#    my ($self) = @_;
+#    $self->dbh->disconnect;
 }
 
 1;
