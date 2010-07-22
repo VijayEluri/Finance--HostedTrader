@@ -224,12 +224,51 @@ FROM (
 
 sub getSignalData {
     my ( $self, $args ) = @_;
+    my $sql = $self->_getSignalSql($args);
+    print $sql if ($args->{debug});
+
+    my $dbh = $self->{_ds}->dbh;
+    my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
+    $sth->execute() or die( $DBI::errstr . $sql );
+    my $data = $sth->fetchall_arrayref;
+    $sth->finish() or die($DBI::errstr);
+    return $data;
+}
+
+sub getSystemData {
+    my ( $self, $args ) = @_;
+
+    $args->{expr} = $args->{enter};
+    $args->{fields} = "'ENTRY' AS Action, datetime, close";
+    my $sql_entry = $self->_getSignalSql($args);
+    $args->{expr} = $args->{exit};
+    $args->{fields} = "'EXIT' AS Action, datetime, close";
+    my $sql_exit  = $self->_getSignalSql($args);
+
+
+    my $sql = $sql_entry . ' UNION ALL ' . $sql_exit . ' ORDER BY datetime';
+    print $sql if ($args->{debug});
+
+    my $dbh = $self->{_ds}->dbh;
+    my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
+    $sth->execute() or die( $DBI::errstr . $sql );
+    my $data = $sth->fetchall_arrayref;
+    $sth->finish() or die($DBI::errstr);
+    return $data;
+}
+
+sub _getSignalSql {
+my ($self, $args) = @_;
     my $tf = $args->{tf} || 'day';
     $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
     my $expr   = $args->{expr}   || die("No expression set");
     my $symbol = $args->{symbol} || die("No symbol set");
     my $maxLoadedItems = $args->{maxLoadedItems};
+    my $startPeriod = $args->{startPeriod} || '0001-01-01 00:00:00';
+    my $endPeriod = $args->{endPeriod} || '9999-12-31 23:59:59';
+    my $fields = $args->{fields};
+
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} )
         || $args->{maxLoadedItems} == -1 );
@@ -246,7 +285,8 @@ sub getSignalData {
     $WHERE_FILTER = 'WHERE dayofweek(datetime) <> 1' if ( $tf != 604800 );
 
     my $sql = qq(
-SELECT datetime FROM (
+SELECT * FROM (
+SELECT $fields FROM (
 SELECT *$select_fields
 FROM (
     SELECT * FROM (
@@ -259,15 +299,12 @@ FROM (
 ) AS T_INNER
 ) AS T_OUTER
 WHERE $result
+) AS DT
+WHERE datetime >= '$startPeriod' AND datetime <='$endPeriod'
 );
-    print $sql if ($args->{debug});
 
-    my $dbh = $self->{_ds}->dbh;
-    my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
-    $sth->execute() or die( $DBI::errstr . $sql );
-    my $data = $sth->fetchall_arrayref;
-    $sth->finish() or die($DBI::errstr);
-    return [ map { $_->[0] } @$data ];
+return $sql;
+
 }
 
 1;
