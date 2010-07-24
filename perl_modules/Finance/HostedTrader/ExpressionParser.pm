@@ -261,6 +261,13 @@ sub getSystemData {
 
 sub _getSignalSql {
 my ($self, $args) = @_;
+
+    my @good_args = qw(tf expr symbol maxLoadedItems startPeriod endPeriod fields debug);
+
+    foreach my $key (keys %$args) {
+        die("invalid arg in _getSignalSql: $key") unless grep { /$key/ } @good_args;
+    }
+
     my $tf = $args->{tf} || 'day';
     $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
@@ -269,7 +276,7 @@ my ($self, $args) = @_;
     my $maxLoadedItems = $args->{maxLoadedItems};
     my $startPeriod = $args->{startPeriod} || '0001-01-01 00:00:00';
     my $endPeriod = $args->{endPeriod} || '9999-12-31 23:59:59';
-    my $fields = $args->{fields};
+    my $fields = $args->{fields} || 'datetime';
 
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} )

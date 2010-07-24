@@ -99,8 +99,8 @@ $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 
 
 my @signals = (
-'rsi(close,14) > 60 AND ema(close,200) > close AND ema(close,200) > ema(close,50)',
-'rsi(close,14) < 40 AND ema(close,200) < close AND ema(close,200) < ema(close,50)',
+'close > previous(max(close,89),1)',
+'low < previous(min(close,89),1)',
 );
 
 foreach my $signal (@signals) {
