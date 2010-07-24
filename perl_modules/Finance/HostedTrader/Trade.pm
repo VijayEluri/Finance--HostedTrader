@@ -23,6 +23,18 @@ use warnings;
 use Moose;
 use Moose::Util::TypeConstraints;
 
+
+subtype 'positiveNum'
+    => as 'Num'
+    => where { $_ > 0 }
+    => message { "The number provided ($_) must be positive" };
+
+subtype 'positiveInt'
+    => as 'Int'
+    => where { $_ > 0 }
+    => message { "The number provided ($_) must be a positive integer" };
+
+
 =item C<symbol>
 
 
@@ -39,6 +51,7 @@ long or short
 
 =cut
 enum 'tradeDirection' => qw(long short);
+enum 'tradeStatus' => qw(open closed);
 has direction => (
     is     => 'ro',
     isa    => 'Str',
@@ -63,7 +76,17 @@ has openDate => (
 =cut
 has openPrice => (
     is     => 'ro',
-    isa    => 'Num',
+    isa    => 'positiveNum',
+    required=>1,
+);
+
+=item C<size>
+
+
+=cut
+has size => (
+    is     => 'ro',
+    isa    => 'positiveInt',
     required=>1,
 );
 
@@ -73,7 +96,7 @@ has openPrice => (
 
 =cut
 has closeDate => (
-    is     => 'rw',
+    is     => 'ro',
     isa    => 'Str',
     required=>0,
 );
@@ -83,7 +106,7 @@ has closeDate => (
 
 =cut
 has closePrice => (
-    is     => 'rw',
+    is     => 'ro',
     isa    => 'Num',
     required=>0,
 );
@@ -99,6 +122,29 @@ sub profit {
     return sprintf("%.4f", $self->closePrice - $self->openPrice) if ($self->direction eq 'long');
     return sprintf("%.4f", $self->openPrice - $self->closePrice) if ($self->direction eq 'short');
     die('WTF');
+}
+
+=item C<status>
+
+
+=cut
+sub status {
+    my ($self) = @_;
+
+    return 'open' if (!defined($self->closePrice));
+    return 'closed';
+}
+
+=item C<close>
+
+
+=cut
+sub close {
+    my ($self, $closeDate, $closePrice) = @_;
+
+    die('trade already closed') if ($self->status eq 'closed');
+    $self->closeDate($closeDate);
+    $self->closePrice($closePrice);
 }
 
 __PACKAGE__->meta->make_immutable;
