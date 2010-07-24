@@ -63,7 +63,7 @@ term:           number
 
 number:         /\d+/
 
-field:			"open" | "high" | "low" | "close"
+field:			"datetime" | "open" | "high" | "low" | "close"
 
 function:
 		'ema(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("round(ta_ema($vals[0],$item[4]), 4)") } |
@@ -116,7 +116,7 @@ term:           number
 
 number:         /\d+/
 
-field:			"open" | "high" | "low" | "close"
+field:			"datetime" | "open" | "high" | "low" | "close"
 
 function:
 		'ema(' expression ',' number ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[2]); "T".Finance::HostedTrader::ExpressionParser::getID("round(ta_ema($vals[0],$item[4]), 4)") } |
@@ -158,6 +158,8 @@ sub getIndicatorData {
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} )
         || $args->{maxLoadedItems} == -1 );
+    my $displayEndDate   = $args->{displayEndDate} || '9999-12-31';
+    my $displayStartDate = $args->{displayStartDate} || '0001-01-31';
     my $itemCount = $args->{maxDisplayItems} || $maxLoadedItems;
     my $expr      = $args->{expr}            || die("No expression set");
     my $symbol    = $args->{symbol}          || die("No symbol set");
@@ -185,14 +187,13 @@ sub getIndicatorData {
           { 'result' => $result, 'select_fields' => $select_fields };
     }
 
-    $result        = ",$result"           if ($result);
     $select_fields = ',' . $select_fields if ($select_fields);
 
     my $WHERE_FILTER = '';
     $WHERE_FILTER = 'WHERE dayofweek(datetime) <> 1' if ( $tf != 604800 );
 
     my $sql = qq(
-SELECT datetime$result FROM (
+SELECT $result FROM (
 SELECT *$select_fields
 FROM (
     SELECT * FROM (
@@ -204,6 +205,7 @@ FROM (
     ORDER BY datetime
 ) AS T_INNER
 ) AS T_OUTER
+WHERE datetime >= '$displayStartDate' AND datetime <= '$displayEndDate'
 );
 
     print $sql if ($args->{debug});
