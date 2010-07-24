@@ -262,7 +262,7 @@ sub getSystemData {
 sub _getSignalSql {
 my ($self, $args) = @_;
 
-    my @good_args = qw(tf expr symbol maxLoadedItems startPeriod endPeriod fields debug);
+    my @good_args = qw(tf expr symbol maxLoadedItems startPeriod endPeriod numItems fields debug);
 
     foreach my $key (keys %$args) {
         die("invalid arg in _getSignalSql: $key") unless grep { /$key/ } @good_args;
@@ -277,6 +277,7 @@ my ($self, $args) = @_;
     my $startPeriod = $args->{startPeriod} || '0001-01-01 00:00:00';
     my $endPeriod = $args->{endPeriod} || '9999-12-31 23:59:59';
     my $fields = $args->{fields} || 'datetime';
+    my $nbItems = $args->{numItems} || 10_000_000_000;
 
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} )
@@ -294,7 +295,7 @@ my ($self, $args) = @_;
     $WHERE_FILTER = 'WHERE dayofweek(datetime) <> 1' if ( $tf != 604800 );
 
     my $sql = qq(
-SELECT * FROM (
+SELECT $fields FROM (
 SELECT $fields FROM (
 SELECT *$select_fields
 FROM (
@@ -307,9 +308,11 @@ FROM (
     ORDER BY datetime
 ) AS T_INNER
 ) AS T_OUTER
-WHERE $result
+WHERE ( $result ) AND datetime >= '$startPeriod' AND datetime <='$endPeriod'
+ORDER BY datetime DESC
+LIMIT $nbItems
 ) AS DT
-WHERE datetime >= '$startPeriod' AND datetime <='$endPeriod'
+ORDER BY datetime
 );
 
 return $sql;
