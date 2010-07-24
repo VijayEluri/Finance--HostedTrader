@@ -85,7 +85,8 @@ GetOptions(
     "debug"               => \$debug,
     "symbols=s"           => \$symbols_txt,
     "max-loaded-items=i"  => \$max_loaded_items,
-    "start=i" => \$startPeriod,
+    "start=s" => \$startPeriod,
+    "end=s" => \$endPeriod,
 ) || pod2usage(2);
 pod2usage(1) if ($help);
 
