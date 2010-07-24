@@ -85,7 +85,7 @@ GetOptions(
     "debug"               => \$debug,
     "symbols=s"           => \$symbols_txt,
     "max-loaded-items=i"  => \$max_loaded_items,
-    "start=i" => \$startPeriod,
+    "start=s" => \$startPeriod,
 ) || pod2usage(2);
 pod2usage(1) if ($help);
 
@@ -98,8 +98,8 @@ $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 
 
 my @signals = (
-'rsi(close,14) > 60 AND ema(close,200) > close AND ema(close,200) > ema(close,50)',
-'rsi(close,14) < 40 AND ema(close,200) < close AND ema(close,200) < ema(close,50)',
+'close > previous(max(close,89),1)',
+'low < previous(min(close,89),1)',
 );
 
 foreach my $signal (@signals) {
