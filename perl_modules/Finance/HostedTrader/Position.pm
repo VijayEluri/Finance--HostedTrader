@@ -44,15 +44,6 @@ has trades => (
     required=>0,
 );
 
-=item C<profit>
-
-
-=cut
-sub profit {
-    my ($self) = @_;
-
-}
-
 =item C<addTrade>
 
 
@@ -61,22 +52,6 @@ sub addTrade {
     my ($self, $trade) = @_;
 
     push @{$self->trades}, $trade;
-}
-
-=item C<close>
-
-
-=cut
-sub close {
-    my ($self, $closeDate, $closePrice) = @_;
-
-    my $size = 0;
-
-    foreach my $trade (@{ $self->trades }) {
-        $trade->close();
-    }
-
-    return $size;
 }
 
 =item C<size>

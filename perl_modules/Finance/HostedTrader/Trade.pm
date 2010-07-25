@@ -143,8 +143,8 @@ sub close {
     my ($self, $closeDate, $closePrice) = @_;
 
     die('trade already closed') if ($self->status eq 'closed');
-    $self->closeDate($closeDate);
-    $self->closePrice($closePrice);
+    $self->{closeDate} = $closeDate;
+    $self->{closePrice} = $closePrice;
 }
 
 __PACKAGE__->meta->make_immutable;

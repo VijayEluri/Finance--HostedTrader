@@ -24,6 +24,50 @@ use Moose;
 use Finance::HostedTrader::Position;
 use Finance::HostedTrader::Trade;
 
+##Specific to the simulator account
+use Storable;
+=item C<simulatedTime>
+
+
+=cut
+has simulatedTime => (
+    is     => 'rw',
+    isa    => 'Str',
+    required=>1,
+);
+
+=item C<expressionParser>
+
+
+=cut
+has expressionParser => (
+    is     => 'ro',
+    isa    => 'Finance::HostedTrader::ExpressionParser',
+    required=>1,
+);
+
+
+##These should exist everywhere, regardless of broker
+=item C<username>
+
+
+=cut
+has username => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+);
+
+=item C<password>
+
+
+=cut
+has password => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+);
+
 =item C<positions>
 
 
@@ -36,16 +80,6 @@ has positions => (
 );
 
 
-=item C<setPosition>
-
-
-=cut
-sub setPosition {
-    my ($self, $symbol, $position) = @_;
-
-    $self->positions->{$symbol} = $position;
-}
-
 =item C<getPosition>
 
 
@@ -57,54 +91,64 @@ sub getPosition {
 
     if (!defined($position)) {
         $position = Finance::HostedTrader::Position->new( symbol => $symbol);
-        $self->setPosition($symbol, $position);
+        $self->positions->{$symbol} = $position;
     }
 
     return $position;
 }
 
-=item C<addTrade>
+sub marketOrder {
+    my ($self, $symbol, $size, $direction) = @_;
 
+    my $ep = $self->expressionParser;
+    my $data = $ep->getIndicatorData( {
+        symbol  => $symbol,
+        tf      => 'min',
+        fields  => 'datetime, close',
+        maxLoadedItems => 1,
+        endPeriod => $self->simulatedTime,
+        debug => 0,
+    } );
 
-=cut
-sub addTrade {
-    my ($self, $trade) = @_;
+    my ($datetime, $price);
+    ($datetime, $price) = @{ $data->[0] } if ( defined($data) );
+    die('market order failed') unless(defined($datetime) && defined($price));
+
+    my $trade = Finance::HostedTrader::Trade->new(
+                direction => $direction,
+                symbol => $symbol,
+                openDate => $datetime,
+                openPrice => $price,
+                size => $size,
+            );
 
     my $position = $self->getPosition($trade->symbol);
     $position->addTrade($trade);
 }
 
-=item C<addPosition>
+sub _getfilename {
+    my ($self) = @_;
 
-
-=cut
-sub addPosition {
-    my ($self, $symbol, $direction, $size) = @_;
-
-    my $trade = Finance::HostedTrader::Trade->new(
-                direction => $direction,
-                symbol => $symbol,
-                openDate => '2010-01-01',
-                openPrice => 0.8800,
-                size => $size,
-            );
-
-    $self->addTrade($trade);
+    return '/tmp/' . $self->{username} . $self->{password};
 }
 
-=item C<closePosition>
+sub storePositions {
+    my ($self) = @_;
 
-
-=cut
-sub closePosition {
-    my ($self, $symbol) = @_;
-
-    my $pos = $self->getPosition($symbol);
-    $pos->close();
+    my $filename = $self->_getfilename;
+    store $self->{positions}, $filename;
 }
 
 sub _empty_hash {
     return {};
+}
+
+sub BUILD {
+    my $self = shift;
+
+    my $filename = $self->_getfilename;
+    return if (! -f $filename);
+    $self->{positions} = retrieve($filename);
 }
 
 __PACKAGE__->meta->make_immutable;
