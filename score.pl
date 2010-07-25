@@ -22,15 +22,15 @@ my $symbols    = $cfg->symbols->all;
 foreach my $symbol ( @{$symbols} ) {
     my $data = $signal_processor->getIndicatorData(
         {
-            'expr'            => 'ema(trend(close,21),13)',
+            'fields'          => 'ema(trend(close,21),13)',
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $max_loaded_items,
-            'maxDisplayItems' => 290
+            'numItems'        => 290
         }
       )
       ; #TODO: 295 is hardcoded here because it seems the current database has at least 295 weekly data records for each pair
-    $data = [ grep { defined( $_->[1] ) } @{$data} ];
+    $data = [ grep { defined( $_->[0] ) } @{$data} ];
 
     #	$scores{$symbol} = $data->[0]->[1];
     $scores{$symbol} = $data;

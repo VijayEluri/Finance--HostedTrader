@@ -28,14 +28,14 @@ my $symbols    = $cfg->symbols->all;
 foreach my $symbol ( @{$symbols} ) {
     my $data = $signal_processor->getIndicatorData(
         {
-            'expr'            => 'ema(trend(close,21),13)',
+            'fields'          => 'ema(trend(close,21),13)',
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $max_loaded_items,
-            'maxDisplayItems' => 1
+            'numItems'        => 1
         }
     );
-    $scores{$symbol} = $data->[0]->[1];
+    $scores{$symbol} = $data->[0]->[0];
 }
 
 my @items = qw(AUD CAD CHF EUR GBP NZD JPY USD XAU XAG);

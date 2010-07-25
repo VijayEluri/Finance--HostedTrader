@@ -81,7 +81,7 @@ foreach my $tf ( @{$tfs} ) {
         print "$symbol $tf\n" if ($verbose);
         my $data = $signal_processor->getIndicatorData(
             {
-                'expr'   => 'open,low,high,close',
+                'fields' => 'datetime,open,low,high,close',
                 'symbol' => $symbol,
                 'tf'     => $tf,
             }
