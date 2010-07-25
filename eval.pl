@@ -84,7 +84,7 @@ GetOptions(
     "debug"               => \$debug,
     "symbols=s"           => \$symbols_txt,
     "max-loaded-items=i"  => \$max_loaded_items,
-    "max-display-items=i" => \$max_display_items,
+    "numItems=i" => \$max_display_items,
 ) || pod2usage(2);
 pod2usage(1) if ($help);
 
@@ -97,11 +97,11 @@ $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 foreach my $symbol ( @{$symbols} ) {
     my $data = $signal_processor->getIndicatorData(
         {
-            'expr'            => $ARGV[0],
+            'fields'           => $ARGV[0],
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $max_loaded_items,
-            'maxDisplayItems' => $max_display_items
+            'numItems' => $max_display_items
         }
     );
     foreach my $item (@$data) {

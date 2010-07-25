@@ -98,12 +98,7 @@ my $symbols = $cfg->symbols->natural;
 $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 
 
-my @signals = (
-'close > previous(max(close,89),1)',
-'low < previous(min(close,89),1)',
-);
-
-foreach my $signal (@signals) {
+foreach my $signal (@ARGV) {
 print "$signal\n----------------------\n";
 foreach my $symbol ( @{$symbols} ) {
     my $data = $signal_processor->getSignalData(
