@@ -150,6 +150,12 @@ function:
 sub getIndicatorData {
     my ( $self, $args ) = @_;
 
+    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug);
+
+    foreach my $key (keys %$args) {
+        die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
+    }
+
     #Handle arguments
     my $tf = $args->{tf} || 'day';
     $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
@@ -158,10 +164,10 @@ sub getIndicatorData {
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} )
         || $args->{maxLoadedItems} == -1 );
-    my $displayEndDate   = $args->{displayEndDate} || '9999-12-31';
-    my $displayStartDate = $args->{displayStartDate} || '0001-01-31';
-    my $itemCount = $args->{maxDisplayItems} || $maxLoadedItems;
-    my $expr      = $args->{expr}            || die("No expression set");
+    my $displayEndDate   = $args->{endPeriod} || '9999-12-31';
+    my $displayStartDate = $args->{startPeriod} || '0001-01-31';
+    my $itemCount = $args->{numItems} || $maxLoadedItems;
+    my $expr      = $args->{fields}          || die("No fields set");
     my $symbol    = $args->{symbol}          || die("No symbol set");
 
     my ( $result, $select_fields );
@@ -189,10 +195,11 @@ sub getIndicatorData {
 
     $select_fields = ',' . $select_fields if ($select_fields);
 
-    my $WHERE_FILTER = '';
-    $WHERE_FILTER = 'WHERE dayofweek(datetime) <> 1' if ( $tf != 604800 );
+    my $WHERE_FILTER = "WHERE datetime <= '$displayEndDate'";
+    $WHERE_FILTER .= ' AND dayofweek(datetime) <> 1' if ( $tf != 604800 );
 
     my $sql = qq(
+SELECT * FROM (
 SELECT $result FROM (
 SELECT *$select_fields
 FROM (
@@ -205,7 +212,11 @@ FROM (
     ORDER BY datetime
 ) AS T_INNER
 ) AS T_OUTER
-WHERE datetime >= '$displayStartDate' AND datetime <= '$displayEndDate'
+WHERE datetime >= '$displayStartDate'
+ORDER BY datetime desc
+LIMIT $itemCount
+) AS DT
+ORDER BY datetime
 );
 
     print $sql if ($args->{debug});
@@ -216,7 +227,7 @@ WHERE datetime >= '$displayStartDate' AND datetime <= '$displayEndDate'
     my $data = $sth->fetchall_arrayref;
     $sth->finish() or die($DBI::errstr);
     my $lastItemIndex = scalar(@$data) - 1;
-    if ( defined($itemCount) && ( $lastItemIndex > $itemCount ) ) {
+    if ( 0 && defined($itemCount) && ( $lastItemIndex > $itemCount ) ) {
         my @slice =
           @{$data}[ $lastItemIndex - $itemCount + 1 .. $lastItemIndex ];
         return \@slice;
