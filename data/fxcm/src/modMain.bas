@@ -26,6 +26,7 @@ Public Sub Main()
     Dim i As Long, numTicks As Long
     Dim oTerminator As Terminator
     Dim dateFrom As Date, dateTo As Date
+    Dim accountType As String
     
     Set oLog = New Logger
     Call oLog.log(vbCrLf)
@@ -37,16 +38,16 @@ Public Sub Main()
     
     Args = Split(Command$, " ")
     
-    If UBound(Args) < 4 Then
+    If UBound(Args) < 5 Then
         Call oLog.log("Invalid arguments")
         End
     End If
-    numTimeframes = UBound(Args) - 3
+    numTimeframes = UBound(Args) - 4
     ReDim TfInfo(numTimeframes - 1)
     For i = 0 To numTimeframes - 1
-        TfInfo(i).SleepInterval = CLng(Args(4 + i)) * 250
+        TfInfo(i).SleepInterval = CLng(Args(5 + i)) * 250
         TfInfo(i).LastTimeDownloaded = TfInfo(i).SleepInterval * (-2) ' This is necessary because in Wine, GetTickCount starts at 0 when the application starts
-        TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(4 + i))
+        TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(5 + i))
     Next
     
     
@@ -54,13 +55,14 @@ Public Sub Main()
 
     username = Args(0)
     password = Args(1)
-    dateFrom = CDate(Replace(Args(2), "_", " "))
-    dateTo = CDate(Replace(Args(3), "_", " "))
+    accountType = Args(2)
+    dateFrom = CDate(Replace(Args(3), "_", " "))
+    dateTo = CDate(Replace(Args(4), "_", " "))
 
     Set oCore = New FXCore.CoreAut
     Set oTradeDesk = oCore.CreateTradeDesk("trader")
     
-    Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/", "Demo")
+    Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/Hosts.jsp", accountType)
     Call oLog.log("Login successfull")
     Call oLog.log("Start date: " & Args(2))
     Call oLog.log("Final date: " & Args(3))
