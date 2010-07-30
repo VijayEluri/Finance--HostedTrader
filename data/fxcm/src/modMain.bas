@@ -63,8 +63,9 @@ Public Sub Main()
     
     Call oTradeDesk.Login(username, password, "http://www.fxcorporate.com/Hosts.jsp", accountType)
     Call oLog.log("Login successfull")
-    Call oLog.log("Start date: " & Args(2))
-    Call oLog.log("Final date: " & Args(3))
+    Call oLog.log("Account Type: " & accountType)
+    Call oLog.log("Start date: " & dateFrom)
+    Call oLog.log("Final date: " & dateTo)
     numTicks = 300
     
 '    Dim Instruments As Object
@@ -75,7 +76,7 @@ Public Sub Main()
 '    Next
     
     Set oTerminator = New Terminator
-    Do While (1)
+    Do
 
     For i = 0 To numTimeframes - 1
         If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
@@ -93,7 +94,7 @@ Public Sub Main()
     End If
     Sleep 5000
     numTicks = 10
-    Loop
+    Loop While (dateTo = 0)
     
     GoTo CleanUp
     
