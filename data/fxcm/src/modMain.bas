@@ -50,8 +50,7 @@ Public Sub Main()
         TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(5 + i))
     Next
     
-    
-    Symbols = Array("EUR/USD", "USD/JPY", "GBP/USD", "USD/CHF", "EUR/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "GBP/CHF")
+    Symbols = Array("EUR/USD", "USD/JPY", "GBP/USD", "USD/CHF", "EUR/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "GBP/CHF", "XAU/USD", "XAG/USD") ', "USOil", "UKOil", "NAS100", "SPX500")
 
     username = Args(0)
     password = Args(1)
@@ -67,6 +66,13 @@ Public Sub Main()
     Call oLog.log("Start date: " & Args(2))
     Call oLog.log("Final date: " & Args(3))
     numTicks = 300
+    
+'    Dim Instruments As Object
+'    Dim Instrument As Variant
+'    Set Instruments = oTradeDesk.GetInstruments()
+'    For Each Instrument In Instruments
+'        oLog.log CStr(Instrument)
+'    Next
     
     Set oTerminator = New Terminator
     Do While (1)
