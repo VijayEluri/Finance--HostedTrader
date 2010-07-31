@@ -3,7 +3,7 @@ set -e
 
 TF=$1
 # Load natural timeframes
-mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\n' -s -ufxcm fxcm *_$TF
+mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\n' -s -ufxcm fxcm *_$TF 2> mysqlimport.errors
 rm -Rf *_$TF
 
 # Create synthetic pairs

@@ -1,6 +1,8 @@
 To start the datafeed:
 ./RatePrinter start
 
+Datafeed only starts if there is an X-server running, this is because RatePrinter.exe is written in Visual Basic (running under wine) and that it requires a GUI even though it doesn't use it.
+
 To see what's going on
 
 tail -f log.txt

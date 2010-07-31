@@ -6,7 +6,7 @@ Outputs the value of an indicator against all known symbols
 
 =head1 SYNOPSIS
 
-    eval.pl [--timeframe=tf] [--verbose] [--symbols=s] [--debug] [--max-loaded-items=i] [--max-display-items=i] expr
+    eval.pl [--timeframe=tf] [--verbose] [--symbols=s] [--debug] [--max-loaded-items=i] [--numItems=i] expr
 
 
 =head1 DESCRIPTION
@@ -46,7 +46,7 @@ Debug output.
 
 Number of database records to load. Defaults to 1000 which should be enough to calculate any indicator.
 
-=item C<--max-display-items=i>
+=item C<--numItems=i>
 
 Number of indicator periods to display. Defaults to one (eg: only display the indicator value today)
 
@@ -101,11 +101,12 @@ foreach my $symbol ( @{$symbols} ) {
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $max_loaded_items,
-            'numItems' => $max_display_items
+            'numItems' => $max_display_items,
+            'debug'         => $debug,
         }
     );
     foreach my $item (@$data) {
-        print "$symbol\t" . join( "\t", @$item ) . "\n";
+        print "$symbol\t" . print join( "\t", @$item ) . "\n";
     }
     print "$symbol\t" . Dumper( \$data ) if ($debug);
 }

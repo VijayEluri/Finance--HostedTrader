@@ -12,6 +12,8 @@ symbols:
         - USDCAD
         - USDCHF
         - USDJPY
+        - XAUUSD
+        - XAGUSD
     synthetic:
         - AUDJPY
 timeframes:

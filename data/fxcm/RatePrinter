@@ -6,6 +6,12 @@ prog="FXCM RatePrinter"
 
 start() {
 	echo -n $"Starting $prog: "	
+    if ( ! ps aux | grep Xvfb | grep -v grep > /dev/null ); then
+			echo -n $"X server not running (required by RatePrinter.exe)";
+			failure $"X server not running (required by RatePrinter.exe)";
+			echo
+			return 1
+    fi
 	if [ -e /tmp/var_lock_subsys_RatePrinter ]; then
 		if [ -e /tmp/RatePrinter.exe.pid ] && [ -e /proc/`cat /tmp/RatePrinter.exe.pid` ]; then
 			echo -n $"cannot start $prog: already running.";
