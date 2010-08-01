@@ -79,6 +79,42 @@ has positions => (
     required=>0,
 );
 
+=item C<getMovePerPoint>
+
+
+=cut
+sub getMovePerPoint {
+    my ($self) = @_;
+
+    my $ep = $self->expressionParser;
+    my $data = $ep->getIndicatorData( {
+        symbol  => 'GBPUSD',
+        tf      => 'min',
+        fields  => 'datetime, close',
+        maxLoadedItems => 1,
+        endPeriod => $self->simulatedTime,
+        debug => 0,
+    } );
+    return 1 / $data->[0]->[1];
+}
+
+sub getMultiplier {
+    my ($self, $symbol) = @_;
+    return 100 if ($symbol =~ /JPY/);
+    return 10000;
+}
+
+=item C<getPosition>
+
+=item C<getBalance>
+
+
+=cut
+sub getBalance {
+    my ($self) = @_;
+
+    return 15000;
+}
 
 =item C<getPosition>
 

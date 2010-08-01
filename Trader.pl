@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Proc::Daemon;
+#use Proc::Daemon;
 #Proc::Daemon::Init;
 use Config::Any;
 use Data::Dumper;
@@ -16,8 +16,8 @@ my $username = 'joaocosta';
 my $password = 'password';
 
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
-my $datetimeNow = UnixDate('2010-07-20 13:00:00', '%Y-%m-%d %H:%M:%S');
-my $tradingStop = UnixDate('2010-07-21 00:00:00', '%Y-%m-%d %H:%M:%S');
+my $datetimeNow = UnixDate('2010-07-26 00:00:00', '%Y-%m-%d %H:%M:%S');
+my $tradingStop = UnixDate('2010-07-31 00:00:00', '%Y-%m-%d %H:%M:%S');
 
 
 my $account = Finance::HostedTrader::Account->new(
@@ -28,18 +28,18 @@ my $account = Finance::HostedTrader::Account->new(
 
 my $systems = loadSystems('system.yml');
 
-
+my $debug = 0;
 while ($datetimeNow lt $tradingStop) {
     foreach my $system (@$systems) {
         logger($datetimeNow);
-#        checkSystem($account, $system, 'long');
+        checkSystem($account, $system, 'long');
         checkSystem($account, $system, 'short');
     }
     $datetimeNow = UnixDate(DateCalc($datetimeNow, '+ 5minutes'), '%Y-%m-%d %H:%M:%S');
     $account->simulatedTime($datetimeNow);
 }
 
-$account->storePositions();
+#$account->storePositions();
 
 foreach my $direction (qw(long short)){
 foreach my $system (@$systems) {
@@ -65,22 +65,47 @@ sub checkSystem {
         my $pos_size = $account->getPosition($symbol)->size;
         logger("$symbol = $pos_size");
 
-        my $trade_size = $system->{maxExposure} - $pos_size;
-        if ($trade_size) {
+        if (!$pos_size) {
             logger("Check open $symbol $direction");
-            my $signal = checkSignal($system->{$direction.'EnterSignal'}, $symbol, $direction, $system->{timeframe}, $system->{maxLoadedItems});
-            logger(Dumper(\$signal));
-            if ($signal) {
-                logger("Adding position for $symbol $direction ( $trade_size )");
+            my $signal = $system->{signals}->{enter}->{$direction};
+            my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
+            logger(Dumper(\$result));
+            if ($result) {
+                my $max_loss   = $account->getBalance * $system->{maxExposure} / 100;
+                my $move_per_point = $account->getMovePerPoint();
+                my $stopLoss = $signal_processor->getIndicatorData( {
+                    symbol  => $symbol,
+                    tf      => $signal->{timeframe},
+                    fields  => 'datetime, close,' . $signal->{initialStop},
+                    maxLoadedItems => $signal->{maxLoadedItems},
+                    endPeriod => $datetimeNow,
+                    numItems => 1,
+                    debug => 0,
+                } );
+                my $currentPrice = $stopLoss->[0]->[1];
+                $stopLoss = $stopLoss->[0]->[2];
+                my $pointsToSL = abs($stopLoss - $currentPrice) * $account->getMultiplier($symbol);
+                my $trade_size = int(( $max_loss / $move_per_point ) / ( $pointsToSL ));
+                warn qq|
+$datetimeNow
+symbol: $symbol
+maxLoss: $max_loss
+movePP: $move_per_point
+stopLoss: $stopLoss
+current: $currentPrice
+TradeSize: $trade_size
+                |;
+                logger("Adding position for $symbol $direction, initialStop=$stopLoss ( $trade_size )");
                 $account->marketOrder($symbol, $trade_size, $direction);
             }
         }
 
         if ($pos_size) {
             logger("Check close $symbol $direction");
-            my $signal = checkSignal($system->{$direction.'ExitSignal'}, $symbol, $direction, $system->{timeframe}, $system->{maxLoadedItems});
-            logger(Dumper(\$signal));
-            if ($signal) {
+            my $signal = $system->{signals}->{exit}->{$direction};
+            my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
+            logger(Dumper(\$result));
+            if ($result) {
                 logger("Closing position for $symbol $direction ( $pos_size )");
                 $account->marketOrder($symbol, $pos_size, ($direction eq 'long' ? 'short' : 'long' ));
             }
@@ -103,7 +128,7 @@ sub checkSignal {
             'startPeriod'     => $startPeriod,
             'endPeriod'       => $datetimeNow,
             'numItems'        => 1,
-            'debug'           => 0,
+            'debug'           => $debug,
         }
     );
 
