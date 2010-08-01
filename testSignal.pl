@@ -6,7 +6,7 @@ Outputs the value of an indicator against all known symbols
 
 =head1 SYNOPSIS
 
-    eval.pl [--timeframe=tf] [--verbose] [--symbols=s] [--debug] [--max-loaded-items=i] [--max-display-items=i] expr
+    eval.pl [--timeframe=tf] [--verbose] [--symbols=s] [--debug] [--maxLoadedItems=i] [--numItems=i] expr
 
 
 =head1 DESCRIPTION
@@ -42,11 +42,11 @@ Display usage information.
 
 Debug output.
 
-=item C<--max-loaded-items=i>
+=item C<--maxLoadedItems=i>
 
 Number of database records to load. Defaults to 1000 which should be enough to calculate any indicator.
 
-=item C<--max-display-items=i>
+=item C<--numItems=i>
 
 Number of indicator periods to display. Defaults to one (eg: only display the indicator value today)
 
@@ -84,7 +84,7 @@ GetOptions(
     "timeframe=s"         => \$timeframe,
     "debug"               => \$debug,
     "symbols=s"           => \$symbols_txt,
-    "max-loaded-items=i"  => \$max_loaded_items,
+    "maxLoadedItems=i"  => \$max_loaded_items,
     "start=s" => \$startPeriod,
     "end=s" => \$endPeriod,
 ) || pod2usage(2);
@@ -109,7 +109,7 @@ foreach my $symbol ( @{$symbols} ) {
             'maxLoadedItems'  => $max_loaded_items,
             'startPeriod'     => UnixDate($startPeriod, '%Y-%m-%d %H:%M:%S'),
             'endPeriod'       => UnixDate($endPeriod, '%Y-%m-%d %H:%M:%S'),
-            'debug'           => 0,
+            'debug'           => $debug,
         }
     );
     print $symbol, ' - ', Dumper(\$data) if (scalar(@$data));
