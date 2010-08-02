@@ -25,6 +25,7 @@ End Sub
 
 Public Sub log(ByRef s As String)
     Call file.WriteLine("[" & Format(Now(), "YYYY-MM-DD hh:mm:ss") & "] " & s)
+    Debug.Print "[" & Format(Now(), "YYYY-MM-DD hh:mm:ss") & "] " & s
 End Sub
 
 Private Sub Class_Terminate()

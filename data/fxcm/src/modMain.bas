@@ -8,12 +8,92 @@ Private Declare Function GetTickCount Lib "kernel32" () As Long
 Dim oCore As FXCore.CoreAut
 Dim oTradeDesk As FXCore.TradeDeskAut
 Dim oLog As Logger
+Dim lastTimePositionsUpdated As Long
 
 Type TimeframeInfoType
     SleepInterval As Long
     LastTimeDownloaded As Long
     FXCore2GO_Code As String
 End Type
+
+Sub ProcessOrders()
+Dim fso As Scripting.FileSystemObject
+Dim fld As Scripting.Folder
+Dim file As Scripting.file
+Dim stream As Scripting.TextStream
+Dim Order() As String
+Dim rv As Long
+Dim fileCount As Long
+Dim symbol As String
+
+Set fso = New Scripting.FileSystemObject
+
+If Not fso.FolderExists("c:/orders") Then Exit Sub
+Set fld = fso.GetFolder("c:/orders")
+fileCount = fld.Files.Count
+If fileCount > 0 Then
+    oLog.log "Processing " & fileCount & " order(s)"
+    For Each file In fld.Files
+        Set stream = file.OpenAsTextStream(ForReading)
+        Order = Split(stream.ReadAll, " ")
+        stream.Close
+        Set stream = Nothing
+        symbol = Left$(Order(0), 3) & "/" & Right$(Order(0), 3)
+        If marketOrder(symbol, Order(1), Order(2), Order(3)) = 0 Then
+            file.Delete True
+        End If
+    Next
+End If
+Set fld = Nothing
+Set fso = Nothing
+
+End Sub
+
+Private Function marketOrder(ByVal symbol As String, ByVal direction As String, ByVal maxLoss As Long, ByVal maxLossPrice As Double) As Long
+    Dim orderId, dealer
+    Dim offer As Object
+    Dim acct  As Object
+    Dim value As Double
+    Dim accountId As String
+    Dim base As String
+    Dim amount As Long
+    Dim maxLossPts As Double
+
+On Error GoTo EH:
+    Set acct = oTradeDesk.FindMainTable("accounts")
+    accountId = acct.CellValue(1, "AccountID")
+    Set acct = Nothing
+    
+    base = UCase$(Right$(symbol, 3))
+    If base <> "GBP" Then
+        Set offer = oTradeDesk.FindRowInTable("offers", "Instrument", "GBP/" & base)
+        maxLoss = maxLoss * offer.CellValue("Ask")
+    End If
+    
+    Set offer = oTradeDesk.FindRowInTable("offers", "Instrument", symbol)
+    If direction = "long" Then
+        value = offer.CellValue("Ask")
+        maxLossPts = value - maxLossPrice
+    Else
+        value = offer.CellValue("Bid")
+        maxLossPts = maxLossPrice - value
+    End If
+    If maxLossPts <= 0 Then
+        Err.Raise -1, "marketOrder", "Tried to set stop to " & CStr(maxLossPrice) & " but current price is " & value
+    End If
+    amount = (maxLoss / maxLossPts) / 10000
+    amount = amount * 10000
+    
+    oTradeDesk.CreateFixOrder3 oTradeDesk.FIX_OPEN, "", value, 0, "", accountId, symbol, LCase$(direction) = "long", amount, "", 0, 0, oTradeDesk.TIF_IOC, orderId, dealer
+    Set offer = Nothing
+    marketOrder = 0
+    Exit Function
+
+EH:
+   marketOrder = 1
+   oLog.log symbol & " : " & direction & " : " & Err.Source & " : " & Err.Description
+End Function
+
 
 Public Sub Main()
     Dim username As String
@@ -67,7 +147,9 @@ Public Sub Main()
     Call oLog.log("Start date: " & dateFrom)
     Call oLog.log("Final date: " & dateTo)
     
-    If dateTo = "0" Then getPositions
+    If dateTo = "0" Then
+        getPositions
+    End If
     Call oTradeDesk.EnablePendingEvents(oTradeDesk.EventAdd + oTradeDesk.EventRemove + oTradeDesk.EventSessionStatusChange)
     numTicks = 300
     
@@ -83,16 +165,21 @@ Public Sub Main()
 
     For i = 0 To numTimeframes - 1
         If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
-            Sleep 250
             oLog.log ("Fetching " & numTicks & " data items in timeframe " & TfInfo(i).FXCore2GO_Code)
             TfInfo(i).LastTimeDownloaded = GetTickCount()
             For Each symbol In Symbols
                 Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks, CDate(dateFrom), CDate(dateTo))
-                If dateTo = "0" Then ProcessEvents
+                If dateTo = "0" Then
+                    ProcessEvents
+                    ProcessOrders
+                End If
             Next
             oLog.log ("Fetching done")
         End If
-        If dateTo = "0" Then ProcessEvents
+        If dateTo = "0" Then
+            ProcessEvents
+            ProcessOrders
+        End If
     Next
     If oTerminator.isTerminate() Then
         Call oLog.log("Terminator signal invoked, exiting")
@@ -100,6 +187,10 @@ Public Sub Main()
     End If
     Sleep 2000
     numTicks = 10
+    If GetTickCount() - lastTimePositionsUpdated > 180000 Then
+        oLog.log "Refreshing positions due to timeout"
+        getPositions
+    End If
     Loop While (dateTo = 0)
     
     GoTo CleanUp
@@ -216,8 +307,10 @@ Next
 stream.Close
 Set stream = Nothing
 Set fso = Nothing
-
 Set trades = Nothing
+
+lastTimePositionsUpdated = GetTickCount()
+
 End Sub
 
 Private Sub ProcessEvents()
@@ -235,7 +328,8 @@ Dim refresh As Boolean
     Next
     Set Events = Nothing
     
-    
-    
-    If refresh Then getPositions
+    If refresh Then
+        oLog.log "Refreshing positions due to event received"
+        getPositions
+    End If
 End Sub
