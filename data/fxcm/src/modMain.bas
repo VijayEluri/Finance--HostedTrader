@@ -66,6 +66,9 @@ Public Sub Main()
     Call oLog.log("Account Type: " & accountType)
     Call oLog.log("Start date: " & dateFrom)
     Call oLog.log("Final date: " & dateTo)
+    
+    If dateTo = "0" Then getPositions
+    Call oTradeDesk.EnablePendingEvents(oTradeDesk.EventAdd + oTradeDesk.EventRemove + oTradeDesk.EventSessionStatusChange)
     numTicks = 300
     
 '    Dim Instruments As Object
@@ -80,19 +83,22 @@ Public Sub Main()
 
     For i = 0 To numTimeframes - 1
         If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
+            Sleep 250
             oLog.log ("Fetching " & numTicks & " data items in timeframe " & TfInfo(i).FXCore2GO_Code)
             TfInfo(i).LastTimeDownloaded = GetTickCount()
             For Each symbol In Symbols
                 Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks, CDate(dateFrom), CDate(dateTo))
+                If dateTo = "0" Then ProcessEvents
             Next
             oLog.log ("Fetching done")
         End If
+        If dateTo = "0" Then ProcessEvents
     Next
     If oTerminator.isTerminate() Then
         Call oLog.log("Terminator signal invoked, exiting")
         Exit Do
     End If
-    Sleep 5000
+    Sleep 2000
     numTicks = 10
     Loop While (dateTo = 0)
     
@@ -135,51 +141,106 @@ Function PrintRateHistory(ByVal symbol As String, ByVal period As String, ByVal 
     Set fso = Nothing
 End Function
 
-    Private Function MapTimeframe(ByVal tf As String) As String
-        If tf = "t" Then
-            MapTimeframe = "0"
-        ElseIf tf = "m1" Then
-            MapTimeframe = "60"
-        ElseIf tf = "m5" Then
-            MapTimeframe = "300"
-        ElseIf tf = "m15" Then
-            MapTimeframe = "900"
-        ElseIf tf = "m30" Then
-            MapTimeframe = "1800"
-        ElseIf tf = "H1" Then
-            MapTimeframe = "3600"
-        ElseIf tf = "D1" Then
-            MapTimeframe = "86400"
-        ElseIf tf = "W1" Then
-            MapTimeframe = "604800"
-        ElseIf tf = "M1" Then
-            MapTimeframe = "2592000"
-        Else
-            End
-        End If
-    End Function
+Private Function MapTimeframe(ByVal tf As String) As String
+    If tf = "t" Then
+        MapTimeframe = "0"
+    ElseIf tf = "m1" Then
+        MapTimeframe = "60"
+    ElseIf tf = "m5" Then
+        MapTimeframe = "300"
+    ElseIf tf = "m15" Then
+        MapTimeframe = "900"
+    ElseIf tf = "m30" Then
+        MapTimeframe = "1800"
+    ElseIf tf = "H1" Then
+        MapTimeframe = "3600"
+    ElseIf tf = "D1" Then
+        MapTimeframe = "86400"
+    ElseIf tf = "W1" Then
+        MapTimeframe = "604800"
+    ElseIf tf = "M1" Then
+        MapTimeframe = "2592000"
+    Else
+        End
+    End If
+End Function
 
-    Private Function UnmapTimeframe(ByVal tf As String) As String
-        If tf = "0" Then
-            UnmapTimeframe = "t"
-        ElseIf tf = "60" Then
-            UnmapTimeframe = "m1"
-        ElseIf tf = "300" Then
-            UnmapTimeframe = "m5"
-        ElseIf tf = "90" Then
-            UnmapTimeframe = "m15"
-        ElseIf tf = "1800" Then
-            UnmapTimeframe = "m30"
-        ElseIf tf = "3600" Then
-            UnmapTimeframe = "H1"
-        ElseIf tf = "86400" Then
-            UnmapTimeframe = "D1"
-        ElseIf tf = "604800" Then
-            UnmapTimeframe = "W1"
-        ElseIf tf = "2592000" Then
-            UnmapTimeframe = "M1"
-        Else
-            End
-        End If
-    End Function
+Private Function UnmapTimeframe(ByVal tf As String) As String
+    If tf = "0" Then
+        UnmapTimeframe = "t"
+    ElseIf tf = "60" Then
+        UnmapTimeframe = "m1"
+    ElseIf tf = "300" Then
+        UnmapTimeframe = "m5"
+    ElseIf tf = "90" Then
+        UnmapTimeframe = "m15"
+    ElseIf tf = "1800" Then
+        UnmapTimeframe = "m30"
+    ElseIf tf = "3600" Then
+        UnmapTimeframe = "H1"
+    ElseIf tf = "86400" Then
+        UnmapTimeframe = "D1"
+    ElseIf tf = "604800" Then
+        UnmapTimeframe = "W1"
+    ElseIf tf = "2592000" Then
+        UnmapTimeframe = "M1"
+    Else
+        End
+    End If
+End Function
 
+
+'Writes current open positions to a yaml file
+Private Sub getPositions()
+Dim trades As Object
+Dim trade As Object
+Dim i As Long
+Dim Direction As String
+Dim openPrice As Double
+Dim Size As Long
+Dim when As String
+
+Set trades = oTradeDesk.FindMainTable("trades")
+
+Dim fso As Scripting.FileSystemObject
+Dim stream As Scripting.TextStream
+Set fso = New Scripting.FileSystemObject
+
+Set stream = fso.OpenTextFile("C:/trades.yml", ForWriting, True)
+
+Dim sTrade As String
+For Each trade In trades.Rows
+        sTrade = "- symbol: " & trade.CellValue("Instrument") & vbLf & _
+                 "  direction: " & IIf(trade.CellValue("BS") = "B", "long", "short") & vbLf & _
+                 "  openPrice: " & trade.CellValue("Open") & vbLf & _
+                 "  size: " & trade.CellValue("Lot") & vbLf & _
+                 "  when: " & Format$(trade.CellValue("Time"), "yyyy-mm-dd hh:nn:ss") & vbLf
+        stream.Write sTrade
+Next
+
+stream.Close
+Set stream = Nothing
+Set fso = Nothing
+
+Set trades = Nothing
+End Sub
+
+Private Sub ProcessEvents()
+Dim Events As Object
+Dim Ev As Object
+Dim refresh As Boolean
+
+    refresh = False
+    Set Events = oTradeDesk.GetPendingEvents()
+    For Each Ev In Events
+        If Ev.TableType = "summary" Then
+            Debug.Print Ev.ExtInfo
+            refresh = True
+        End If
+    Next
+    Set Events = Nothing
+    
+    
+    
+    If refresh Then getPositions
+End Sub
