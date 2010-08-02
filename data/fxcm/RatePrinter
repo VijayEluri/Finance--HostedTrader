@@ -43,6 +43,7 @@ stop() {
 	#TODO: A timeout here would be nice
 		sleep 1
 	done
+    killall RatePrinter.exe 2> /dev/null
 
 	echo
         [ $RETVAL -eq 0 ] && rm -f /tmp/var_lock_subsys_RatePrinter /tmp/RatePrinter.exe.pid;
