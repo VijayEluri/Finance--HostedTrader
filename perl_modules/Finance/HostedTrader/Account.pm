@@ -24,6 +24,18 @@ use Moose;
 use Finance::HostedTrader::Position;
 use Finance::HostedTrader::Trade;
 
+
+use YAML::Syck;
+use Data::Dumper;
+
+YAML::Syck->VERSION( '0.70' );
+
+
+
+
+
+
+
 ##Specific to the simulator account
 use Storable;
 =item C<simulatedTime>
@@ -33,7 +45,8 @@ use Storable;
 has simulatedTime => (
     is     => 'rw',
     isa    => 'Str',
-    required=>1,
+    required=>0,
+    'default' => '9999-12-31 23:59:59'
 );
 
 =item C<expressionParser>
@@ -177,6 +190,26 @@ sub storePositions {
 
 sub _empty_hash {
     return {};
+}
+
+sub loadPositionsFromYML {
+my $self = shift;
+my $file = shift;
+
+open( my $fh, $file ) or die $!;
+my $content = do { local $/; <$fh> };
+close $fh;
+my $data = YAML::Syck::Load( $content );
+my %positions=();
+
+    $self->{positions} = {};
+    foreach my $trade_data (@$data) {
+        my $trade = Finance::HostedTrader::Trade->new(
+            $trade_data
+        );
+        my $position = $self->getPosition($trade->symbol);
+        $position->addTrade($trade);
+    }
 }
 
 sub BUILD {
