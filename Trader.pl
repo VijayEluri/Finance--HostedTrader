@@ -16,46 +16,24 @@ my $username = 'joaocosta';
 my $password = 'password';
 
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
-my $datetimeNow = UnixDate('2010-07-26 00:00:00', '%Y-%m-%d %H:%M:%S');
-my $tradingStop = UnixDate('2010-07-31 00:00:00', '%Y-%m-%d %H:%M:%S');
-
+my $tradesFile = '/home/fxhistor/.wine/drive_c/trades.yml';
 
 my $account = Finance::HostedTrader::Account->new(
                 username => $username,
                 password => $password,
-                simulatedTime => $datetimeNow,
                 expressionParser => $signal_processor );
 
 my $systems = loadSystems('system.yml');
 
 my $debug = 0;
-while ($datetimeNow lt $tradingStop) {
+while (1) {
     foreach my $system (@$systems) {
-        logger($datetimeNow);
+        $account->loadPositionsFromYML($tradesFile);
         checkSystem($account, $system, 'long');
         checkSystem($account, $system, 'short');
+        sleep(30);
     }
-    $datetimeNow = UnixDate(DateCalc($datetimeNow, '+ 5minutes'), '%Y-%m-%d %H:%M:%S');
-    $account->simulatedTime($datetimeNow);
 }
-
-#$account->storePositions();
-
-foreach my $direction (qw(long short)){
-foreach my $system (@$systems) {
-my $symbols = $system->{symbols}->{$direction};
-
-foreach my $symbol ( @$symbols ) {
-my $positions = $account->getPosition($symbol);
-print "$symbol $system->{name} $direction\n";
-foreach my $trade (@{ $positions->trades }) {
-    print $trade->openDate, ' ', $trade->openPrice, ' ', $trade->size, ' ', $trade->direction, "\n";
-}
-print "\n";
-}
-}
-}
-
 
 sub checkSystem {
     my ($account, $system, $direction) = @_;
@@ -78,7 +56,6 @@ sub checkSystem {
                     tf      => $signal->{timeframe},
                     fields  => 'datetime, close,' . $signal->{initialStop},
                     maxLoadedItems => $signal->{maxLoadedItems},
-                    endPeriod => $datetimeNow,
                     numItems => 1,
                     debug => 0,
                 } );
@@ -86,15 +63,6 @@ sub checkSystem {
                 $stopLoss = $stopLoss->[0]->[2];
                 my $pointsToSL = abs($stopLoss - $currentPrice) * $account->getMultiplier($symbol);
                 my $trade_size = int(( $max_loss / $move_per_point ) / ( $pointsToSL ));
-                warn qq|
-$datetimeNow
-symbol: $symbol
-maxLoss: $max_loss
-movePP: $move_per_point
-stopLoss: $stopLoss
-current: $currentPrice
-TradeSize: $trade_size
-                |;
                 logger("Adding position for $symbol $direction, initialStop=$stopLoss ( $trade_size )");
                 $account->marketOrder($symbol, $trade_size, $direction);
             }
@@ -118,7 +86,7 @@ sub checkSignal {
 #    logger("Signal $expr");
 #    Hardcoded -1hour, means check signals ocurring in the last hour
 #    would be better to use the date of the last signal instead
-    my $startPeriod = UnixDate(DateCalc($datetimeNow, '- 1hour'), '%Y-%m-%d %H:%M:%S');
+    my $startPeriod = UnixDate(DateCalc('now', '- 1hour'), '%Y-%m-%d %H:%M:%S');
     my $data = $signal_processor->getSignalData(
         {
             'expr'            => $expr,
@@ -126,7 +94,6 @@ sub checkSignal {
             'tf'              => $timeframe,
             'maxLoadedItems'  => $maxLoadedItems,
             'startPeriod'     => $startPeriod,
-            'endPeriod'       => $datetimeNow,
             'numItems'        => 1,
             'debug'           => $debug,
         }
@@ -152,5 +119,6 @@ sub loadSystems {
 sub logger {
     my $msg = shift;
 
-    print "$msg\n";
+    my $datetimeNow = UnixDate('now', '%Y-%m-%d %H:%M:%S');
+    print "[$datetimeNow] $msg\n";
 }
