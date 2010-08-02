@@ -194,11 +194,6 @@ End Function
 Private Sub getPositions()
 Dim trades As Object
 Dim trade As Object
-Dim i As Long
-Dim Direction As String
-Dim openPrice As Double
-Dim Size As Long
-Dim when As String
 
 Set trades = oTradeDesk.FindMainTable("trades")
 
@@ -210,11 +205,11 @@ Set stream = fso.OpenTextFile("C:/trades.yml", ForWriting, True)
 
 Dim sTrade As String
 For Each trade In trades.Rows
-        sTrade = "- symbol: " & trade.CellValue("Instrument") & vbLf & _
+        sTrade = "- symbol: " & Replace(trade.CellValue("Instrument"), "/", vbNullString) & vbLf & _
                  "  direction: " & IIf(trade.CellValue("BS") = "B", "long", "short") & vbLf & _
                  "  openPrice: " & trade.CellValue("Open") & vbLf & _
                  "  size: " & trade.CellValue("Lot") & vbLf & _
-                 "  when: " & Format$(trade.CellValue("Time"), "yyyy-mm-dd hh:nn:ss") & vbLf
+                 "  openDate: " & Format$(trade.CellValue("Time"), "yyyy-mm-dd hh:nn:ss") & vbLf
         stream.Write sTrade
 Next
 
