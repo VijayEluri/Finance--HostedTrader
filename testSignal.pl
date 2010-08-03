@@ -77,11 +77,12 @@ use Date::Manip;
 use Getopt::Long;
 use Pod::Usage;
 
-my ( $timeframe, $max_loaded_items, $symbols_txt, $debug, $help, $startPeriod, $endPeriod ) =
-  ( 'day', 1000, '', 0, 0, '90 days ago', 'today' );
+my ( $timeframe, $max_loaded_items, $symbols_txt, $debug, $help, $startPeriod, $endPeriod, $numItems ) =
+  ( 'day', 1000, '', 0, 0, '90 days ago', 'today', 200 );
 
 GetOptions(
     "timeframe=s"         => \$timeframe,
+    "numItems=i"         => \$numItems,
     "debug"               => \$debug,
     "symbols=s"           => \$symbols_txt,
     "maxLoadedItems=i"  => \$max_loaded_items,
@@ -104,6 +105,7 @@ foreach my $symbol ( @{$symbols} ) {
     my $data = $signal_processor->getSignalData(
         {
             'expr'            => $signal,
+            'numItems'        => $numItems,
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $max_loaded_items,
