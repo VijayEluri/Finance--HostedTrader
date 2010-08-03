@@ -35,6 +35,16 @@ subtype 'positiveInt'
     => message { "The number provided ($_) must be a positive integer" };
 
 
+=item C<id>
+
+
+=cut
+has id => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+);
+
 =item C<symbol>
 
 
