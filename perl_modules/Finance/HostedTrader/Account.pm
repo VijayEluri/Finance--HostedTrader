@@ -92,32 +92,6 @@ has positions => (
     required=>0,
 );
 
-=item C<getMovePerPoint>
-
-
-=cut
-sub getMovePerPoint {
-    my ($self) = @_;
-
-    my $ep = $self->expressionParser;
-    my $data = $ep->getIndicatorData( {
-        symbol  => 'GBPUSD',
-        tf      => 'min',
-        fields  => 'datetime, close',
-        maxLoadedItems => 1,
-        endPeriod => $self->simulatedTime,
-        debug => 0,
-    } );
-    return 1 / $data->[0]->[1];
-}
-
-sub getMultiplier {
-    my ($self, $symbol) = @_;
-    return 100 if ($symbol =~ /JPY/);
-    return 10000;
-}
-
-=item C<getPosition>
 
 =item C<getBalance>
 
@@ -136,61 +110,54 @@ sub getBalance {
 sub getPosition {
     my ($self, $symbol) = @_;
 
+    my $tradesFile = '/home/fxhistor/.wine/drive_c/trades.yml';
+    $self->loadPositionsFromYML($tradesFile);
+
+    return $self->_getPosition($symbol);
+}
+
+sub _writeTempFile {
+    my ($prefix, $content) = @_;
+    use File::Temp qw/ tempfile /;
+    my ($fh, $filename) = tempfile($prefix.'.XXXXX', DIR => '/home/fxhistor/.wine/drive_c/orders');
+
+    print $fh $content;
+    close($fh);
+    print STDERR $filename;
+}
+
+sub marketOrder {
+    my ($self, $symbol, $direction, $maxLossCurrency, $stopLossValue) = @_;
+
+    _writeTempFile 'open', "$symbol $direction $maxLossCurrency $stopLossValue";
+}
+
+sub closeTrades {
+    my ($self, $symbol) = @_;
+
+    my $position = $self->getPosition($symbol);
+    foreach my $trade (@{ $position->trades }) {
+        _writeTempFile 'close', $trade->id . ' ' . $trade->size;
+    }
+}
+
+sub _empty_hash {
+    return {};
+}
+
+
+sub _getPosition {
+    my ($self, $symbol) = @_;
+
     my $position = $self->positions->{$symbol};
 
     if (!defined($position)) {
         $position = Finance::HostedTrader::Position->new( symbol => $symbol);
         $self->positions->{$symbol} = $position;
     }
-
     return $position;
 }
 
-sub marketOrder {
-    my ($self, $symbol, $size, $direction) = @_;
-
-    my $ep = $self->expressionParser;
-    my $data = $ep->getIndicatorData( {
-        symbol  => $symbol,
-        tf      => 'min',
-        fields  => 'datetime, close',
-        maxLoadedItems => 1,
-        endPeriod => $self->simulatedTime,
-        debug => 0,
-    } );
-
-    my ($datetime, $price);
-    ($datetime, $price) = @{ $data->[0] } if ( defined($data) );
-    die('market order failed') unless(defined($datetime) && defined($price));
-
-    my $trade = Finance::HostedTrader::Trade->new(
-                direction => $direction,
-                symbol => $symbol,
-                openDate => $datetime,
-                openPrice => $price,
-                size => $size,
-            );
-
-    my $position = $self->getPosition($trade->symbol);
-    $position->addTrade($trade);
-}
-
-sub _getfilename {
-    my ($self) = @_;
-
-    return '/tmp/' . $self->{username} . $self->{password};
-}
-
-sub storePositions {
-    my ($self) = @_;
-
-    my $filename = $self->_getfilename;
-    store $self->{positions}, $filename;
-}
-
-sub _empty_hash {
-    return {};
-}
 
 sub loadPositionsFromYML {
 my $self = shift;
@@ -207,17 +174,10 @@ my %positions=();
         my $trade = Finance::HostedTrader::Trade->new(
             $trade_data
         );
-        my $position = $self->getPosition($trade->symbol);
+
+        my $position = $self->_getPosition($trade->symbol);
         $position->addTrade($trade);
     }
-}
-
-sub BUILD {
-    my $self = shift;
-
-    my $filename = $self->_getfilename;
-    return if (! -f $filename);
-    $self->{positions} = retrieve($filename);
 }
 
 __PACKAGE__->meta->make_immutable;
