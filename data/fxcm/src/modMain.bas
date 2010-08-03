@@ -25,7 +25,10 @@ Dim Order() As String
 Dim rv As Long
 Dim fileCount As Long
 Dim symbol As String
+Dim update As Boolean
+Dim result As Long
 
+update = False
 Set fso = New Scripting.FileSystemObject
 
 If Not fso.FolderExists("c:/orders") Then Exit Sub
@@ -38,8 +41,19 @@ If fileCount > 0 Then
         Order = Split(stream.ReadAll, " ")
         stream.Close
         Set stream = Nothing
-        symbol = Left$(Order(0), 3) & "/" & Right$(Order(0), 3)
-        If marketOrder(symbol, Order(1), Order(2), Order(3)) = 0 Then
+        
+        If Left$(file.Name, 4) = "open" Then
+            symbol = Left$(Order(0), 3) & "/" & Right$(Order(0), 3)
+            oLog.log "Order:" & symbol & " " & Order(1) & " " & Order(2) & " " & Order(3)
+            result = marketOrder(symbol, Order(1), Order(2), Order(3))
+        Else
+            oLog.log "CloseTrade:" & Order(0) & " " & Order(1)
+            result = closeTrade(Order(0), Order(1))
+        End If
+        
+        If result = 0 Then
+            update = True
+            oLog.log "Order executed, deleting file " & file.Name
             file.Delete True
         End If
     Next
@@ -47,7 +61,20 @@ End If
 Set fld = Nothing
 Set fso = Nothing
 
+If update Then
+    oLog.log "Refreshing positions due to new orders executed"
+    getPositions
+End If
+
 End Sub
+
+Private Function closeTrade(ByVal sTradeID As String, ByVal amount As Long)
+Dim orderId, dealer
+    closeTrade = 1
+    oTradeDesk.CreateFixOrder2 oTradeDesk.FIX_CLOSEMARKET, sTradeID, 0, 0, "", "", "", 0, amount, "", 0, orderId, dealer
+    closeTrade = 0
+End Function
+
 
 Private Function marketOrder(ByVal symbol As String, ByVal direction As String, ByVal maxLoss As Long, ByVal maxLossPrice As Double) As Long
     Dim orderId, dealer
@@ -69,7 +96,6 @@ On Error GoTo EH:
         Set offer = oTradeDesk.FindRowInTable("offers", "Instrument", "GBP/" & base)
         maxLoss = maxLoss * offer.CellValue("Ask")
     End If
-    
     Set offer = oTradeDesk.FindRowInTable("offers", "Instrument", symbol)
     If direction = "long" Then
         value = offer.CellValue("Ask")
@@ -84,7 +110,11 @@ On Error GoTo EH:
     amount = (maxLoss / maxLossPts) / 10000
     amount = amount * 10000
     
-    oTradeDesk.CreateFixOrder3 oTradeDesk.FIX_OPEN, "", value, 0, "", accountId, symbol, LCase$(direction) = "long", amount, "", 0, 0, oTradeDesk.TIF_IOC, orderId, dealer
+    'oTradeDesk.CreateFixOrder3 oTradeDesk.FIX_OPEN, "", value, 0, "", accountId, symbol, LCase$(direction) = "long", amount, "", 0, 0, oTradeDesk.TIF_IOC, orderId, dealer
+    'CreateFixOrder3 throws some sort of segmentation fault when running under Wine
+    'Using CreateFixOrder2 instead which seems to work
+    'According to the Order2Go help CreateFixOrder2 is deprecated by CreateFixOrder3
+    oTradeDesk.CreateFixOrder2 oTradeDesk.FIX_OPEN, "", value, 0, "", accountId, symbol, LCase$(direction) = "long", amount, "", 0, orderId, dealer
     Set offer = Nothing
     marketOrder = 0
     Exit Function
@@ -297,6 +327,7 @@ Set stream = fso.OpenTextFile("C:/trades.yml", ForWriting, True)
 Dim sTrade As String
 For Each trade In trades.Rows
         sTrade = "- symbol: " & Replace(trade.CellValue("Instrument"), "/", vbNullString) & vbLf & _
+                 "  id: " & trade.CellValue("TradeID") & vbLf & _
                  "  direction: " & IIf(trade.CellValue("BS") = "B", "long", "short") & vbLf & _
                  "  openPrice: " & trade.CellValue("Open") & vbLf & _
                  "  size: " & trade.CellValue("Lot") & vbLf & _
