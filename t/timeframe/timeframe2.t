@@ -28,15 +28,15 @@ my %existingSymbols = map { $_ => 1} @{$cfg->symbols->all};
 foreach my $tf (@{$naturalTFs}) {
 	my $available_timeframe = $tf;
 	foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
-		$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$tf");
-		$dbh->do("CREATE TABLE $TEST_TABLE\_$tf LIKE $BASE_SYMBOL\_$tf");
-		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime LIMIT 1_000_000");
+		$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$tf") || die($DBI::errstr
+		$dbh->do("CREATE TABLE $TEST_TABLE\_$tf LIKE $BASE_SYMBOL\_$tf") || die($DBI::errstr);
+		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime LIMIT 1000000") || die($DBI::errstr);
 	}
 
 	foreach my $stf (@{$syntheticTFs}) {
 		foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
-			$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$stf");
-			$dbh->do("CREATE TABLE $TEST_TABLE\_$stf LIKE $BASE_SYMBOL\_$stf");
+			$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$stf") || die($DBI::errstr);
+			$dbh->do("CREATE TABLE $TEST_TABLE\_$stf LIKE $BASE_SYMBOL\_$stf") || die($DBI::errstr);
 		}
 
         $ds->convertOHLCTimeSeries($TEST_TABLE_ONE,
