@@ -30,7 +30,7 @@ foreach my $tf (@{$naturalTFs}) {
 	foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
 		$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$tf");
 		$dbh->do("CREATE TABLE $TEST_TABLE\_$tf LIKE $BASE_SYMBOL\_$tf");
-		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf");
+		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime LIMIT 1_000_000");
 	}
 
 	foreach my $stf (@{$syntheticTFs}) {
