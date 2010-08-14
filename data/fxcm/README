@@ -14,4 +14,4 @@ To stop it (might have delays if there is work going on):
 
 To start the auto trader application (this reads system.yml to determine what to do)
 It trades against whatever account RatePrinter.exe was logged on as
-./Trader.pl > trader.log 2>&1 < /dev/null &
+./Trader.pl >> trader.log 2>&1 < /dev/null &
