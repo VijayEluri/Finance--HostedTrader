@@ -5,11 +5,12 @@ use Getopt::Long;
 use Finance::HostedTrader::Datasource;
 use Data::Dumper;
 
-my ($timeframes_txt, $symbols_txt);
+my ($sql,$timeframes_txt, $symbols_txt) = ('TABLE_NAME');
 
 my $result = GetOptions(
                         "timeframes=s", \$timeframes_txt,
                         "symbols=s", \$symbols_txt,
+                        "sql=s", \$sql,
 					);
 
 my $db = Finance::HostedTrader::Datasource->new();
@@ -32,9 +33,9 @@ $timeframes = [split(',',$timeframes_txt)] if ($timeframes_txt);
 foreach my $symbol (@{$symbols}) {
 foreach my $tf (@$timeframes) {
 next if ($tf == 60);
-#print qq /DELETE FROM `$symbol\_$tf` WHERE datetime > '2009-09-12';
-print qq /ALTER TABLE `$symbol\_$tf` MODIFY open DECIMAL(9,4) NOT NULL, MODIFY low DECIMAL(9,4) NOT NULL, MODIFY high DECIMAL(9,4) NOT NULL, MODIFY close DECIMAL(9,4) NOT NULL;
-/;
-
+my $tableName = $symbol.'_'.$tf;
+my $s = $sql;
+$s =~ s/TABLE_NAME/$tableName/g;
+print $s,";\n";
 }
 }
