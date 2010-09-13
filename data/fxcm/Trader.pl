@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-
+$| = 1;
 #use Proc::Daemon;
 #Proc::Daemon::Init;
 use Config::Any;
@@ -20,7 +20,7 @@ my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 my $account = Finance::HostedTrader::Account->new(
                 username => $username,
                 password => $password,
-                expressionParser => $signal_processor );
+              );
 
 my $systems = loadSystems('system.yml') || die('Could not load systems from file "system.yml"');
 
@@ -29,7 +29,7 @@ while (1) {
     foreach my $system (@$systems) {
         checkSystem($account, $system, 'long');
         checkSystem($account, $system, 'short');
-        sleep(30);
+        sleep(20);
     }
 }
 
@@ -47,18 +47,14 @@ sub checkSystem {
             my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
             logger(Dumper(\$result));
             if ($result) {
-                my $max_loss   = $account->getBalance * $system->{maxExposure} / 100;
-                my $stopLoss = $signal_processor->getIndicatorData( {
-                    symbol  => $symbol,
-                    tf      => $signal->{timeframe},
-                    fields  => 'datetime, ' . $signal->{initialStop},
-                    maxLoadedItems => $signal->{maxLoadedItems},
-                    numItems => 1,
-                    debug => $debug,
-                } );
-                $stopLoss = $stopLoss->[0]->[1];
-                logger("Adding position for $symbol $direction, initialStop=$stopLoss");
-                $account->marketOrder($symbol, $direction, $max_loss, $stopLoss); #note stopLoss is not actually set in the market order, it's use to determine position sizing
+                my $amount = getTradeSize($account, $system, $signal, $symbol, $direction);
+                logger("Adding position for $symbol $direction ($amount)");
+                $account->openMarket($symbol, $direction, $amount);
+                sendMail(qq {Open Trade:
+Instrument: $symbol
+Direction: $direction
+Amount: $amount
+                });
             }
         }
 
@@ -70,6 +66,13 @@ sub checkSystem {
             if ($result) {
                 logger("Closing position for $symbol $direction ( $pos_size )");
                 $account->closeTrades($symbol);
+                logger("before sendMail");
+                sendMail(qq {Close Trade:
+Instrument: $symbol
+Direction: $direction
+Position Size: $pos_size
+                });
+                logger("after sendMail");
             }
         }
     }
@@ -97,6 +100,47 @@ sub checkSignal {
     return undef;
 }
 
+sub getTradeSize {
+my $account = shift;
+my $system = shift;
+my $signal = shift;
+my $symbol = shift;
+my $direction = shift;
+
+my $value;
+my $maxLossPts;
+
+    my $maxLoss   = $account->getBalance * $system->{maxExposure} / 100;
+    my $stopLoss = $signal_processor->getIndicatorData( {
+                symbol  => $symbol,
+                tf      => $signal->{timeframe},
+                fields  => 'datetime, ' . $signal->{initialStop},
+                maxLoadedItems => $signal->{maxLoadedItems},
+                numItems => 1,
+                debug => 0,
+    } );
+    $stopLoss = $stopLoss->[0]->[1];
+    my $base = uc(substr($symbol, -3));
+    if ($base ne "GBP") {
+        $maxLoss *= $account->getAsk("GBP$base");
+    }
+
+    if ($direction eq "long") {
+        $value = $account->getAsk($symbol);
+        $maxLossPts = $value - $stopLoss;
+    } else {
+        $value = $account->getBid($symbol);
+        $maxLossPts = $stopLoss - $value;
+    }
+
+    if ( $maxLossPts <= 0 ) {
+        die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
+    }
+    my $amount = ($maxLoss / $maxLossPts) / 10000;#This bit is specific to FXCM, since they only accept multiples of 10.000
+    $amount = int($amount) * 10000;
+    return $amount;
+}
+
 sub loadSystems {
     my $file = shift;
     my $system = Config::Any->load_files(
@@ -115,4 +159,20 @@ sub logger {
 
     my $datetimeNow = UnixDate('now', '%Y-%m-%d %H:%M:%S');
     print "[$datetimeNow] $msg\n";
+}
+
+
+sub sendMail {
+my ($content) = @_;
+require MIME::Lite;
+
+    ### Create a new single-part message, to send a GIF file:
+    my $msg = MIME::Lite->new(
+        From     => 'fxhistor@fxhistoricaldata.com',
+        To       => 'joaocosta@zonalivre.org',
+#        Cc       => 'elad.sharf@gmail.com',
+        Subject  => 'Trading Robot',
+        Data     => $content
+    );
+    $msg->send; # send via default
 }
