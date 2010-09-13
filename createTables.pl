@@ -53,7 +53,7 @@ use Pod::Usage;
 my ( $symbols_txt, $tfs_txt, $help );
 my $cfg = Finance::HostedTrader::Config->new();
 
-my $result = GetOptions( "symbols=s", \$symbols_txt, "timeframe=s", \$tfs_txt, "help", \$help)
+my $result = GetOptions( "symbols=s", \$symbols_txt, "timeframes=s", \$tfs_txt, "help", \$help)
   or pod2usage(1);
 pod2usage(1) if ($help);
 
