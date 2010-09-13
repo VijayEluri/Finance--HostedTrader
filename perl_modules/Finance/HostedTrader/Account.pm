@@ -23,41 +23,13 @@ use warnings;
 use Moose;
 use Finance::HostedTrader::Position;
 use Finance::HostedTrader::Trade;
+use FXCMServer;
 
 
 use YAML::Syck;
 use Data::Dumper;
 
 YAML::Syck->VERSION( '0.70' );
-
-
-
-
-
-
-
-##Specific to the simulator account
-use Storable;
-=item C<simulatedTime>
-
-
-=cut
-has simulatedTime => (
-    is     => 'rw',
-    isa    => 'Str',
-    required=>0,
-    'default' => '9999-12-31 23:59:59'
-);
-
-=item C<expressionParser>
-
-
-=cut
-has expressionParser => (
-    is     => 'ro',
-    isa    => 'Finance::HostedTrader::ExpressionParser',
-    required=>1,
-);
 
 
 ##These should exist everywhere, regardless of broker
@@ -108,38 +80,82 @@ sub getBalance {
 
 =cut
 sub getPosition {
-    my ($self, $symbol) = @_;
+my ($self, $symbol) = @_;
+my $s = FXCMServer->new();
+my $trades = $s->getTrades(),
+my %positions=();
 
-    my $tradesFile = '/home/fxhistor/.wine/drive_c/trades.yml';
-    $self->loadPositionsFromYML($tradesFile);
+    $self->{positions} = {};
+    foreach my $trade_data (@$trades) {
+        my $trade = Finance::HostedTrader::Trade->new(
+            $trade_data
+        );
+
+        my $position = $self->_getPosition($trade->symbol);
+        $position->addTrade($trade);
+    }
 
     return $self->_getPosition($symbol);
 }
 
-sub _writeTempFile {
-    my ($prefix, $content) = @_;
-    use File::Temp qw/ tempfile /;
-    my ($fh, $filename) = tempfile($prefix.'.XXXXX', DIR => '/home/fxhistor/.wine/drive_c/orders');
+=item C<openMarket>
 
-    print $fh $content;
-    close($fh);
-    print STDERR $filename;
+
+=cut
+sub openMarket {
+    my $self = shift;
+    my $s = FXCMServer->new();
+
+    return $s->openMarket(@_);
 }
 
-sub marketOrder {
-    my ($self, $symbol, $direction, $maxLossCurrency, $stopLossValue) = @_;
+=item C<closeTrades>
 
-    _writeTempFile 'open', "$symbol $direction $maxLossCurrency $stopLossValue";
-}
 
+=cut
 sub closeTrades {
     my ($self, $symbol) = @_;
+    my $s = FXCMServer->new();
 
     my $position = $self->getPosition($symbol);
     foreach my $trade (@{ $position->trades }) {
-        _writeTempFile 'close', $trade->id . ' ' . $trade->size;
+        $s->closeMarket($trade->id, $trade->size);
     }
 }
+
+=item C<closeMarket>
+
+
+=cut
+sub closeMarket {
+    my $self = shift;
+    my $s = FXCMServer->new();
+
+    return $s->closeMarket(@_);
+}
+
+=item C<getAsk>
+
+
+=cut
+sub getAsk {
+    my $self = shift;
+    my $s = FXCMServer->new();
+
+    return $s->getAsk(@_);
+}
+
+=item C<getBid>
+
+
+=cut
+sub getBid {
+    my $self = shift;
+    my $s = FXCMServer->new();
+
+    return $s->getBid(@_);
+}
+
 
 sub _empty_hash {
     return {};
@@ -158,27 +174,6 @@ sub _getPosition {
     return $position;
 }
 
-
-sub loadPositionsFromYML {
-my $self = shift;
-my $file = shift;
-
-open( my $fh, $file ) or die $!;
-my $content = do { local $/; <$fh> };
-close $fh;
-my $data = YAML::Syck::Load( $content );
-my %positions=();
-
-    $self->{positions} = {};
-    foreach my $trade_data (@$data) {
-        my $trade = Finance::HostedTrader::Trade->new(
-            $trade_data
-        );
-
-        my $position = $self->_getPosition($trade->symbol);
-        $position->addTrade($trade);
-    }
-}
 
 __PACKAGE__->meta->make_immutable;
 1;
