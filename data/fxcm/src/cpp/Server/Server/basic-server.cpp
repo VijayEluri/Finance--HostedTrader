@@ -51,9 +51,9 @@ bool initCore();
 string convertSymbolFromFXCM(string );
 string convertSymbolToFXCM(string );
 string CmdGetCurrentPrice(string , string );
-string CmdMarketOrder(string , string , int );
-string CmdCloseTrade(string , int );
-string CmdGetPositions();
+string CmdOpenMarketOrder(string , string , int );
+string CmdCloseMarketOrder(string , int );
+string CmdGetTrades();
 
 string sCommandData;
 ////////////////////////////////////////////////////////////////////////
@@ -217,13 +217,13 @@ string ProcessCommand(string sCmd) {
 			throw "Empty command";
 		}
 
-		if (tokens[0].compare("positions") == 0) {
-			sResponse = CmdGetPositions();
+		if (tokens[0].compare("trades") == 0) {
+			sResponse = CmdGetTrades();
 		} else if (tokens[0].compare("ask") == 0) {
 			sResponse = CmdGetCurrentPrice(tokens[1].c_str(), "Ask");
 		} else if (tokens[0].compare("bid") == 0) {
 			sResponse = CmdGetCurrentPrice(tokens[1].c_str(), "Bid");
-		} else if (tokens[0].compare("market") == 0) {
+		} else if (tokens[0].compare("openmarket") == 0) {
 			int i;
 			if (tokens.size() != 4) {
 				throw "Expected 3 arguments";
@@ -231,8 +231,8 @@ string ProcessCommand(string sCmd) {
 			if (!from_string<int>(i, tokens[3], std::dec)) {
 				throw "argument 3 must be an integer";
 			}
-			sResponse = CmdMarketOrder(tokens[1], tokens[2], i);
-		} else if (tokens[0].compare("close") == 0) {
+			sResponse = CmdOpenMarketOrder(tokens[1], tokens[2], i);
+		} else if (tokens[0].compare("closemarket") == 0) {
 			int i;
 			if (tokens.size() != 3) {
 				throw "Expected 2 arguments";
@@ -240,7 +240,7 @@ string ProcessCommand(string sCmd) {
 			if (!from_string<int>(i, tokens[2], std::dec)) {
 				throw "argument 2 must be an integer";
 			}
-			sResponse = CmdCloseTrade(tokens[1], i);
+			sResponse = CmdCloseMarketOrder(tokens[1], i);
 		} else if (tokens[0].compare("quit") == 0) {
 			g_IsRunning = false;
 			sResponse = "200";
@@ -269,7 +269,8 @@ string ProcessCommand(string sCmd) {
 	sResponse.append(sCmd);
 
 clean:
-	cout << sResponse << endl;
+	sResponse.append("||THE_END||");
+	cout << sResponse;
 	return sResponse;
 }
 
@@ -363,7 +364,7 @@ string CmdGetCurrentPrice(string symbol, string sType) {
 	return rv;
 }
 
-string CmdMarketOrder(string symbol, string direction, int iAmount) {
+string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 	string sType;
 	boolean bBuy;
 	double dRate;
@@ -387,7 +388,8 @@ string CmdMarketOrder(string symbol, string direction, int iAmount) {
 				iAmount, "", 0, &vOrderID, &vDealerInt);
 
 	rv = "200 ";// + vOrderID.bstrVal;// + " " + dRate;
-	rv.append((const char *)vOrderID.bstrVal);
+	_bstr_t _vOrderID = vOrderID.bstrVal;
+	rv.append((const char *) _vOrderID );
 	rv+=" ";
 
 	os << dRate;
@@ -428,16 +430,16 @@ std::ostringstream strs_Date;
 	return strs_Date.str();
 }
 
-string CmdGetPositions() {
+string CmdGetTrades() {
 FXCore::ITableAutPtr pTradesTable = g_pTradeDesk->FindMainTable("trades");
 string sTrades = "200 ";
 
-std::ostringstream strs_Price;
-std::ostringstream strs_Lot;
 
 		unsigned long lRows = pTradesTable->GetRowCount();
 		for (unsigned long l = 1; l <= lRows; ++l)
 		{
+			std::ostringstream strs_Price;
+			std::ostringstream strs_Lot;
 			_bstr_t _symbol = pTradesTable->CellValue(l, "Instrument").bstrVal;
 			string symbol = (const char*) _symbol;
 			symbol = convertSymbolFromFXCM(symbol);
@@ -478,14 +480,15 @@ std::ostringstream strs_Lot;
 */
 }
 
-string CmdCloseTrade(string sTradeID, int amount) {
+string CmdCloseMarketOrder(string sTradeID, int amount) {
 _variant_t vOrderID = "", vDealerInt = "";
 
 	g_pTradeDesk->CreateFixOrder2(g_pTradeDesk->FIX_CLOSEMARKET, sTradeID.c_str(), 0, 0, "", "", "", 0, 
 				amount, "", 0, &vOrderID, &vDealerInt);
 
 	string rv = "200 ";
-	rv.append((const char *)vOrderID.bstrVal);
+	_bstr_t _vOrderID = vOrderID.bstrVal;
+	rv.append((const char *) _vOrderID);
 	return rv;
 }
 
