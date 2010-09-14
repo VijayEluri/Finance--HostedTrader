@@ -6,7 +6,7 @@ function checkProcess {
    echo `ps aux | egrep "$1" | grep -vi defunct | grep -v egrep | wc -l`
 }
 
-
+exit
 for p in Trader.pl RatePrinter.exe Server.exe; do
     VAR=$(checkProcess $p)
     if [[ "$VAR" == "0"  ]]; then

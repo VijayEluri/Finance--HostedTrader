@@ -1,5 +1,0 @@
-killall Server.exe
-wine Server.exe 127.0.0.1 1500 GBD60267001 3724 Demo >> server.log 2>&1 < /dev/null &
-
-killall Trader.pl
-./Trader.pl >> trader.log 2>&1 < /dev/null &

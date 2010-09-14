@@ -47,13 +47,15 @@ sub checkSystem {
             my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
             logger(Dumper(\$result));
             if ($result) {
-                my $amount = getTradeSize($account, $system, $signal, $symbol, $direction);
+                my ($amount, $value, $stopLoss) = getTradeSize($account, $system, $signal, $symbol, $direction);
                 logger("Adding position for $symbol $direction ($amount)");
-                $account->openMarket($symbol, $direction, $amount);
+                $account->openMarket($symbol, $direction, $amount) if ($amount > 0);
                 sendMail(qq {Open Trade:
 Instrument: $symbol
 Direction: $direction
 Amount: $amount
+Current Value: $value
+Stop Loss: $stopLoss
                 });
             }
         }
@@ -138,7 +140,7 @@ my $maxLossPts;
     }
     my $amount = ($maxLoss / $maxLossPts) / 10000;#This bit is specific to FXCM, since they only accept multiples of 10.000
     $amount = int($amount) * 10000;
-    return $amount;
+    return ($amount, $value, $stopLoss);
 }
 
 sub loadSystems {
@@ -164,7 +166,7 @@ sub logger {
 
 sub sendMail {
 my ($content) = @_;
-require MIME::Lite;
+use MIME::Lite;
 
     ### Create a new single-part message, to send a GIF file:
     my $msg = MIME::Lite->new(
