@@ -27,8 +27,19 @@ my $systems = loadSystems('system.yml') || die('Could not load systems from file
 my $debug = 0;
 while (1) {
     foreach my $system (@$systems) {
-        checkSystem($account, $system, 'long');
-        checkSystem($account, $system, 'short');
+        eval {
+            checkSystem($account, $system, 'long');
+            1;
+        } or do {
+            logger($@);
+        }
+
+        eval {
+            checkSystem($account, $system, 'short');
+            1;
+        } or do {
+            logger($@);
+        }
         sleep(20);
     }
 }
@@ -49,14 +60,24 @@ sub checkSystem {
             if ($result) {
                 my ($amount, $value, $stopLoss) = getTradeSize($account, $system, $signal, $symbol, $direction);
                 logger("Adding position for $symbol $direction ($amount)");
-                $account->openMarket($symbol, $direction, $amount) if ($amount > 0);
-                sendMail(qq {Open Trade:
+
+                foreach my $try (1..3) {
+                    eval {
+                        $account->openMarket($symbol, $direction, $amount) if ($amount > 0);
+                        1;
+                    } or do {
+                        logger($@);
+                        next;
+                    };
+                    sendMail(qq {Open Trade:
 Instrument: $symbol
 Direction: $direction
 Amount: $amount
 Current Value: $value
 Stop Loss: $stopLoss
                 });
+                    last;
+                }
             }
         }
 
