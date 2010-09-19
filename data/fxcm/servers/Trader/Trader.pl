@@ -50,16 +50,14 @@ sub checkSystem {
 
     foreach my $symbol ( @$symbols ) {
         my $pos_size = $account->getPosition($symbol)->size;
-        logger("$symbol = $pos_size");
 
         if (!$pos_size) {
-            logger("Check open $symbol $direction");
             my $signal = $system->{signals}->{enter}->{$direction};
             my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
-            logger(Dumper(\$result));
             if ($result) {
                 my ($amount, $value, $stopLoss) = getTradeSize($account, $system, $signal, $symbol, $direction);
                 logger("Adding position for $symbol $direction ($amount)");
+                logger(Dumper(\$result));
 
                 foreach my $try (1..3) {
                     eval {
@@ -82,12 +80,11 @@ Stop Loss: $stopLoss
         }
 
         if ($pos_size) {
-            logger("Check close $symbol $direction");
             my $signal = $system->{signals}->{exit}->{$direction};
             my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
-            logger(Dumper(\$result));
             if ($result) {
                 logger("Closing position for $symbol $direction ( $pos_size )");
+                logger(Dumper(\$result));
                 $account->closeTrades($symbol);
                 logger("before sendMail");
                 sendMail(qq {Close Trade:
