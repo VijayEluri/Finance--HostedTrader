@@ -32,14 +32,14 @@ while (1) {
             1;
         } or do {
             logger($@);
-        }
+        };
 
         eval {
             checkSystem($account, $system, 'short');
             1;
         } or do {
             logger($@);
-        }
+        };
         sleep(20);
     }
 }
