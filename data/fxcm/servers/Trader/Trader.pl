@@ -12,6 +12,8 @@ use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Account;
 use Finance::HostedTrader::Trade;
 
+logger("STARTUP");
+
 my $username = 'joaocosta';
 my $password = 'password';
 
