@@ -1,3 +1,5 @@
 #!/bin/sh
 
-wine Server.exe 127.0.0.1 1500 GBD60267001 3724 Demo >> server.log 2>&1 < /dev/null &
+. ../config.sh
+
+wine Server.exe 127.0.0.1 1500 $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE >> server.log 2>&1 < /dev/null &

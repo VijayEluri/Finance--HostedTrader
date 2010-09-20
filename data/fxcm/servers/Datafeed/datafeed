@@ -1,4 +1,7 @@
 #!/bin/sh
+
+. ../config.sh
+
 TIMEFRAMES=`perl -MData::Dumper -MConfig::Any -e 'my $cfg_all = Config::Any->load_files({ files => [qw(fx.yml)], use_ext => 1, flatten_to_hash => 1 } );print join(" ", @{$cfg_all->{"fx.yml"}->{timeframes}->{natural}})'`
 
 echo $$ > /tmp/RatePrinter.exe.pid
@@ -7,8 +10,7 @@ echo $$ > /tmp/RatePrinter.exe.pid
 
 # RatePrinter.exe is a windows binary running with wine which uses the FXOrder2Go FXCM API 
 # and writes data files to disk
-wine ./RatePrinter.exe  GBD60267001 3724 Demo 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
-#wine ./RatePrinter.exe 7510107448 "6e[bzwyI" Real 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
+wine ./RatePrinter.exe $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
 sleep 2
 
 while [ 1 ]; do
@@ -18,8 +20,7 @@ while [ 1 ]; do
       sleep 30
 #      wine ./RatePrinter.exe FX1125841001 3151 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
 
-      wine ./RatePrinter.exe  GBD60267001 3724 Demo 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
-#      wine ./RatePrinter.exe 7510107448 "6e[bzwyI" Real 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
+      wine ./RatePrinter.exe  $USERNAME $PASSWORD $TYPE 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
   done
 
 
