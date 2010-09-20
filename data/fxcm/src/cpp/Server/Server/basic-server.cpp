@@ -372,6 +372,10 @@ string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 	_variant_t vOrderID = "", vDealerInt = "";
 
 	FXCore::ITableAutPtr pAcctTable = g_pTradeDesk->FindMainTable("Accounts");
+	long rowcount = pAcctTable->RowCount;
+	if (rowcount == 0) {
+		throw "No rows defined in Accounts table, cannot fetch AccountID and raise an open market order, perhaps this login belongs to a closed account ?";
+	}
 	_variant_t AcctID = pAcctTable->CellValue(1,"AccountID"); //Assumes only one account
 
 	ostringstream os;
