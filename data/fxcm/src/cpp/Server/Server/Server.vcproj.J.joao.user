@@ -39,7 +39,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="127.0.0.1 1500 GBD60267001 3724 Demo"
+				CommandArguments="127.0.0.1 1500 GBD66242001 6444 Demo"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

@@ -45,6 +45,10 @@ bool from_string(T& t,
 bool g_IsRunning;
 FXCore::ICoreAutPtr g_pCore;
 FXCore::ITradeDeskAutPtr g_pTradeDesk;
+const char* g_pcLogin;
+const char* g_pcPassw;
+const char* g_pcAcType;
+
 using namespace FXCore;
 
 bool initCore();
@@ -74,8 +78,18 @@ bool EchoIncomingPackets(SOCKET sd);
 // The module's driver function -- we just call other functions and
 // interpret their results.
 
+
+void CheckTradeDeskLogin() {
+	if (!g_pTradeDesk->IsLoggedIn()) {
+		g_pTradeDesk->Login(g_pcLogin, g_pcPassw, "http://www.fxcorporate.com/Hosts.jsp", g_pcAcType);
+	}
+}
+
 int DoWinsock(const char* pcAddress, int nPort, const char* pcLogin, const char* pcPassw, const char* pcAcType) {
 
+	g_pcLogin = pcLogin;
+	g_pcPassw = pcPassw;
+	g_pcAcType = pcAcType;
 
 	g_IsRunning = true;
 	g_pCore = 0;
@@ -87,7 +101,7 @@ int DoWinsock(const char* pcAddress, int nPort, const char* pcLogin, const char*
     try {
 		g_pTradeDesk->Login(pcLogin, pcPassw, "http://www.fxcorporate.com/Hosts.jsp", pcAcType);
 	}
-	catch(_com_error e) {		
+	catch(_com_error e) {
 		cout << "Login error: " << e.Description() << endl ;
 		exit(1);
 	}
@@ -349,9 +363,10 @@ bool initCore() {
 
 
 double GetCurrentPrice(string symbol, string sType) {
-		FXCore::IRowAutPtr offer = g_pTradeDesk->FindRowInTable("offers", "Instrument", convertSymbolToFXCM(symbol).c_str() );
-		_variant_t rv = offer->CellValue(sType.c_str());
-		return rv.dblVal;
+	CheckTradeDeskLogin();
+	FXCore::IRowAutPtr offer = g_pTradeDesk->FindRowInTable("offers", "Instrument", convertSymbolToFXCM(symbol).c_str() );
+	_variant_t rv = offer->CellValue(sType.c_str());
+	return rv.dblVal;
 }
 
 
@@ -371,6 +386,7 @@ string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 	string rv;
 	_variant_t vOrderID = "", vDealerInt = "";
 
+	CheckTradeDeskLogin();
 	FXCore::ITableAutPtr pAcctTable = g_pTradeDesk->FindMainTable("Accounts");
 	long rowcount = pAcctTable->RowCount;
 	if (rowcount == 0) {
@@ -435,6 +451,7 @@ std::ostringstream strs_Date;
 }
 
 string CmdGetTrades() {
+CheckTradeDeskLogin();
 FXCore::ITableAutPtr pTradesTable = g_pTradeDesk->FindMainTable("trades");
 string sTrades = "200 ";
 
@@ -487,6 +504,7 @@ string sTrades = "200 ";
 string CmdCloseMarketOrder(string sTradeID, int amount) {
 _variant_t vOrderID = "", vDealerInt = "";
 
+	CheckTradeDeskLogin();
 	g_pTradeDesk->CreateFixOrder2(g_pTradeDesk->FIX_CLOSEMARKET, sTradeID.c_str(), 0, 0, "", "", "", 0, 
 				amount, "", 0, &vOrderID, &vDealerInt);
 
