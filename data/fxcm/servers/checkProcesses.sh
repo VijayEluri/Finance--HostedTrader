@@ -19,7 +19,7 @@ LAST_TICK=`mysql -N -ufxcm -e "SELECT MAX(datetime) FROM XAUUSD_300" fxcm`
 perl -MDate::Manip -e 'my $timediff=Delta_Format(DateCalc($ARGV[0], "now"),0,"%sh"); print "Datafeed out of date\n" if ($timediff > 1200)' "$LAST_TICK" 
 
 #check if the FXCM API server is responding to requests
-RES=`echo ask XAUUSD | nc -w 3 localhost 1500`
+RES=`echo ask XAUUSD | nc -w 10 localhost 1500`
 if [[ "$RES" = "" ]]; then
     echo Server timeout
 else
