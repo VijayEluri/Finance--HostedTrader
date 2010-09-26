@@ -37,8 +37,12 @@ port 1500 to access the Order2Go API.
 
 use Moose;
 use IO::Socket;
+use IO::Select;
 use YAML::Syck;
 use Finance::HostedTrader::Trade;
+
+use constant CONNECT_TIMEOUT => 10;
+use constant READ_TIMEOUT => 15;
 
 =back
 
@@ -53,6 +57,7 @@ sub BUILD {
                     PeerAddr => '127.0.0.1',
                     PeerPort => '1500',
                     Proto    => 'tcp',
+                    Timeout  => CONNECT_TIMEOUT,
                     ) or die($!);
     $sock->autoflush(1);
     $self->{_sock} = $sock;
@@ -138,23 +143,31 @@ sub _sendCmd {
     my ($self, $cmd) = @_;
     my $sock = $self->{_sock};
 
-    $/="||THE_END||";
-    print $sock $cmd."\n";
-    my $data = <$sock>;
-    chomp($data);
+    my $select = IO::Select->new($sock);
 
-    my ($code, $msg) = split(/ /, $data, 2);
-    if ($code == 200) {
+    print $sock $cmd."\n";
+
+    if ( $select->can_read(READ_TIMEOUT) ) {
+        $/="||THE_END||";
+        my $data = <$sock>;
+        die("Server returned no response") if (!$data);
+        chomp($data);
+
+        my ($code, $msg) = split(/ /, $data, 2);
+        if ($code == 200) {
+            return $msg;
+        } elsif ($code == 500) {
+            die("Internal Error: $msg");
+        } elsif ($code == 404) {
+            die("Command not found: $msg");
+        } else {
+            die("Unknown return code: $code, msg=$msg");
+        }
         return $msg;
-    } elsif ($code == 500) {
-        die("Internal Error: $msg");
-    } elsif ($code == 404) {
-        die("Command not found: $msg");
     } else {
-        die("Unknown return code: $code, msg=$msg");
+        die("Timeout reading from server");
     }
 
-    return $msg;
 }
 
 sub DEMOLISH {
