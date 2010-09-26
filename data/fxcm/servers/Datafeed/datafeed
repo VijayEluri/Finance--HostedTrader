@@ -18,8 +18,6 @@ while [ 1 ]; do
       # If RatePrinter.exe stops running, sleep 30 seconds
       # and try to restart it
       sleep 30
-#      wine ./RatePrinter.exe FX1125841001 3151 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
-
       wine ./RatePrinter.exe  $USERNAME $PASSWORD $TYPE 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
   done
 
