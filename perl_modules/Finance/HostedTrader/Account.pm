@@ -72,7 +72,7 @@ has positions => (
 sub getBalance {
     my ($self) = @_;
 
-    return 15000;
+    return 10000;
 }
 
 =item C<getPosition>
@@ -81,8 +81,15 @@ sub getBalance {
 =cut
 sub getPosition {
 my ($self, $symbol) = @_;
+
+my $trades;
+
+{
 my $s = FXCMServer->new();
-my $trades = $s->getTrades(),
+$trades = $s->getTrades();
+#$s will go out of scope and close the TCP connection to the single threaded server
+}
+
 my %positions=();
 
     $self->{positions} = {};
@@ -115,9 +122,9 @@ sub openMarket {
 =cut
 sub closeTrades {
     my ($self, $symbol) = @_;
-    my $s = FXCMServer->new();
 
     my $position = $self->getPosition($symbol);
+    my $s = FXCMServer->new();
     foreach my $trade (@{ $position->trades }) {
         $s->closeMarket($trade->id, $trade->size);
     }
