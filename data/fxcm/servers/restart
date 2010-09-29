@@ -1,0 +1,25 @@
+#!/bin/sh
+
+
+BASE_DIR=~/fx/data/fxcm/servers
+SERVERS="Trader Server Datafeed"
+
+
+REV_SERVERS=`echo $SERVERS | awk '{n=split($0,A);S=A[n];{for(i=n-1;i>0;i--)S=S" "A[i]}}END{print S}'`
+
+for p in $SERVERS; do
+    cd $BASE_DIR/$p
+    ./stop
+done
+
+sudo /etc/init.d/mysqld restart
+
+for p in $REV_SERVERS; do
+    cd $BASE_DIR/$p
+    ./start
+    sleep 5
+done
+
+$BASE_DIR/checkProcesses.sh
+
+echo Done
