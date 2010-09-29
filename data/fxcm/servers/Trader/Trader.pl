@@ -86,15 +86,19 @@ Stop Loss: $stopLoss
             my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
             if ($result) {
                 logger("Closing position for $symbol $direction ( $pos_size )");
-                logger(Dumper(\$result));
                 $account->closeTrades($symbol);
-                logger("before sendMail");
+                my $value;
+                if ($direction eq "long") {
+                    $value = $account->getAsk($symbol);
+                } else {
+                    $value = $account->getBid($symbol);
+                }
                 sendMail(qq {Close Trade:
 Instrument: $symbol
 Direction: $direction
 Position Size: $pos_size
+Current Value: $value
                 });
-                logger("after sendMail");
             }
         }
     }
