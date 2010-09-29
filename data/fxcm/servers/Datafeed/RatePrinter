@@ -39,11 +39,10 @@ stop() {
 	RETVAL=$?
 
 	touch ~/.wine/drive_c/RatePrinter.kill
+    sleep 5
 	while ps aux | grep RatePrinter.exe | grep -v defunct | grep -v grep > /dev/null; do
-	#TODO: A timeout here would be nice
-		sleep 1
+        killall RatePrinter.exe 2> /dev/null
 	done
-    killall RatePrinter.exe 2> /dev/null
     killall datafeed 2> /dev/null
 
 	echo
