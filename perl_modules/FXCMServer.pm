@@ -165,7 +165,7 @@ sub _sendCmd {
         }
         return $msg;
     } else {
-        die("Timeout reading from server");
+        die("Timeout reading from server (cmd=$cmd)");
     }
 
 }
