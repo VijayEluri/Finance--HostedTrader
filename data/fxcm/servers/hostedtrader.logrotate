@@ -1,0 +1,7 @@
+/home/fxhistor/fx/data/fxcm/servers/Trader/trader.log /home/fxhistor/fx/data/fxcm/servers/Server/server.log {
+    daily
+    notifempty
+    missingok
+    rotate 6
+}
+
