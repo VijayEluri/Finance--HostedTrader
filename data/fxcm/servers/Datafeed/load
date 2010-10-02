@@ -12,6 +12,7 @@ rm -Rf *_$TF
 # Create synthetic timeframes
 if [[ "$TF" == "300" ]]; then
 ~/fx/updateTf.pl --start="15 days ago" --timeframes=900 --available-timeframe=5min --symbols=natural
+~/fx/updateTf.pl --start="15 days ago" --timeframes=1800 --available-timeframe=15min --symbols=natural
 fi
 
 if [[ "$TF" == "3600" ]]; then
