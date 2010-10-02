@@ -8,122 +8,12 @@ Private Declare Function GetTickCount Lib "kernel32" () As Long
 Dim oCore As FXCore.CoreAut
 Dim oTradeDesk As FXCore.TradeDeskAut
 Dim oLog As Logger
-Dim lastTimePositionsUpdated As Long
 
 Type TimeframeInfoType
     SleepInterval As Long
     LastTimeDownloaded As Long
     FXCore2GO_Code As String
 End Type
-
-Sub ProcessOrders()
-Dim fso As Scripting.FileSystemObject
-Dim fld As Scripting.Folder
-Dim file As Scripting.file
-Dim stream As Scripting.TextStream
-Dim Order() As String
-Dim rv As Long
-Dim fileCount As Long
-Dim symbol As String
-Dim update As Boolean
-Dim result As Long
-
-update = False
-Set fso = New Scripting.FileSystemObject
-
-If Not fso.FolderExists("c:/orders") Then Exit Sub
-Set fld = fso.GetFolder("c:/orders")
-fileCount = fld.Files.Count
-If fileCount > 0 Then
-    oLog.log "Processing " & fileCount & " order(s)"
-    For Each file In fld.Files
-        Set stream = file.OpenAsTextStream(ForReading)
-        Order = Split(stream.ReadAll, " ")
-        stream.Close
-        Set stream = Nothing
-        
-        If Left$(file.Name, 4) = "open" Then
-            symbol = Left$(Order(0), 3) & "/" & Right$(Order(0), 3)
-            oLog.log "Order:" & symbol & " " & Order(1) & " " & Order(2) & " " & Order(3)
-            result = marketOrder(symbol, Order(1), Order(2), Order(3))
-        Else
-            oLog.log "CloseTrade:" & Order(0) & " " & Order(1)
-            result = closeTrade(Order(0), Order(1))
-        End If
-        
-        If result = 0 Then
-            update = True
-            oLog.log "Order executed, deleting file " & file.Name
-            file.Delete True
-        End If
-    Next
-End If
-Set fld = Nothing
-Set fso = Nothing
-
-If update Then
-    oLog.log "Refreshing positions due to new orders executed"
-    getPositions
-End If
-
-End Sub
-
-Private Function closeTrade(ByVal sTradeID As String, ByVal amount As Long)
-Dim orderId, dealer
-    closeTrade = 1
-    oTradeDesk.CreateFixOrder2 oTradeDesk.FIX_CLOSEMARKET, sTradeID, 0, 0, "", "", "", 0, amount, "", 0, orderId, dealer
-    closeTrade = 0
-End Function
-
-
-Private Function marketOrder(ByVal symbol As String, ByVal direction As String, ByVal maxLoss As Long, ByVal maxLossPrice As Double) As Long
-    Dim orderId, dealer
-    Dim offer As Object
-    Dim acct  As Object
-    Dim value As Double
-    Dim accountId As String
-    Dim base As String
-    Dim amount As Long
-    Dim maxLossPts As Double
-
-On Error GoTo EH:
-    Set acct = oTradeDesk.FindMainTable("accounts")
-    accountId = acct.CellValue(1, "AccountID")
-    Set acct = Nothing
-    
-    base = UCase$(Right$(symbol, 3))
-    If base <> "GBP" Then
-        Set offer = oTradeDesk.FindRowInTable("offers", "Instrument", "GBP/" & base)
-        maxLoss = maxLoss * offer.CellValue("Ask")
-    End If
-    Set offer = oTradeDesk.FindRowInTable("offers", "Instrument", symbol)
-    If direction = "long" Then
-        value = offer.CellValue("Ask")
-        maxLossPts = value - maxLossPrice
-    Else
-        value = offer.CellValue("Bid")
-        maxLossPts = maxLossPrice - value
-    End If
-    If maxLossPts <= 0 Then
-        Err.Raise -1, "marketOrder", "Tried to set stop to " & CStr(maxLossPrice) & " but current price is " & value
-    End If
-    amount = (maxLoss / maxLossPts) / 10000
-    amount = amount * 10000
-    
-    'oTradeDesk.CreateFixOrder3 oTradeDesk.FIX_OPEN, "", value, 0, "", accountId, symbol, LCase$(direction) = "long", amount, "", 0, 0, oTradeDesk.TIF_IOC, orderId, dealer
-    'CreateFixOrder3 throws some sort of segmentation fault when running under Wine
-    'Using CreateFixOrder2 instead which seems to work
-    'According to the Order2Go help CreateFixOrder2 is deprecated by CreateFixOrder3
-    oTradeDesk.CreateFixOrder2 oTradeDesk.FIX_OPEN, "", value, 0, "", accountId, symbol, LCase$(direction) = "long", amount, "", 0, orderId, dealer
-    Set offer = Nothing
-    marketOrder = 0
-    Exit Function
-
-EH:
-   marketOrder = 1
-   oLog.log symbol & " : " & direction & " : " & Err.Source & " : " & Err.Description
-End Function
-
 
 Public Sub Main()
     Dim username As String
@@ -177,10 +67,6 @@ Public Sub Main()
     Call oLog.log("Start date: " & dateFrom)
     Call oLog.log("Final date: " & dateTo)
     
-    If dateTo = "0" Then
-        getPositions
-    End If
-    Call oTradeDesk.EnablePendingEvents(oTradeDesk.EventAdd + oTradeDesk.EventRemove + oTradeDesk.EventSessionStatusChange)
     numTicks = 300
     
 '    Dim Instruments As Object
@@ -192,35 +78,22 @@ Public Sub Main()
     
     Set oTerminator = New Terminator
     Do
-
-    For i = 0 To numTimeframes - 1
-        If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
-            oLog.log ("Fetching " & numTicks & " data items in timeframe " & TfInfo(i).FXCore2GO_Code)
-            TfInfo(i).LastTimeDownloaded = GetTickCount()
-            For Each symbol In Symbols
-                Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks, CDate(dateFrom), CDate(dateTo))
-                If dateTo = "0" Then
-                    ProcessEvents
-                    ProcessOrders
-                End If
-            Next
-            oLog.log ("Fetching done")
+        For i = 0 To numTimeframes - 1
+            If TfInfo(i).SleepInterval + TfInfo(i).LastTimeDownloaded <= GetTickCount() Then
+                oLog.log ("Fetching " & numTicks & " data items in timeframe " & TfInfo(i).FXCore2GO_Code)
+                TfInfo(i).LastTimeDownloaded = GetTickCount()
+                For Each symbol In Symbols
+                    Call PrintRateHistory(CStr(symbol), TfInfo(i).FXCore2GO_Code, numTicks, CDate(dateFrom), CDate(dateTo))
+                Next
+                oLog.log ("Fetching done")
+            End If
+        Next
+        If oTerminator.isTerminate() Then
+            Call oLog.log("Terminator signal invoked, exiting")
+            Exit Do
         End If
-        If dateTo = "0" Then
-            ProcessEvents
-            ProcessOrders
-        End If
-    Next
-    If oTerminator.isTerminate() Then
-        Call oLog.log("Terminator signal invoked, exiting")
-        Exit Do
-    End If
-    Sleep 2000
-    numTicks = 10
-    If GetTickCount() - lastTimePositionsUpdated > 180000 Then
-        oLog.log "Refreshing positions due to timeout"
-        getPositions
-    End If
+        Sleep 2000
+        numTicks = 10
     Loop While (dateTo = 0)
     
     GoTo CleanUp
@@ -230,12 +103,14 @@ ErrorHandler:
 
 CleanUp:
 On Error Resume Next
-    Call oTradeDesk.Logout
-    On Error GoTo 0
+    If oTradeDesk.IsLoggedIn() Then _
+        Call oTradeDesk.Logout
+On Error GoTo 0
     Set oTradeDesk = Nothing
     Set oCore = Nothing
     Set oTerminator = Nothing
     Call oLog.log("App End")
+    Set oLog = Nothing
     End
 End Sub
 
@@ -309,58 +184,3 @@ Private Function UnmapTimeframe(ByVal tf As String) As String
         End
     End If
 End Function
-
-
-'Writes current open positions to a yaml file
-Private Sub getPositions()
-Dim trades As Object
-Dim trade As Object
-
-Set trades = oTradeDesk.FindMainTable("trades")
-
-Dim fso As Scripting.FileSystemObject
-Dim stream As Scripting.TextStream
-Set fso = New Scripting.FileSystemObject
-
-Set stream = fso.OpenTextFile("C:/trades.yml", ForWriting, True)
-
-Dim sTrade As String
-For Each trade In trades.Rows
-        sTrade = "- symbol: " & Replace(trade.CellValue("Instrument"), "/", vbNullString) & vbLf & _
-                 "  id: " & trade.CellValue("TradeID") & vbLf & _
-                 "  direction: " & IIf(trade.CellValue("BS") = "B", "long", "short") & vbLf & _
-                 "  openPrice: " & trade.CellValue("Open") & vbLf & _
-                 "  size: " & trade.CellValue("Lot") & vbLf & _
-                 "  openDate: " & Format$(trade.CellValue("Time"), "yyyy-mm-dd hh:nn:ss") & vbLf
-        stream.Write sTrade
-Next
-
-stream.Close
-Set stream = Nothing
-Set fso = Nothing
-Set trades = Nothing
-
-lastTimePositionsUpdated = GetTickCount()
-
-End Sub
-
-Private Sub ProcessEvents()
-Dim Events As Object
-Dim Ev As Object
-Dim refresh As Boolean
-
-    refresh = False
-    Set Events = oTradeDesk.GetPendingEvents()
-    For Each Ev In Events
-        If Ev.TableType = "summary" Then
-            Debug.Print Ev.ExtInfo
-            refresh = True
-        End If
-    Next
-    Set Events = Nothing
-    
-    If refresh Then
-        oLog.log "Refreshing positions due to event received"
-        getPositions
-    End If
-End Sub

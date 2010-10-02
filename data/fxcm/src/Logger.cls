@@ -18,7 +18,7 @@ Dim file As Scripting.TextStream
 
 Private Sub Class_Initialize()
     Dim logfile As String
-    logfile = "log.txt"
+    logfile = App.EXEName & ".log"
     Set fso = New Scripting.FileSystemObject
     Set file = fso.OpenTextFile(logfile, ForAppending, True)
 End Sub
