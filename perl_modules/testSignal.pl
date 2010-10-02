@@ -36,6 +36,12 @@ Symbol for which to calculate the signal.
 
 Defaults to EURUSD.
 
+=item C<--numItems=i>
+
+Number of periods to return.
+
+Defaults to 20.
+
 =item C<--help>
 
 Display usage information.
@@ -66,19 +72,20 @@ use Finance::HostedTrader::ExpressionParser;
 
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
-my ( $timeframe, $symbols_txt, $debug, $help ) =
-  ( 'day', 'EURUSD', 0, 0 );
+my ( $timeframe, $symbols_txt, $debug, $help, $numItems ) =
+  ( 'day', 'EURUSD', 0, 0, 20 );
 
 GetOptions(
     "timeframe=s"         => \$timeframe,
     "help"               => \$help,
     "debug"               => \$debug,
     "symbol=s"           => \$symbols_txt,
+    "numItems=i"           => \$numItems,
 ) || pod2usage(2);
 pod2usage(1) if ($help);
 
 my $expr = join( ' ', @ARGV );
 my $data = $signal_processor->getSignalData(
-    { symbol => $symbols_txt, tf => $timeframe, expr => $expr, debug => $debug } );
+    { symbol => $symbols_txt, tf => $timeframe, expr => $expr, debug => $debug, numItems => $numItems } );
 
 print Dumper ( \$data );
