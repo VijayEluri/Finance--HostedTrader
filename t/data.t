@@ -3,6 +3,17 @@
 use strict;
 use warnings;
 
+=pod
+Tests for the presence of invalid period data in the dataset.
+
+Invalid records include:
+ - High < Low
+ - High < Close
+ - Low > Close
+ - High < Open
+ - Low > Open
+=cut
+
 use Finance::HostedTrader::Config;
 use Finance::HostedTrader::Datasource;
 use Data::Dumper;
@@ -19,7 +30,7 @@ my $timeframes = $cfg->timeframes->all;
 foreach my $tf (@$timeframes) {
     foreach my $symbol (@$symbols) {
         my $sql = qq |
-SELECT datetime
+SELECT datetime, open, high, low, close
 FROM $symbol\_$tf
 WHERE high < low OR high < close OR low > close OR high < open OR low > open
 |;
@@ -30,5 +41,8 @@ WHERE high < low OR high < close OR low > close OR high < open OR low > open
     $sth->finish() or die($DBI::errstr);
 
     is(scalar(@$data), 0, "Invalid records in $symbol\_$tf");
+    if (scalar(@$data) > 0) {
+        print Dumper(\$data);
+    }
     }
 }
