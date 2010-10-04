@@ -72,7 +72,7 @@ has positions => (
 sub getBalance {
     my ($self) = @_;
 
-    return 10000;
+    return 3155;
 }
 
 =item C<getPosition>
