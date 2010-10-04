@@ -45,6 +45,8 @@ bool from_string(T& t,
 bool g_IsRunning;
 FXCore::ICoreAutPtr g_pCore;
 FXCore::ITradeDeskAutPtr g_pTradeDesk;
+FXCore::ITradingSettingsProviderAutPtr g_pTradingSettings;
+
 const char* g_pcLogin;
 const char* g_pcPassw;
 const char* g_pcAcType;
@@ -55,6 +57,7 @@ bool initCore();
 string convertSymbolFromFXCM(string );
 string convertSymbolToFXCM(string );
 string CmdGetCurrentPrice(string , string );
+string CmdGetBaseUnit(string );
 string CmdOpenMarketOrder(string , string , int );
 string CmdCloseMarketOrder(string , int );
 string CmdGetTrades();
@@ -94,6 +97,7 @@ int DoWinsock(const char* pcAddress, int nPort, const char* pcLogin, const char*
 	g_IsRunning = true;
 	g_pCore = 0;
 	g_pTradeDesk = 0;
+	g_pTradingSettings = 0;
 
 	if (!initCore()) exit(1);
 	g_pTradeDesk = g_pCore->CreateTradeDesk("trader");
@@ -105,6 +109,7 @@ int DoWinsock(const char* pcAddress, int nPort, const char* pcLogin, const char*
 		cout << "Login error: " << e.Description() << endl ;
 		exit(1);
 	}
+	g_pTradingSettings = g_pTradeDesk->TradingSettingsProvider;
 
 	// Begin listening for connections
     cout << "Establishing the listener..." << endl;
@@ -234,9 +239,20 @@ string ProcessCommand(string sCmd) {
 		if (tokens[0].compare("trades") == 0) {
 			sResponse = CmdGetTrades();
 		} else if (tokens[0].compare("ask") == 0) {
+			if (tokens.size() != 2) {
+				throw "Expected 1 argument";
+			}
 			sResponse = CmdGetCurrentPrice(tokens[1].c_str(), "Ask");
 		} else if (tokens[0].compare("bid") == 0) {
+			if (tokens.size() != 2) {
+				throw "Expected 1 argument";
+			}
 			sResponse = CmdGetCurrentPrice(tokens[1].c_str(), "Bid");
+		} else if (tokens[0].compare("baseunit") == 0) {
+			if (tokens.size() != 2) {
+				throw "Expected 1 argument";
+			}
+			sResponse = CmdGetBaseUnit(tokens[1].c_str());
 		} else if (tokens[0].compare("openmarket") == 0) {
 			int i;
 			if (tokens.size() != 4) {
@@ -361,6 +377,17 @@ bool initCore() {
     return true;
 }
 
+BSTR GetAccountID() {
+	FXCore::ITableAutPtr pAcctTable = g_pTradeDesk->FindMainTable("Accounts");
+	long rowcount = pAcctTable->RowCount;
+	if (rowcount == 0) {
+		throw "No rows defined in Accounts table, cannot fetch AccountID and raise an open market order, perhaps this login belongs to a closed account ?";
+	}
+	_variant_t AcctID = pAcctTable->CellValue(1,"AccountID"); //Assumes only one account
+	
+	return AcctID.bstrVal;
+}
+
 
 double GetCurrentPrice(string symbol, string sType) {
 	CheckTradeDeskLogin();
@@ -379,22 +406,28 @@ string CmdGetCurrentPrice(string symbol, string sType) {
 	return rv;
 }
 
+string CmdGetBaseUnit(string symbol) {
+	ostringstream os;
+	string rv = "200 ";
+	CheckTradeDeskLogin();
+	BSTR AcctID = GetAccountID();
+	int baseUnit = g_pTradingSettings->GetBaseUnitSize(convertSymbolToFXCM(symbol).c_str(), AcctID);
+
+	os << baseUnit;
+	rv.append(os.str());
+	return rv;
+}
+
 string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 	string sType;
 	boolean bBuy;
 	double dRate;
 	string rv;
 	_variant_t vOrderID = "", vDealerInt = "";
+	ostringstream os;
 
 	CheckTradeDeskLogin();
-	FXCore::ITableAutPtr pAcctTable = g_pTradeDesk->FindMainTable("Accounts");
-	long rowcount = pAcctTable->RowCount;
-	if (rowcount == 0) {
-		throw "No rows defined in Accounts table, cannot fetch AccountID and raise an open market order, perhaps this login belongs to a closed account ?";
-	}
-	_variant_t AcctID = pAcctTable->CellValue(1,"AccountID"); //Assumes only one account
-
-	ostringstream os;
+	BSTR AcctID = GetAccountID();
 
 	if (direction.compare("long") == 0) {
 		sType = "Ask";
@@ -404,7 +437,7 @@ string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 		bBuy = false;
 	}
 	dRate = GetCurrentPrice(symbol, sType);
-	g_pTradeDesk->CreateFixOrder2(g_pTradeDesk->FIX_OPEN, "", dRate, 0, "", AcctID.bstrVal, convertSymbolToFXCM(symbol).c_str(), bBuy, 
+	g_pTradeDesk->CreateFixOrder2(g_pTradeDesk->FIX_OPEN, "", dRate, 0, "", AcctID, convertSymbolToFXCM(symbol).c_str(), bBuy, 
 				iAmount, "", 0, &vOrderID, &vDealerInt);
 
 	rv = "200 ";// + vOrderID.bstrVal;// + " " + dRate;
