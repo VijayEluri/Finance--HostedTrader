@@ -139,6 +139,19 @@ sub closeMarket {
     return $self->_sendCmd("closemarket $tradeID $amount");
 }
 
+=item C<baseUnit($symbol)>
+
+Returns the base unit at which the symbol trades.
+Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (15000 would be an invalid trade size).
+
+=cut
+
+sub baseUnit {
+    my ($self, $symbol) = @_;
+
+    return $self->_sendCmd("baseunit $symbol");
+}
+
 sub _sendCmd {
     my ($self, $cmd) = @_;
     my $sock = $self->{_sock};

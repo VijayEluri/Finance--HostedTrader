@@ -162,8 +162,9 @@ my $maxLossPts;
     if ( $maxLossPts <= 0 ) {
         die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
     }
-    my $amount = ($maxLoss / $maxLossPts) / 10000;#This bit is specific to FXCM, since they only accept multiples of 10.000
-    $amount = int($amount) * 10000;
+    my $baseUnit = $account->baseUnit($symbol); #This is the minimum amount that can be trader for the symbol
+    my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
+    $amount = int($amount) * $baseUnit;
     return ($amount, $value, $stopLoss);
 }
 

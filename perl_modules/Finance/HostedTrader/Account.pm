@@ -163,6 +163,17 @@ sub getBid {
     return $s->getBid(@_);
 }
 
+=item C<baseUnit>
+
+
+=cut
+sub getBaseUnit {
+    my $self = shift;
+    my $s = FXCMServer->new();
+
+    return $s->baseUnit(@_);
+}
+
 
 sub _empty_hash {
     return {};
