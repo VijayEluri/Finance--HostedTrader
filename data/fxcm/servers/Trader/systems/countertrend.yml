@@ -1,0 +1,27 @@
+name: countertrend
+signals:
+  enter:
+    long: 
+      signal: crossoverup(close, min(ema(close,200)+5*atr(14), 50))
+      initialStop: previous(min(low,120),1)
+      timeframe: 30min
+      maxLoadedItems: 2000
+    short:
+      signal: crossoverdown(close, max(ema(close,200)-5*atr(14), 50))
+      initialStop: previous(max(high,120),1)
+      timeframe: 30min
+      maxLoadedItems: 2000
+  exit:
+    long:
+      signal: low < previous(min(low,120),1)
+      timeframe: 30min
+      maxLoadedItems: 2500
+    short:
+      signal: high > previous(max(high,120),1)
+      timeframe: 30min
+      maxLoadedItems: 2500
+symbols:
+  short:
+    - EURUSD
+  long:
+maxExposure: 5
