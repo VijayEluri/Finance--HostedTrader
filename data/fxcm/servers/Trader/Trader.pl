@@ -5,12 +5,24 @@ use warnings;
 $| = 1;
 #use Proc::Daemon;
 #Proc::Daemon::Init;
-use Config::Any;
+use Getopt::Long;
 use Data::Dumper;
 use Date::Manip;
+use Pod::Usage;
+
+
 use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Account;
-use Finance::HostedTrader::Trade;
+use Systems;
+
+my ($verbose, $help);
+
+my $result = GetOptions(
+    "verbose",  \$verbose,
+    "help",     \$help,
+) || pod2usage(2);
+
+pod2usage(1) if ($help);
 
 logger("STARTUP");
 
@@ -24,11 +36,18 @@ my $account = Finance::HostedTrader::Account->new(
                 password => $password,
               );
 
-my $systems = loadSystems('system.yml') || die('Could not load systems from file "system.yml"');
+my @systems =   (   
+                    Systems::loadSystem('trendfollow'),
+                    Systems::loadSystem('countertrend'),
+                );
+
+foreach my $system (@systems) {
+    logger("Loaded system " . $system->{name});
+}
 
 my $debug = 0;
 while (1) {
-    foreach my $system (@$systems) {
+    foreach my $system (@systems) {
         eval {
             checkSystem($account, $system, 'long');
             1;
@@ -55,6 +74,7 @@ sub checkSystem {
 
         if (!$pos_size) {
             my $signal = $system->{signals}->{enter}->{$direction};
+            logger("Checking $system->{name} $symbol $direction") if ($verbose);
             my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
             if ($result) {
                 my ($amount, $value, $stopLoss) = getTradeSize($account, $system, $signal, $symbol, $direction);
@@ -168,19 +188,6 @@ my $maxLossPts;
     return ($amount, $value, $stopLoss);
 }
 
-sub loadSystems {
-    my $file = shift;
-    my $system = Config::Any->load_files(
-        {
-            files => [$file],
-            use_ext => 1,
-            flatten_to_hash => 1,
-        }
-    );
-
-    return $system->{$file} if defined($system);
-}
-
 sub logger {
     my $msg = shift;
 
@@ -197,7 +204,7 @@ use MIME::Lite;
     my $msg = MIME::Lite->new(
         From     => 'fxhistor@fxhistoricaldata.com',
         To       => 'joaocosta@zonalivre.org',
-#        Cc       => 'elad.sharf@gmail.com',
+        Cc       => 'elad.sharf@gmail.com',
         Subject  => 'Trading Robot',
         Data     => $content
     );
