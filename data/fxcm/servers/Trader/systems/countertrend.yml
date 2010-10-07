@@ -23,5 +23,6 @@ signals:
 symbols:
   short:
     - EURUSD
+      EURGBP
   long:
 maxExposure: 5

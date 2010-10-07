@@ -20,7 +20,4 @@ signals:
       signal: high > previous(max(high,240),1)
       timeframe: 15min
       maxLoadedItems: 2500
-symbols:
-  short:
-  long:
 maxExposure: 3

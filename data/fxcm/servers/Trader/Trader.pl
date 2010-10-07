@@ -37,8 +37,8 @@ my $account = Finance::HostedTrader::Account->new(
               );
 
 my @systems =   (   
-                    Systems::loadSystem('trendfollow'),
-                    Systems::loadSystem('countertrend'),
+                    Systems->new( name => 'trendfollow' ),
+                    Systems->new( name => 'countertrend' ),
                 );
 
 foreach my $system (@systems) {
@@ -49,14 +49,14 @@ my $debug = 0;
 while (1) {
     foreach my $system (@systems) {
         eval {
-            checkSystem($account, $system, 'long');
+            checkSystem($account, $system->data, 'long');
             1;
         } or do {
             logger($@);
         };
 
         eval {
-            checkSystem($account, $system, 'short');
+            checkSystem($account, $system->data, 'short');
             1;
         } or do {
             logger($@);
