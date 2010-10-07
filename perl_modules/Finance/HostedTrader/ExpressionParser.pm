@@ -167,8 +167,8 @@ sub getIndicatorData {
     my $displayEndDate   = $args->{endPeriod} || '9999-12-31';
     my $displayStartDate = $args->{startPeriod} || '0001-01-31';
     my $itemCount = $args->{numItems} || $maxLoadedItems;
-    my $expr      = $args->{fields}          || die("No fields set");
-    my $symbol    = $args->{symbol}          || die("No symbol set");
+    my $expr      = $args->{fields}          || die("No fields set for indicator");
+    my $symbol    = $args->{symbol}          || die("No symbol set for indicator");
 
     my ( $result, $select_fields );
     my $cache = $self->{_cache}->{$expr};
@@ -282,7 +282,7 @@ my ($self, $args) = @_;
     my $tf = $args->{tf} || 'day';
     $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
-    my $expr   = $args->{expr}   || die("No expression set");
+    my $expr   = $args->{expr}   || die("No expression set for signal");
     my $symbol = $args->{symbol} || die("No symbol set");
     my $maxLoadedItems = $args->{maxLoadedItems};
     my $startPeriod = $args->{startPeriod} || '0001-01-01 00:00:00';
