@@ -20,9 +20,4 @@ signals:
       signal: high > previous(max(high,120),1)
       timeframe: 30min
       maxLoadedItems: 2500
-symbols:
-  short:
-    - EURUSD
-      EURGBP
-  long:
 maxExposure: 5
