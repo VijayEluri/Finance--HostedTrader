@@ -46,12 +46,12 @@ sub updateSymbols {
     $symbols->{long} = \@symbols_to_keep_long;
     use Data::Dumper;
     #Now add to the trade list symbols triggered by the system as trade opportunities
-    foreach my $item ( @$newSymbols ) {
-        my ($symbol, $tradeDirection) = @$item;
-
+    foreach my $tradeDirection (qw /long short/ ) {
+    foreach my $symbol ( @{$newSymbols->{$tradeDirection}} ) {
         #Don't add a symbol if it already exists in the list (avoid duplicates)
         next if (grep {/$symbol/} @{ $symbols->{$tradeDirection} });
         push @{ $symbols->{$tradeDirection} }, $symbol;
+    }
     }
 
     my $yml = YAML::Tiny->new;
