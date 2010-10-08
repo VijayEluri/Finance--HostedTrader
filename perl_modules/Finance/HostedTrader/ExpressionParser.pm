@@ -115,7 +115,7 @@ term:           number
               | function
               | '(' statement ')'        {"($item[2])"}
 
-number:         /\d+/
+number:         /-?\d+/
 
 field:			"datetime" | "open" | "high" | "low" | "close"
 
