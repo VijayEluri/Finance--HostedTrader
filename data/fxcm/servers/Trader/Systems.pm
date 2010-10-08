@@ -4,10 +4,12 @@ use strict;
 use warnings;
 
 use FXCMServer;
+use Finance::HostedTrader::ExpressionParser;
 
 
 use Moose;
 use Config::Any;
+use Date::Manip;
 use YAML::Tiny;
 
 has 'name' => (
@@ -20,6 +22,7 @@ sub BUILD {
     my $self = shift;
 
     $self-> _loadSystem();
+    $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
     $self->{_system}->{symbols} = $self->_loadSymbols();
 }
 
@@ -77,6 +80,48 @@ sub _loadSymbols {
     die("invalid name in symbol file $file") if ($self->name ne $yaml->[0]->{name});
 
     return $yaml->[0]->{symbols};
+}
+
+sub checkEntrySignal {
+    my $self = shift;
+
+    return $self->_checkSignalWithAction('enter', @_);
+}
+
+sub checkExitSignal {
+    my $self = shift;
+
+    return $self->_checkSignalWithAction('exit', @_);
+}
+
+sub _checkSignalWithAction {
+    my ($self, $action, $symbol, $tradeDirection) = @_;
+
+    my $signal_definition = $self->{_system}->{signals}->{$action}->{$tradeDirection};
+
+    return $self->_checkSignal($signal_definition->{signal}, $symbol, $tradeDirection, $signal_definition->{timeframe}, $signal_definition->{maxLoadedItems});
+}
+
+sub _checkSignal {
+    my ($self, $expr, $symbol, $direction, $timeframe, $maxLoadedItems) = @_;
+#    logger("Signal $expr");
+#    Hardcoded -1hour, means check signals ocurring in the last hour
+#    would be better to use the date of the last signal instead
+    my $startPeriod = UnixDate(DateCalc('now', '- 1hour'), '%Y-%m-%d %H:%M:%S');
+    my $data = $self->{_signal_processor}->getSignalData(
+        {
+            'expr'            => $expr,
+            'symbol'          => $symbol,
+            'tf'              => $timeframe,
+            'maxLoadedItems'  => $maxLoadedItems,
+            'startPeriod'     => $startPeriod,
+            'numItems'        => 1,
+            'debug'           => 0,
+        }
+    );
+
+    return $data->[0] if defined($data);
+    return undef;
 }
 
 sub _loadSystem {

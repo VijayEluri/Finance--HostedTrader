@@ -49,14 +49,14 @@ my $debug = 0;
 while (1) {
     foreach my $system (@systems) {
         eval {
-            checkSystem($account, $system->data, 'long');
+            checkSystem($account, $system, 'long');
             1;
         } or do {
             logger($@);
         };
 
         eval {
-            checkSystem($account, $system->data, 'short');
+            checkSystem($account, $system, 'short');
             1;
         } or do {
             logger($@);
@@ -67,17 +67,19 @@ while (1) {
 
 sub checkSystem {
     my ($account, $system, $direction) = @_;
-    my $symbols = $system->{symbols}->{$direction};
+
+    my $system_definition = $system->data;
+    my $symbols = $system_definition->{symbols}->{$direction};
 
     foreach my $symbol ( @$symbols ) {
         my $pos_size = $account->getPosition($symbol)->size;
 
         if (!$pos_size) {
-            my $signal = $system->{signals}->{enter}->{$direction};
-            logger("Checking $system->{name} $symbol $direction") if ($verbose);
-            my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
+            my $signal = $system_definition->{signals}->{enter}->{$direction};
+            logger("Checking $system_definition->{name} $symbol $direction") if ($verbose);
+            my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
-                my ($amount, $value, $stopLoss) = getTradeSize($account, $system, $signal, $symbol, $direction);
+                my ($amount, $value, $stopLoss) = getTradeSize($account, $system_definition, $signal, $symbol, $direction);
                 logger("Adding position for $symbol $direction ($amount)");
                 logger(Dumper(\$result));
 
@@ -102,8 +104,7 @@ Stop Loss: $stopLoss
         }
 
         if ($pos_size) {
-            my $signal = $system->{signals}->{exit}->{$direction};
-            my $result = checkSignal($signal->{signal}, $symbol, $direction, $signal->{timeframe}, $signal->{maxLoadedItems});
+            my $result = $system->checkExitSignal($symbol, $direction);
             if ($result) {
                 logger("Closing position for $symbol $direction ( $pos_size )");
                 $account->closeTrades($symbol);
@@ -122,28 +123,6 @@ Current Value: $value
             }
         }
     }
-}
-
-sub checkSignal {
-    my ($expr, $symbol, $direction, $timeframe, $maxLoadedItems) = @_;
-#    logger("Signal $expr");
-#    Hardcoded -1hour, means check signals ocurring in the last hour
-#    would be better to use the date of the last signal instead
-    my $startPeriod = UnixDate(DateCalc('now', '- 1hour'), '%Y-%m-%d %H:%M:%S');
-    my $data = $signal_processor->getSignalData(
-        {
-            'expr'            => $expr,
-            'symbol'          => $symbol,
-            'tf'              => $timeframe,
-            'maxLoadedItems'  => $maxLoadedItems,
-            'startPeriod'     => $startPeriod,
-            'numItems'        => 1,
-            'debug'           => $debug,
-        }
-    );
-
-    return $data->[0] if defined($data);
-    return undef;
 }
 
 sub getTradeSize {
