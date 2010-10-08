@@ -102,7 +102,6 @@ sub _checkSignalWithAction {
         {
             'expr' => $signal_definition->{signal}, 
             'symbol' => $symbol,
-            'direction' => $tradeDirection,
             'timeframe' => $signal_definition->{timeframe},
             'maxLoadedItems' => $signal_definition->{maxLoadedItems},
             'period' => '1hour',
