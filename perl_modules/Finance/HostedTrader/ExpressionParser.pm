@@ -1,6 +1,7 @@
 package Finance::HostedTrader::ExpressionParser;
 use strict;
 use warnings;
+use Date::Manip;
 my ( %INDICATORS, %VALUES );
 
 use Parse::RecDescent;
@@ -330,4 +331,39 @@ return $sql;
 
 }
 
+
+#Check wether a given signal occurred in a given period of time
+sub checkSignal {
+    my ( $self, $args ) = @_;
+
+    my @good_args = qw( expr symbol direction timeframe maxLoadedItems debug period );
+
+    foreach my $key (keys %$args) {
+        die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
+    }
+
+    my $expr = $args->{expr} || die("expr argument missing in checkSignal");
+    my $symbol = $args->{symbol} || die("symbol argument missing in checkSignal");
+    my $direction = $args->{direction} || die("direction argument missing in checkSignal");
+    my $timeframe = $args->{timeframe} || die("timeframe argument missing in checkSignal");
+    my $maxLoadedItems = $args->{maxLoadedItems} || -1;
+    my $debug = $args->{debug} || 0;
+    my $period = $args->{period} || '1hour';
+
+    my $startPeriod = UnixDate(DateCalc('now', '- '.$period), '%Y-%m-%d %H:%M:%S');
+    my $data = $self->getSignalData(
+        {
+            'expr'            => $expr,
+            'symbol'          => $symbol,
+            'tf'              => $timeframe,
+            'maxLoadedItems'  => $maxLoadedItems,
+            'startPeriod'     => $startPeriod,
+            'numItems'        => 1,
+            'debug'           => 0,
+        }
+    );
+
+    return $data->[0] if defined($data);
+    return undef;
+}
 1;

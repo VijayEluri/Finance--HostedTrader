@@ -9,7 +9,6 @@ use Finance::HostedTrader::ExpressionParser;
 
 use Moose;
 use Config::Any;
-use Date::Manip;
 use YAML::Tiny;
 
 has 'name' => (
@@ -99,29 +98,16 @@ sub _checkSignalWithAction {
 
     my $signal_definition = $self->{_system}->{signals}->{$action}->{$tradeDirection};
 
-    return $self->_checkSignal($signal_definition->{signal}, $symbol, $tradeDirection, $signal_definition->{timeframe}, $signal_definition->{maxLoadedItems});
-}
-
-sub _checkSignal {
-    my ($self, $expr, $symbol, $direction, $timeframe, $maxLoadedItems) = @_;
-#    logger("Signal $expr");
-#    Hardcoded -1hour, means check signals ocurring in the last hour
-#    would be better to use the date of the last signal instead
-    my $startPeriod = UnixDate(DateCalc('now', '- 1hour'), '%Y-%m-%d %H:%M:%S');
-    my $data = $self->{_signal_processor}->getSignalData(
+    return $self->{_signal_processor}->checkSignal(
         {
-            'expr'            => $expr,
-            'symbol'          => $symbol,
-            'tf'              => $timeframe,
-            'maxLoadedItems'  => $maxLoadedItems,
-            'startPeriod'     => $startPeriod,
-            'numItems'        => 1,
-            'debug'           => 0,
+            'expr' => $signal_definition->{signal}, 
+            'symbol' => $symbol,
+            'direction' => $tradeDirection,
+            'timeframe' => $signal_definition->{timeframe},
+            'maxLoadedItems' => $signal_definition->{maxLoadedItems},
+            'period' => '1hour',
         }
     );
-
-    return $data->[0] if defined($data);
-    return undef;
 }
 
 sub _loadSystem {
