@@ -359,7 +359,7 @@ sub checkSignal {
             'maxLoadedItems'  => $maxLoadedItems,
             'startPeriod'     => $startPeriod,
             'numItems'        => 1,
-            'debug'           => 0,
+            'debug'           => $debug,
         }
     );
 
