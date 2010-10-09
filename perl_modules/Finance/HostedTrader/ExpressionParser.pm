@@ -337,7 +337,7 @@ return $sql;
 sub checkSignal {
     my ( $self, $args ) = @_;
 
-    my @good_args = qw( expr symbol timeframe maxLoadedItems debug period );
+    my @good_args = qw( expr symbol tf maxLoadedItems debug period );
 
     foreach my $key (keys %$args) {
         die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
@@ -345,7 +345,7 @@ sub checkSignal {
 
     my $expr = $args->{expr} || die("expr argument missing in checkSignal");
     my $symbol = $args->{symbol} || die("symbol argument missing in checkSignal");
-    my $timeframe = $args->{timeframe} || die("timeframe argument missing in checkSignal");
+    my $timeframe = $args->{tf} || die("timeframe argument missing in checkSignal");
     my $maxLoadedItems = $args->{maxLoadedItems} || -1;
     my $debug = $args->{debug} || 0;
     my $period = $args->{period} || '1hour';

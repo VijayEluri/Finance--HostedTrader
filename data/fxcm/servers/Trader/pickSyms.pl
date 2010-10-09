@@ -33,7 +33,7 @@ sub getSymbolsTrendFollow {
         if ($processor->checkSignal( {
             'expr' => 'trend(close,21) > 1',
             'symbol' => $symbol,
-            'timeframe' => 'week',
+            'tf' => 'week',
             'maxLoadedItems' => 50,
             'period' => '8days',
             'debug' => 0,
@@ -42,7 +42,7 @@ sub getSymbolsTrendFollow {
         } elsif ($processor->checkSignal( {
             'expr' => 'trend(close,21) < -1',
             'symbol' => $symbol,
-            'timeframe' => 'week',
+            'tf' => 'week',
             'maxLoadedItems' => 50,
             'period' => '8days',
             'debug' => 0,
