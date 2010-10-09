@@ -46,8 +46,15 @@ foreach my $system (@systems) {
 }
 
 my $debug = 0;
+my $symbolsLastUpdated = 0;
 while (1) {
     foreach my $system (@systems) {
+# Applies system filters and updates list of symbols traded by this system
+# Updates symbol list every 15 minutes
+        if ( time() - $symbolsLastUpdated > 900 ) {
+            $system->updateSymbols();
+            $symbolsLastUpdated = time();
+        }
         eval {
             checkSystem($account, $system, 'long');
             1;
