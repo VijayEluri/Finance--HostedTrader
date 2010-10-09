@@ -11,11 +11,46 @@ use Finance::HostedTrader::Config;
 use Finance::HostedTrader::ExpressionParser;
 
 
-my $newSymbols = getSymbolsTrendFollow();
-$newSymbols = filterTopX($newSymbols, 5);
+my $trendFollowingFilter = {
+    long => {
+        signal => 'trend(close,21) > 1'
+    },
+    short => {
+        signal => 'trend(close,21) < -1'
+    },
+    topFilterIndicator => 'abs(trend(close,21))',
+    args => {
+        tf => 'week',
+        maxLoadedItems => 41,
+        period => '8days',
+    }
+};
 
+my $counterTrendFilter = {
+    long => {
+        signal => 'ema(close,50) > ema(close,200) AND rsi(close,14) < 35'
+    },
+    short => {
+        signal => 'ema(close,50) < ema(close,200) AND rsi(close,14) > 65'
+    },
+    topFilterIndicator => 'abs(1 - (ema(close,50) / ema(close,200)))',
+    args => {
+        tf => 'day',
+        maxLoadedItems => 400,
+        period => '3days',
+    }
+};
+
+
+my $newSymbols = getSymbolsSignalFilter($trendFollowingFilter);
 my $system = Systems->new( name => 'trendfollow' );
 $system->updateSymbols($newSymbols);
+
+
+$newSymbols = getSymbolsSignalFilter($counterTrendFilter);
+$system = Systems->new( name => 'countertrend' );
+$system->updateSymbols($newSymbols);
+
 
 
 #$system = Systems->new( name => 'countertrend');
@@ -23,7 +58,8 @@ $system->updateSymbols($newSymbols);
 
 
 #Return list of symbols to add to the system
-sub getSymbolsTrendFollow {
+sub getSymbolsSignalFilter {
+    my $filter = shift;
     my $symbols = getAllSymbols();
     my $processor   = Finance::HostedTrader::ExpressionParser->new();
 
@@ -31,30 +67,32 @@ sub getSymbolsTrendFollow {
 
     foreach my $symbol (@$symbols) {
         if ($processor->checkSignal( {
-            'expr' => 'trend(close,21) > 1',
+            'expr' => $filter->{long}->{signal},
             'symbol' => $symbol,
-            'tf' => 'week',
-            'maxLoadedItems' => 50,
-            'period' => '8days',
-            'debug' => 0,
+            'tf' => $filter->{args}->{tf},
+            'maxLoadedItems' => $filter->{args}->{maxLoadedItems},
+            'period' => $filter->{args}->{period},
+            'debug' => $filter->{args}->{debug},
         })) {
             push @{ $rv->{long} }, $symbol;
         } elsif ($processor->checkSignal( {
-            'expr' => 'trend(close,21) < -1',
+            'expr' => $filter->{short}->{signal},
             'symbol' => $symbol,
-            'tf' => 'week',
-            'maxLoadedItems' => 50,
-            'period' => '8days',
-            'debug' => 0,
+            'tf' => $filter->{args}->{tf},
+            'maxLoadedItems' => $filter->{args}->{maxLoadedItems},
+            'period' => $filter->{args}->{period},
+            'debug' => $filter->{args}->{debug},
         })) {
             push @{ $rv->{short} }, $symbol;
         }
     }
 
-    return $rv;
+    return $rv if (!defined($filter->{topFilterIndicator}));
+    return filterTopX($filter,$rv, 5);
 }
 
 sub filterTopX {
+    my $filter = shift;
     my $existing = shift;
     my $number_to_keep = shift;
     my @results;
@@ -64,12 +102,12 @@ sub filterTopX {
         my $direction = shift;
         foreach my $symbol (@{ $existing->{$direction} }) {
             my $data = $processor->getIndicatorData( {
-                'fields'          => "datetime,abs(trend(close,21))",
+                'fields'        => "datetime,".$filter->{topFilterIndicator},
                 'symbol'        => $symbol,
-                'tf'            => 'week',
-                'maxLoadedItems'=> 41,
+                'tf'            => $filter->{args}->{tf},
+                'maxLoadedItems'=> $filter->{args}->{maxLoadedItems},
                 'numItems'      => 1,
-                'debug'         => 0,
+                'debug'         => $filter->{args}->{debug},
             } );
             $data = $data->[0];
             push @results, [ $symbol, $direction, $data->[1] ];
@@ -80,7 +118,7 @@ sub filterTopX {
     &$calculateIndicator('short');
 
     my @sorted = sort { $b->[2] <=> $a->[2] } @results ;
-    splice @sorted, $number_to_keep;
+    splice @sorted, $number_to_keep if ($number_to_keep < scalar(@sorted));
 
     my $rv = { long => [], short => [] };
     foreach my $item (@sorted) {
@@ -88,9 +126,6 @@ sub filterTopX {
         push @{ $rv->{short} }, $item->[0] if ($item->[1] eq 'short');
     }
     return $rv;
-}
-
-sub getSymbolsCounterTrend {
 }
 
 #Return list of all available symbols
