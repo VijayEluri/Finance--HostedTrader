@@ -5,6 +5,7 @@ use warnings;
 
 use FXCMServer;
 use Finance::HostedTrader::ExpressionParser;
+use Finance::HostedTrader::Config;
 
 
 use Moose;
@@ -33,8 +34,18 @@ sub data {
 
 sub updateSymbols {
     my $self = shift;
-    my $newSymbols = shift || die("No new symbols specified");
 
+    sub _getCurrentTrades {
+#Call FXCMServer from limited scope
+#so that we release the TCP connection
+#to the single threaded server
+#as soon as possible
+# TODO this code should be agnostic to FXCMServer, instead should be using Finance::HostedTrader::Account
+    my $s = FXCMServer->new();
+        return $s->getTrades();
+    }
+
+    my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filter});
     my $trades = _getCurrentTrades();
     my $symbols = $self->_loadSymbols();#$self->{_system}->{symbols};
     #List of symbols for which there are open short positions
@@ -62,6 +73,86 @@ sub updateSymbols {
     my $file = $self->_getSymbolFileName();
     $yml->write($file) || die("Failed to write symbols file $file. $!");
     $self->{_system}->{symbols} = $symbols;
+}
+
+#Return list of symbols to add to the system
+sub getSymbolsSignalFilter {
+    my $self = shift;
+    my $filter = shift;
+
+#Return list of all available symbols
+    sub getAllSymbols {
+    my $cfg         = Finance::HostedTrader::Config->new();
+
+    return $cfg->symbols->all;
+    }
+
+    my $symbols = getAllSymbols();
+    my $processor = $self->{_signal_processor};
+
+    my $rv = { long => [], short => [] };
+
+    foreach my $symbol (@$symbols) {
+        if ($processor->checkSignal( {
+            'expr' => $filter->{longSignal},
+            'symbol' => $symbol,
+            'tf' => $filter->{args}->{tf},
+            'maxLoadedItems' => $filter->{args}->{maxLoadedItems},
+            'period' => $filter->{args}->{period},
+            'debug' => $filter->{args}->{debug},
+        })) {
+            push @{ $rv->{long} }, $symbol;
+        } elsif ($processor->checkSignal( {
+            'expr' => $filter->{shortSignal},
+            'symbol' => $symbol,
+            'tf' => $filter->{args}->{tf},
+            'maxLoadedItems' => $filter->{args}->{maxLoadedItems},
+            'period' => $filter->{args}->{period},
+            'debug' => $filter->{args}->{debug},
+        })) {
+            push @{ $rv->{short} }, $symbol;
+        }
+    }
+
+    return $rv if (!defined($filter->{topFilterIndicator}));
+    return filterTopX($filter,$rv, $filter->{tradeSymbolLimit});
+}
+
+sub filterTopX {
+    my $filter = shift;
+    my $existing = shift;
+    my $number_to_keep = shift;
+    my @results;
+    my $processor   = Finance::HostedTrader::ExpressionParser->new();
+
+    my $calculateIndicator = sub {
+        my $direction = shift;
+        foreach my $symbol (@{ $existing->{$direction} }) {
+            my $data = $processor->getIndicatorData( {
+                'fields'        => "datetime,".$filter->{topFilterIndicator},
+                'symbol'        => $symbol,
+                'tf'            => $filter->{args}->{tf},
+                'maxLoadedItems'=> $filter->{args}->{maxLoadedItems},
+                'numItems'      => 1,
+                'debug'         => $filter->{args}->{debug},
+            } );
+            $data = $data->[0];
+            push @results, [ $symbol, $direction, $data->[1] ];
+        }
+    };
+
+    &$calculateIndicator('long');
+    &$calculateIndicator('short');
+
+    my @sorted = sort { $b->[2] <=> $a->[2] } @results ;
+    splice @sorted, $number_to_keep if ($number_to_keep < scalar(@sorted));
+
+    my $rv = { long => [], short => [] };
+    foreach my $item (@sorted) {
+        push @{ $rv->{long} }, $item->[0] if ($item->[1] eq 'long');
+        push @{ $rv->{short} }, $item->[0] if ($item->[1] eq 'short');
+    }
+    return $rv;
 }
 
 sub _getSymbolFileName {
@@ -125,17 +216,6 @@ sub _loadSystem {
     die("failed to load system from $file. $!") unless defined($system);
     die("invalid name in symbol file $file") if ($self->name ne $system->{$file}->{name});
     $self->{_system} = $system->{$file};
-}
-
-sub _getCurrentTrades {
-#Call FXCMServer from limited scope
-#so that we release the TCP connection
-#to the single threaded server
-#as soon as possible
-# TODO this code should be agnostic to FXCMServer, instead should be using Finance::HostedTrader::Account
-my $s = FXCMServer->new();
-
-return $s->getTrades();
 }
 
 sub getTradeSize {

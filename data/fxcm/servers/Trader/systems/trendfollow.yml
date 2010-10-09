@@ -1,4 +1,13 @@
 name: trendfollow
+filter:
+  longSignal: trend(close,21) > 1
+  shortSignal: trend(close,21) < -1
+  topFilterIndicator: abs(trend(close,21))
+  tradeSymbolLimit: 5
+  args:
+    period: 9days
+    tf: week
+    maxLoadedItems: 41
 signals:
   enter:
     long: 
