@@ -26,6 +26,7 @@ sub BUILD {
 }
 
 sub data {
+    die("don't think this is being called anywhere");
     my $self = shift;
     return $self->{_system};
 }
@@ -135,6 +136,55 @@ sub _getCurrentTrades {
 my $s = FXCMServer->new();
 
 return $s->getTrades();
+}
+
+sub getTradeSize {
+my $self = shift;
+my $account = shift;
+my $symbol = shift;
+my $direction = shift;
+
+my $value;
+my $maxLossPts;
+my $system = $self->{_system};
+
+    my $signal = $system->{signals}->{enter}->{$direction};
+    my $maxLoss   = $account->getBalance * $system->{maxExposure} / 100;
+    my $stopLoss = $self->{_signal_processor}->getIndicatorData( {
+                symbol  => $symbol,
+                tf      => $signal->{timeframe},
+                fields  => 'datetime, ' . $signal->{initialStop},
+                maxLoadedItems => $signal->{maxLoadedItems},
+                numItems => 1,
+                debug => 0,
+    } );
+    $stopLoss = $stopLoss->[0]->[1];
+    my $base = uc(substr($symbol, -3));
+    if ($base ne "GBP") {
+        $maxLoss *= $account->getAsk("GBP$base");
+    }
+
+    if ($direction eq "long") {
+        $value = $account->getAsk($symbol);
+        $maxLossPts = $value - $stopLoss;
+    } else {
+        $value = $account->getBid($symbol);
+        $maxLossPts = $stopLoss - $value;
+    }
+
+    if ( $maxLossPts <= 0 ) {
+        die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
+    }
+    my $baseUnit = $account->baseUnit($symbol); #This is the minimum amount that can be trader for the symbol
+    my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
+    $amount = int($amount) * $baseUnit;
+    return ($amount, $value, $stopLoss);
+}
+
+sub symbols {
+    my ($self, $direction) = @_;
+
+    return $self->{_system}->{symbols}->{$direction};
 }
 
 

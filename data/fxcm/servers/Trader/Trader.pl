@@ -68,18 +68,16 @@ while (1) {
 sub checkSystem {
     my ($account, $system, $direction) = @_;
 
-    my $system_definition = $system->data;
-    my $symbols = $system_definition->{symbols}->{$direction};
+    my $symbols = $system->symbols($direction);
 
     foreach my $symbol ( @$symbols ) {
         my $pos_size = $account->getPosition($symbol)->size;
 
         if (!$pos_size) {
-            my $signal = $system_definition->{signals}->{enter}->{$direction};
-            logger("Checking $system_definition->{name} $symbol $direction") if ($verbose);
+            logger("Checking ".$system->name." $symbol $direction") if ($verbose);
             my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
-                my ($amount, $value, $stopLoss) = getTradeSize($account, $system_definition, $signal, $symbol, $direction);
+                my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction);
                 logger("Adding position for $symbol $direction ($amount)");
                 logger(Dumper(\$result));
 
@@ -123,48 +121,6 @@ Current Value: $value
             }
         }
     }
-}
-
-sub getTradeSize {
-my $account = shift;
-my $system = shift;
-my $signal = shift;
-my $symbol = shift;
-my $direction = shift;
-
-my $value;
-my $maxLossPts;
-
-    my $maxLoss   = $account->getBalance * $system->{maxExposure} / 100;
-    my $stopLoss = $signal_processor->getIndicatorData( {
-                symbol  => $symbol,
-                tf      => $signal->{timeframe},
-                fields  => 'datetime, ' . $signal->{initialStop},
-                maxLoadedItems => $signal->{maxLoadedItems},
-                numItems => 1,
-                debug => 0,
-    } );
-    $stopLoss = $stopLoss->[0]->[1];
-    my $base = uc(substr($symbol, -3));
-    if ($base ne "GBP") {
-        $maxLoss *= $account->getAsk("GBP$base");
-    }
-
-    if ($direction eq "long") {
-        $value = $account->getAsk($symbol);
-        $maxLossPts = $value - $stopLoss;
-    } else {
-        $value = $account->getBid($symbol);
-        $maxLossPts = $stopLoss - $value;
-    }
-
-    if ( $maxLossPts <= 0 ) {
-        die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
-    }
-    my $baseUnit = $account->baseUnit($symbol); #This is the minimum amount that can be trader for the symbol
-    my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
-    $amount = int($amount) * $baseUnit;
-    return ($amount, $value, $stopLoss);
 }
 
 sub logger {
