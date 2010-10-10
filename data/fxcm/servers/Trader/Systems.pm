@@ -27,7 +27,6 @@ sub BUILD {
 }
 
 sub data {
-    die("don't think this is being called anywhere");
     my $self = shift;
     return $self->{_system};
 }
