@@ -121,11 +121,12 @@ sub openMarket {
 
 =cut
 sub closeTrades {
-    my ($self, $symbol) = @_;
+    my ($self, $symbol, $direction) = @_;
 
     my $position = $self->getPosition($symbol);
     my $s = FXCMServer->new();
     foreach my $trade (@{ $position->trades }) {
+        next if ($trade->direction ne $direction);
         $s->closeMarket($trade->id, $trade->size);
     }
 }
@@ -172,6 +173,15 @@ sub getBaseUnit {
     my $s = FXCMServer->new();
 
     return $s->baseUnit(@_);
+}
+
+sub _getCurrentTrades {
+#Call FXCMServer from limited scope
+#so that we release the TCP connection
+#to the single threaded server
+#as soon as possible
+my $s = FXCMServer->new();
+    return $s->getTrades();
 }
 
 

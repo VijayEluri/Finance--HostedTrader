@@ -112,7 +112,7 @@ Stop Loss: $stopLoss
             my $result = $system->checkExitSignal($symbol, $direction);
             if ($result) {
                 logger("Closing position for $symbol $direction ( $pos_size )");
-                $account->closeTrades($symbol);
+                $account->closeTrades($symbol, $direction);
                 my $value;
                 if ($direction eq "long") {
                     $value = $account->getAsk($symbol);
