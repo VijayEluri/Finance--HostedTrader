@@ -3,9 +3,9 @@ filter:
   longSignal: ema(close,50) > ema(close,200) AND rsi(close,14) < 35
   shortSignal: ema(close,50) < ema(close,200) AND rsi(close,14) > 65
   topFilterIndicator: abs(1 - (ema(close,50) / ema(close,200)))
-  tradeSymbolLimit: 5
+  tradeSymbolLimit: 4
   args:
-    period: 4days
+    period: 6days
     tf: day
     maxLoadedItems: 400
 signals:
