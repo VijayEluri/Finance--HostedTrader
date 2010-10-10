@@ -24,11 +24,18 @@ sub BUILD {
     $self-> _loadSystem();
     $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
     $self->{_system}->{symbols} = $self->_loadSymbols();
+    $self->{_symbolsLastUpdated} = 0;
 }
 
 sub data {
     my $self = shift;
     return $self->{_system};
+}
+
+sub symbolsLastUpdated {
+    my $self = shift;
+
+    return $self->{_symbolsLastUpdated};
 }
 
 sub updateSymbols {
@@ -57,7 +64,7 @@ sub updateSymbols {
     #not be closed by the system
     $symbols->{short} = \@symbols_to_keep_short;
     $symbols->{long} = \@symbols_to_keep_long;
-    use Data::Dumper;
+
     #Now add to the trade list symbols triggered by the system as trade opportunities
     foreach my $tradeDirection (qw /long short/ ) {
     foreach my $symbol ( @{$newSymbols->{$tradeDirection}} ) {
@@ -72,6 +79,7 @@ sub updateSymbols {
     my $file = $self->_getSymbolFileName();
     $yml->write($file) || die("Failed to write symbols file $file. $!");
     $self->{_system}->{symbols} = $symbols;
+    $self->{_symbolsLastUpdated} = time();
 }
 
 #Return list of symbols to add to the system

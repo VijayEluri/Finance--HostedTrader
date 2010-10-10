@@ -49,13 +49,15 @@ my $debug = 0;
 my $symbolsLastUpdated = 0;
 while (1) {
     foreach my $system (@systems) {
+        logger("Analyze " . $system->name) if ($verbose);
 # Applies system filters and updates list of symbols traded by this system
 # Updates symbol list every 15 minutes
-        if ( time() - $symbolsLastUpdated > 900 ) {
+        if ( time() - $system->symbolsLastUpdated() > 900 ) {
+            logger("Update symbol list") if ($verbose);
             $system->updateSymbols();
-            $symbolsLastUpdated = time();
         }
         eval {
+            logger("Check signals long") if ($verbose);
             checkSystem($account, $system, 'long');
             1;
         } or do {
@@ -63,13 +65,14 @@ while (1) {
         };
 
         eval {
+            logger("Check signals short") if ($verbose);
             checkSystem($account, $system, 'short');
             1;
         } or do {
             logger($@);
         };
-        sleep(20);
     }
+    sleep(20);
 }
 
 sub checkSystem {
