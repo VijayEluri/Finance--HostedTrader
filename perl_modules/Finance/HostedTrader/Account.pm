@@ -164,7 +164,7 @@ sub getBid {
     return $s->getBid(@_);
 }
 
-=item C<baseUnit>
+=item C<getBaseUnit>
 
 
 =cut
