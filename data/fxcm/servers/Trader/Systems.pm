@@ -264,7 +264,7 @@ my $system = $self->{_system};
     if ( $maxLossPts <= 0 ) {
         die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
     }
-    my $baseUnit = $account->baseUnit($symbol); #This is the minimum amount that can be trader for the symbol
+    my $baseUnit = $account->getBaseUnit($symbol); #This is the minimum amount that can be trader for the symbol
     my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
     $amount = int($amount) * $baseUnit;
     return ($amount, $value, $stopLoss);
