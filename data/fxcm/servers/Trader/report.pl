@@ -20,13 +20,35 @@ my $processor = Finance::HostedTrader::ExpressionParser->new();
 my $trades = $account->_getCurrentTrades();
 
 
-print "TRADES:\n-------\n" . Dumper(\$trades);
+print "TRADES:\n-------";
+foreach my $trade (@$trades) {
+=pod
+    my $currentExit = $processor->getIndicatorData( {
+        symbol          => $trade->{symbol},
+        numItems        => 1,
+        fields          =>  'datetime,' . $data->{signals}->{exit}->{currentExitPoint},
+        maxLoadedItems  => $data->{signals}->{enter}->{args}->{maxLoadedItems},
+        tf              => $data->{signals}->{enter}->{args}->{timeframe},
+    } );
+    $currentExit = $currentExit->[0];
+=cut
+    my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
+    print qq|
+Symbol: $trade->{symbol}
+Direction: $trade->{direction}
+Open Date: $trade->{openDate}
+Open Price: $trade->{openPrice}
+Size: $trade->{size}
+Stop Loss: 
+Current Price:  $marketPrice
+|;
+}
 
 foreach my $system_name ( qw/trendfollow countertrend/ ) {
     my $system = Systems->new( name => $system_name );
     my $data = $system->data;
     my $symbols = $data->{symbols};
-    print "\nSystem $system_name:\n-------------\n";
+    print "\nSystem $system_name Market Price/Entry Price:\n-------------\n";
 
     foreach my $direction (qw /long short/) {
         foreach my $symbol (@{$symbols->{$direction}}) {
@@ -42,8 +64,8 @@ foreach my $system_name ( qw/trendfollow countertrend/ ) {
 
 
             print $symbol, " ", 
-                ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)), " ",
-                $currentEntry->[1],
+                ($direction eq 'short' ? $account->getAsk($symbol) : $account->getBid($symbol)), "/",
+                $currentEntry->[1], " ", $direction,
                 "\n";
         }
     }
