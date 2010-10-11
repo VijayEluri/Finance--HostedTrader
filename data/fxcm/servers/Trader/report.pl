@@ -6,6 +6,7 @@ use warnings;
 use Data::Dumper;
 
 use Finance::HostedTrader::Account;
+use Finance::HostedTrader::ExpressionParser;
 use Systems;
 
 
@@ -13,19 +14,40 @@ my $account = Finance::HostedTrader::Account->new(
                 username => 'none',
                 password => 'not implemented',
               );
+my $processor = Finance::HostedTrader::ExpressionParser->new();
 
 
 my $trades = $account->_getCurrentTrades();
+
 
 print "TRADES:\n-------\n" . Dumper(\$trades);
 
 foreach my $system_name ( qw/trendfollow countertrend/ ) {
     my $system = Systems->new( name => $system_name );
     my $data = $system->data;
-    print "System $system_name:\n-------------" . Dumper(\$data->{symbols});
+    my $symbols = $data->{symbols};
+    print "\nSystem $system_name:\n-------------\n";
+
+    foreach my $direction (qw /long short/) {
+        foreach my $symbol (@{$symbols->{$direction}}) {
+
+            my $currentEntry = $processor->getIndicatorData( {
+                        symbol  => $symbol,
+                        numItems => 1,
+                        fields          =>  'datetime,' . $data->{signals}->{enter}->{$direction}->{currentEntryPoint},
+                        maxLoadedItems  => $data->{signals}->{enter}->{args}->{maxLoadedItems},
+                        tf              => $data->{signals}->{enter}->{args}->{timeframe},
+            } );
+            $currentEntry = $currentEntry->[0];
+
+
+            print $symbol, " ", 
+                ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)), " ",
+                $currentEntry->[1],
+                "\n";
+        }
+    }
 }
-
-
 
 
 
