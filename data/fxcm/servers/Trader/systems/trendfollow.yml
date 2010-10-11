@@ -31,4 +31,4 @@ signals:
       timeframe: 15min
       maxLoadedItems: 2500
       period: 1hour
-maxExposure: 3
+maxExposure: 4

@@ -5,7 +5,7 @@ filter:
   topFilterIndicator: abs(1 - (ema(close,50) / ema(close,200)))
   tradeSymbolLimit: 4
   args:
-    period: 6days
+    period: 10days
     tf: day
     maxLoadedItems: 400
 signals:
@@ -19,7 +19,7 @@ signals:
     args:
       timeframe: 30min
       maxLoadedItems: 2000
-      period: 1hour
+      period: 12hour
   exit:
     long:
       signal: low < previous(min(low,120),1)
