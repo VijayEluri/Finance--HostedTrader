@@ -204,7 +204,7 @@ sub _checkSignalWithAction {
             'symbol' => $symbol,
             'tf' => $args->{timeframe},
             'maxLoadedItems' => $args->{maxLoadedItems},
-            'period' => '1hour',
+            'period' => $args->{period},
         }
     );
 }

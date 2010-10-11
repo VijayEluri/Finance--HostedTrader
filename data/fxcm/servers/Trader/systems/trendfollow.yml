@@ -19,6 +19,7 @@ signals:
     args:
       timeframe: 15min
       maxLoadedItems: 2000
+      period: 1hour
   exit:
     long:
       signal: low < previous(min(low,240),1)
@@ -29,4 +30,5 @@ signals:
     args:
       timeframe: 15min
       maxLoadedItems: 2500
+      period: 1hour
 maxExposure: 3
