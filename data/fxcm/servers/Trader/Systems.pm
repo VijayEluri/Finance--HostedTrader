@@ -236,13 +236,14 @@ my $value;
 my $maxLossPts;
 my $system = $self->{_system};
 
+    my $args = $system->{signals}->{enter}->{args};
     my $signal = $system->{signals}->{enter}->{$direction};
     my $maxLoss   = $account->getBalance * $system->{maxExposure} / 100;
     my $stopLoss = $self->{_signal_processor}->getIndicatorData( {
                 symbol  => $symbol,
-                tf      => $signal->{timeframe},
+                tf      => $args->{timeframe},
                 fields  => 'datetime, ' . $system->{signals}->{exit}->{$direction}->{currentExitPoint},
-                maxLoadedItems => $signal->{maxLoadedItems},
+                maxLoadedItems => $args->{maxLoadedItems},
                 numItems => 1,
                 debug => 0,
     } );
