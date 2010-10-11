@@ -196,13 +196,14 @@ sub _checkSignalWithAction {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
     my $signal_definition = $self->{_system}->{signals}->{$action}->{$tradeDirection};
+    my $args = $self->{_system}->{signals}->{$action}->{args};
 
     return $self->{_signal_processor}->checkSignal(
         {
             'expr' => $signal_definition->{signal}, 
             'symbol' => $symbol,
-            'tf' => $signal_definition->{timeframe},
-            'maxLoadedItems' => $signal_definition->{maxLoadedItems},
+            'tf' => $args->{timeframe},
+            'maxLoadedItems' => $args->{maxLoadedItems},
             'period' => '1hour',
         }
     );
