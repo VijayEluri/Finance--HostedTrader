@@ -377,7 +377,7 @@ bool initCore() {
     return true;
 }
 
-BSTR GetAccountID() {
+_bstr_t GetAccountID() {
 	FXCore::ITableAutPtr pAcctTable = g_pTradeDesk->FindMainTable("Accounts");
 	long rowcount = pAcctTable->RowCount;
 	if (rowcount == 0) {
@@ -385,7 +385,7 @@ BSTR GetAccountID() {
 	}
 	_variant_t AcctID = pAcctTable->CellValue(1,"AccountID"); //Assumes only one account
 	
-	return AcctID.bstrVal;
+	return (_bstr_t) AcctID.bstrVal;
 }
 
 
@@ -410,7 +410,7 @@ string CmdGetBaseUnit(string symbol) {
 	ostringstream os;
 	string rv = "200 ";
 	CheckTradeDeskLogin();
-	BSTR AcctID = GetAccountID();
+	_bstr_t AcctID = GetAccountID();
 	int baseUnit = g_pTradingSettings->GetBaseUnitSize(convertSymbolToFXCM(symbol).c_str(), AcctID);
 
 	os << baseUnit;
@@ -427,7 +427,7 @@ string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 	ostringstream os;
 
 	CheckTradeDeskLogin();
-	BSTR AcctID = GetAccountID();
+	_bstr_t AcctID = GetAccountID();
 
 	if (direction.compare("long") == 0) {
 		sType = "Ask";
