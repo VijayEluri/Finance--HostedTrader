@@ -91,7 +91,7 @@ sub checkSystem {
                 logger("Adding position for $symbol $direction ($amount)");
                 logger(Dumper(\$result));
 
-                foreach my $try (1..3) {
+                TRY_OPENTRADE: foreach my $try (1..3) {
                     eval {
                         $account->openMarket($symbol, $direction, $amount) if ($amount > 0);
                         1;
@@ -106,9 +106,11 @@ Amount: $amount
 Current Value: $value
 Stop Loss: $stopLoss
                 });
-                    last;
+                    last TRY_OPENTRADE;
                 }
             }
+        } else {
+            logger("Bypassing $symbol $direction. Position already opened.") if ($verbose);
         }
 
         if ($pos_size) {
