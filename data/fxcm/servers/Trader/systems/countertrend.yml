@@ -3,7 +3,7 @@ filter:
   longSignal: ema(close,50) > ema(close,200) AND rsi(close,14) < 35
   shortSignal: ema(close,50) < ema(close,200) AND rsi(close,14) > 65
   topFilterIndicator: abs(1 - (ema(close,50) / ema(close,200)))
-  tradeSymbolLimit: 4
+  tradeSymbolLimit: 2
   args:
     period: 10days
     tf: day
@@ -19,7 +19,7 @@ signals:
     args:
       timeframe: 30min
       maxLoadedItems: 2000
-      period: 12hour
+      period: 1hour
   exit:
     long:
       signal: low < previous(min(low,120),1)
