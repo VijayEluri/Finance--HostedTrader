@@ -22,16 +22,6 @@ my $trades = $account->_getCurrentTrades();
 
 print "TRADES:\n-------";
 foreach my $trade (@$trades) {
-=pod
-    my $currentExit = $processor->getIndicatorData( {
-        symbol          => $trade->{symbol},
-        numItems        => 1,
-        fields          =>  'datetime,' . $data->{signals}->{exit}->{currentExitPoint},
-        maxLoadedItems  => $data->{signals}->{enter}->{args}->{maxLoadedItems},
-        tf              => $data->{signals}->{enter}->{args}->{timeframe},
-    } );
-    $currentExit = $currentExit->[0];
-=cut
     my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
     print qq|
 Symbol: $trade->{symbol}
@@ -48,10 +38,19 @@ foreach my $system_name ( qw/trendfollow countertrend/ ) {
     my $system = Systems->new( name => $system_name );
     my $data = $system->data;
     my $symbols = $data->{symbols};
-    print "\nSystem $system_name Market Price/Entry Price:\n-------------\n";
+    print "\nSystem $system_name Market Price/Entry Price/Exit Price:\n-------------\n";
 
     foreach my $direction (qw /long short/) {
         foreach my $symbol (@{$symbols->{$direction}}) {
+
+    my $currentExit = $processor->getIndicatorData( {
+        symbol          => $symbol,
+        numItems        => 1,
+        fields          =>  'datetime,' . $data->{signals}->{exit}->{$direction}->{currentExitPoint},
+        maxLoadedItems  => $data->{signals}->{exit}->{args}->{maxLoadedItems},
+        tf              => $data->{signals}->{exit}->{args}->{timeframe},
+    } );
+    $currentExit = $currentExit->[0];
 
             my $currentEntry = $processor->getIndicatorData( {
                         symbol  => $symbol,
@@ -64,8 +63,8 @@ foreach my $system_name ( qw/trendfollow countertrend/ ) {
 
 
             print $symbol, " ", 
-                ($direction eq 'short' ? $account->getAsk($symbol) : $account->getBid($symbol)), "/",
-                $currentEntry->[1], " ", $direction,
+                ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)), "/",
+                $currentEntry->[1], "/", $currentExit->[1], " ", $direction,
                 "\n";
         }
     }
