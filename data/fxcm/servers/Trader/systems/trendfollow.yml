@@ -3,7 +3,7 @@ filter:
   longSignal: trend(close,21) > 1
   shortSignal: trend(close,21) < -1
   topFilterIndicator: abs(trend(close,21))
-  tradeSymbolLimit: 4
+  tradeSymbolLimit: 2
   args:
     period: 9days
     tf: week
