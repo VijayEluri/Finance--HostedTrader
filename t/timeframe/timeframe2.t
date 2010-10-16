@@ -6,7 +6,7 @@ use warnings;
 use Finance::HostedTrader::Datasource;
 use Finance::HostedTrader::Config;
 use Data::Dumper;
-use Test::More qw(no_plan);
+use Test::More tests => 9;
 
 my $cfg= Finance::HostedTrader::Config->new();
 my $ds = Finance::HostedTrader::Datasource->new();
@@ -18,8 +18,6 @@ my $TEST_TABLE_TWO = "T2_TWO";
 my $naturalTFs = $cfg->timeframes->natural;
 my $syntheticTFs = $cfg->timeframes->synthetic;
 
-my %existingSymbols = map { $_ => 1} @{$cfg->symbols->all};
-
 #This test will copy the EURUSD table in the smaller timeframe
 #then convert that copy into a larger timeframe
 #it then compares the end result with the original EURUSD table in the target timeframe
@@ -28,13 +26,17 @@ my %existingSymbols = map { $_ => 1} @{$cfg->symbols->all};
 foreach my $tf (@{$naturalTFs}) {
 	my $available_timeframe = $tf;
 	foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
+        diag("Creating $TEST_TABLE\_$tf");
 		$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$tf") || die($DBI::errstr);
 		$dbh->do("CREATE TABLE $TEST_TABLE\_$tf LIKE $BASE_SYMBOL\_$tf") || die($DBI::errstr);
-		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime") || die($DBI::errstr);
+		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime DESC LIMIT 250000") || die($DBI::errstr);
 	}
+    diag("Tables created");
 
-	foreach my $stf (@{$syntheticTFs}) {
-		foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
+#	foreach my $stf (@{$syntheticTFs}) {
+	for (my $i=0;$i<scalar(@{$syntheticTFs});$i++) {
+        my $stf = $syntheticTFs->[$i];
+            foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {
 			$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$stf") || die($DBI::errstr);
 			$dbh->do("CREATE TABLE $TEST_TABLE\_$stf LIKE $BASE_SYMBOL\_$stf") || die($DBI::errstr);
 		}
@@ -59,6 +61,7 @@ foreach my $tf (@{$naturalTFs}) {
 			$sth->finish or die($DBI::errstr);
 		}
 		is_deeply($data[0], $data[1], "Compute timeframe $stf from both $tf and $available_timeframe and compare result");
-		$available_timeframe = $stf;
+        my $next_timeframe = $syntheticTFs->[$i+1];
+		$available_timeframe = $stf if ($next_timeframe && !($next_timeframe % $stf));
 	}
 }
