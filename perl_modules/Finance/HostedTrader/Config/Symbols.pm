@@ -54,7 +54,7 @@ sub _around_symbols {
 
     return $self->$orig() if @_; #Call the Moose generated setter if this is a set call (actually because the attributes are read-only we'll never have a set call, but just in case it changes later)
 
-    # If it is a get call, call the Moose generated getter and sort the items
+    # If it is a get call, call the Moose generated getter
     my $value = $self->$orig();
     return $value if (defined($value));
     return [];
