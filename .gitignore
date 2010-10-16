@@ -1,3 +1,9 @@
 system.yml
-trader.log
+trader.log*
 t.log
+server.log*
+*.symbols.yml
+RatePrinter.log*
+cover_db
+LAST_DOWNLOADED
+TODO
