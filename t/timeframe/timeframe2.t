@@ -29,7 +29,7 @@ foreach my $tf (@{$naturalTFs}) {
         diag("Creating $TEST_TABLE\_$tf");
 		$dbh->do("DROP TABLE IF EXISTS $TEST_TABLE\_$tf") || die($DBI::errstr);
 		$dbh->do("CREATE TABLE $TEST_TABLE\_$tf LIKE $BASE_SYMBOL\_$tf") || die($DBI::errstr);
-		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime DESC LIMIT 250000") || die($DBI::errstr);
+		$dbh->do("INSERT INTO $TEST_TABLE\_$tf (datetime, open, low, high, close) SELECT * FROM $BASE_SYMBOL\_$tf ORDER BY datetime DESC LIMIT 100000") || die($DBI::errstr);
 	}
     diag("Tables created");
 
