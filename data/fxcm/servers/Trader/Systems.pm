@@ -11,6 +11,7 @@ use Finance::HostedTrader::Config;
 use Moose;
 use Config::Any;
 use YAML::Tiny;
+use List::Compare::Functional qw( get_intersection );
 
 has 'name' => (
     is     => 'ro',
@@ -62,8 +63,9 @@ sub updateSymbols {
     #Add symbols for which there are existing positions to the list
     #If these are not kept in the trade list, open positions in these symbols will 
     #not be closed by the system
-    $symbols->{short} = \@symbols_to_keep_short;
-    $symbols->{long} = \@symbols_to_keep_long;
+    #Only keep open trades if they were originally in this list already, otherwise the symbols were input by a different system instance
+    $symbols->{short} = [ get_intersection('--unsorted', [ \@symbols_to_keep_short, $symbols->{short} ] ) ];
+    $symbols->{long} = [ get_intersection('--unsorted', [ \@symbols_to_keep_long, $symbols->{long} ] ) ];
 
     #Now add to the trade list symbols triggered by the system as trade opportunities
     foreach my $tradeDirection (qw /long short/ ) {
