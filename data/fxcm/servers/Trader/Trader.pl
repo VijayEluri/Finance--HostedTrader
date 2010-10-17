@@ -90,10 +90,12 @@ sub checkSystem {
                 my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction);
                 logger("Adding position for $symbol $direction ($amount)");
                 logger(Dumper(\$result));
+                next if ($amount <= 0);
 
                 TRY_OPENTRADE: foreach my $try (1..3) {
                     eval {
-                        $account->openMarket($symbol, $direction, $amount) if ($amount > 0);
+                        my ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
+                        logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate");
                         1;
                     } or do {
                         logger($@);
