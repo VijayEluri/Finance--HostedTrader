@@ -234,7 +234,6 @@ my $account = shift;
 my $symbol = shift;
 my $direction = shift;
 
-my $value;
 my $maxLossPts;
 my $system = $self->{_system};
 
@@ -255,6 +254,7 @@ my $system = $self->{_system};
         $maxLoss *= $account->getAsk("GBP$base");
     }
 
+    my $value;
     if ($direction eq "long") {
         $value = $account->getAsk($symbol);
         $maxLossPts = $value - $stopLoss;
@@ -269,6 +269,7 @@ my $system = $self->{_system};
     my $baseUnit = $account->getBaseUnit($symbol); #This is the minimum amount that can be trader for the symbol
     my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
     $amount = int($amount) * $baseUnit;
+    die("trade size amount is negative: amount=$amount, baseUnit=$baseUnit, maxLoss=$maxLoss, maxLossPts=$maxLossPts") if ($amount < 0);
     return ($amount, $value, $stopLoss);
 }
 
