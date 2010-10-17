@@ -6,4 +6,5 @@ server.log*
 RatePrinter.log*
 cover_db
 LAST_DOWNLOADED
+TO_DOWNLOAD
 TODO
