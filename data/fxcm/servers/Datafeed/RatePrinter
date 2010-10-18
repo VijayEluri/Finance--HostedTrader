@@ -20,7 +20,7 @@ start() {
 			return 1
 		fi
 	fi
-	./datafeed &
+	./datafeed >> datafeed.log 2>> datafeed.log &
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch /tmp/var_lock_subsys_RatePrinter;
