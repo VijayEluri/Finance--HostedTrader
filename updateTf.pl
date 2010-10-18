@@ -29,6 +29,12 @@ Defaults to 9998-12-31.
 Comma separated list of symbols for which to create synthetic data.
 If not supplied, defaults to the list entries in the config file items "symbols.natural" and "symbols.synthetic".
 
+Can accept the followin special values:
+
+all - Default
+natural - only symbols in config item "symbols.natural"
+synthetic - only symbols in config item "symbols.synthetic"
+
 =item C<--timeframes=tf>
 
 Comma separated list of timeframes for which to create synthetic data.
@@ -114,7 +120,7 @@ $end_date = UnixDate( $end_date, "%Y-%m-%d %H:%M:%S" )
 my $db = Finance::HostedTrader::Datasource->new(debug => $debug);
 my $cfg = $db->cfg;
 my $symbols;
-if ( !defined($symbols_txt) ) {
+if ( !defined($symbols_txt) || $symbols_txt eq 'all' ) {
     $symbols = $cfg->symbols->all();
 }
 elsif ( $symbols_txt eq 'natural' ) {
