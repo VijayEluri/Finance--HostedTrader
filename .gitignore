@@ -4,6 +4,7 @@ t.log
 server.log*
 *.symbols.yml
 RatePrinter.log*
+datafeed.log*
 cover_db
 LAST_DOWNLOADED
 TO_DOWNLOAD
