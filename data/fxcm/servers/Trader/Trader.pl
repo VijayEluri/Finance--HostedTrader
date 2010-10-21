@@ -38,7 +38,7 @@ my $account = Finance::HostedTrader::Account->new(
 
 my @systems =   (   
                     Systems->new( name => 'trendfollow' ),
-                    Systems->new( name => 'countertrend' ),
+#                    Systems->new( name => 'countertrend' ),
                 );
 
 foreach my $system (@systems) {
@@ -101,7 +101,7 @@ sub checkSystem {
                         logger($@);
                         next;
                     };
-                    sendMail(qq {Open Trade:
+                    sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
 Instrument: $symbol
 Direction: $direction
 Amount: $amount
@@ -126,7 +126,7 @@ Stop Loss: $stopLoss
                 } else {
                     $value = $account->getBid($symbol);
                 }
-                sendMail(qq {Close Trade:
+                sendMail('Trading Robot - Close Trade ' . $symbol, qq {Close Trade:
 Instrument: $symbol
 Direction: $direction
 Position Size: $pos_size
@@ -146,15 +146,16 @@ sub logger {
 
 
 sub sendMail {
-my ($content) = @_;
+my ($subject, $content) = @_;
 use MIME::Lite;
 
+    logger($content);
     ### Create a new single-part message, to send a GIF file:
     my $msg = MIME::Lite->new(
         From     => 'fxhistor@fxhistoricaldata.com',
         To       => 'joaocosta@zonalivre.org',
         Cc       => 'elad.sharf@gmail.com',
-        Subject  => 'Trading Robot',
+        Subject  => $subject,
         Data     => $content
     );
     $msg->send; # send via default
