@@ -12,6 +12,7 @@ use Moose;
 use Config::Any;
 use YAML::Tiny;
 use List::Compare::Functional qw( get_intersection );
+use Hash::Merge;
 
 has 'name' => (
     is     => 'ro',
@@ -52,7 +53,7 @@ sub updateSymbols {
         return $s->getTrades();
     }
 
-    my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filter});
+    my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filters});
     my $trades = _getCurrentTrades();
     my $symbols = $self->_loadSymbols();#$self->{_system}->{symbols};
     #List of symbols for which there are open short positions
@@ -87,21 +88,17 @@ sub updateSymbols {
 #Return list of symbols to add to the system
 sub getSymbolsSignalFilter {
     my $self = shift;
-    my $filter = shift;
+    my $filters = shift;
 
-#Return list of all available symbols
-    sub getAllSymbols {
-    my $cfg         = Finance::HostedTrader::Config->new();
-
-    return $cfg->symbols->all;
-    }
-
-    my $symbols = getAllSymbols();
+    my $long_symbols = $filters->{symbols}->{long};
+    my $short_symbols = $filters->{symbols}->{short};
     my $processor = $self->{_signal_processor};
 
     my $rv = { long => [], short => [] };
 
-    foreach my $symbol (@$symbols) {
+    my $filter=$filters->{signals}->[0];
+
+    foreach my $symbol (@$long_symbols) {
         if ($processor->checkSignal( {
             'expr' => $filter->{longSignal},
             'symbol' => $symbol,
@@ -111,7 +108,11 @@ sub getSymbolsSignalFilter {
             'debug' => $filter->{args}->{debug},
         })) {
             push @{ $rv->{long} }, $symbol;
-        } elsif ($processor->checkSignal( {
+        }
+    }
+
+    foreach my $symbol (@$short_symbols) {
+        if ($processor->checkSignal( {
             'expr' => $filter->{shortSignal},
             'symbol' => $symbol,
             'tf' => $filter->{args}->{tf},
@@ -123,44 +124,6 @@ sub getSymbolsSignalFilter {
         }
     }
 
-    return $rv if (!defined($filter->{topFilterIndicator}));
-    return filterTopX($filter,$rv, $filter->{tradeSymbolLimit});
-}
-
-sub filterTopX {
-    my $filter = shift;
-    my $existing = shift;
-    my $number_to_keep = shift;
-    my @results;
-    my $processor   = Finance::HostedTrader::ExpressionParser->new();
-
-    my $calculateIndicator = sub {
-        my $direction = shift;
-        foreach my $symbol (@{ $existing->{$direction} }) {
-            my $data = $processor->getIndicatorData( {
-                'fields'        => "datetime,".$filter->{topFilterIndicator},
-                'symbol'        => $symbol,
-                'tf'            => $filter->{args}->{tf},
-                'maxLoadedItems'=> $filter->{args}->{maxLoadedItems},
-                'numItems'      => 1,
-                'debug'         => $filter->{args}->{debug},
-            } );
-            $data = $data->[0];
-            push @results, [ $symbol, $direction, $data->[1] ];
-        }
-    };
-
-    &$calculateIndicator('long');
-    &$calculateIndicator('short');
-
-    my @sorted = sort { $b->[2] <=> $a->[2] } @results ;
-    splice @sorted, $number_to_keep if ($number_to_keep < scalar(@sorted));
-
-    my $rv = { long => [], short => [] };
-    foreach my $item (@sorted) {
-        push @{ $rv->{long} }, $item->[0] if ($item->[1] eq 'long');
-        push @{ $rv->{short} }, $item->[0] if ($item->[1] eq 'short');
-    }
     return $rv;
 }
 
@@ -214,18 +177,28 @@ sub _checkSignalWithAction {
 sub _loadSystem {
     my $self = shift;
 
-    my $file = "systems/".$self->name.".yml";
-    my $system = Config::Any->load_files(
+    my $file = "systems/".$self->name.".tradeable.yml";
+    my $tradeable_filter = "systems/".$self->name.".yml";
+    my @files = ($file, $tradeable_filter);
+    my $system_all = Config::Any->load_files(
         {
-            files => [$file],
+            files => \@files,
             use_ext => 1,
             flatten_to_hash => 1,
         }
     );
+    my $system = {};
 
-    die("failed to load system from $file. $!") unless defined($system);
-    die("invalid name in symbol file $file") if ($self->name ne $system->{$file}->{name});
-    $self->{_system} = $system->{$file};
+	my $merge = Hash::Merge->new('custom_merge'); #The custom_merge behaviour is defined in Finance::HostedTrader::Config
+    foreach my $file (@files) {
+        next unless ( $system_all->{$file} );
+        my $new_system = $merge->merge($system_all->{$file}, $system);
+        $system=$new_system;
+    }
+
+    die("failed to load system from $file. $!") unless defined($system_all);
+    die("invalid name in symbol file $file") if ($self->name ne $system->{name});
+    $self->{_system} = $system;
 }
 
 sub getTradeSize {
@@ -239,7 +212,7 @@ my $system = $self->{_system};
 
     my $args = $system->{signals}->{enter}->{args};
     my $signal = $system->{signals}->{enter}->{$direction};
-    my $maxLoss   = $account->getBalance * $system->{maxExposure} / 100;
+    my $maxLoss   = $account->getNav() * $system->{maxExposure} / 100;
     my $stopLoss = $self->{_signal_processor}->getIndicatorData( {
                 symbol  => $symbol,
                 tf      => $args->{timeframe},
@@ -266,7 +239,7 @@ my $system = $self->{_system};
     if ( $maxLossPts <= 0 ) {
         die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
     }
-    my $baseUnit = $account->getBaseUnit($symbol); #This is the minimum amount that can be trader for the symbol
+    my $baseUnit = $account->getBaseUnit($symbol); #This is the minimum amount that can be traded for the symbol
     my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
     $amount = int($amount) * $baseUnit;
     die("trade size amount is negative: amount=$amount, baseUnit=$baseUnit, maxLoss=$maxLoss, maxLossPts=$maxLossPts") if ($amount < 0);

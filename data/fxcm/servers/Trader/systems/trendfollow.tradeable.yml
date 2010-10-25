@@ -1,0 +1,7 @@
+name: trendfollow
+filters:
+  symbols:
+    long:
+      - XAGUSD
+    short:
+      - EURJPY
