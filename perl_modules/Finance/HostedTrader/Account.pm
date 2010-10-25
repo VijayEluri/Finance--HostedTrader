@@ -65,14 +65,15 @@ has positions => (
 );
 
 
-=item C<getBalance>
+=item C<getNav>
 
 
 =cut
-sub getBalance {
+sub getNav {
     my ($self) = @_;
 
-    return 3155;
+    my $s = FXCMServer->new();
+    return $s->nav();
 }
 
 =item C<getPosition>

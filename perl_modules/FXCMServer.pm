@@ -152,6 +152,12 @@ sub baseUnit {
     return $self->_sendCmd("baseunit $symbol");
 }
 
+sub nav {
+    my ($self, $symbol) = @_;
+
+    return $self->_sendCmd("nav");
+}
+
 sub _sendCmd {
     my ($self, $cmd) = @_;
     my $sock = $self->{_sock};

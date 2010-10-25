@@ -57,6 +57,7 @@ bool initCore();
 string convertSymbolFromFXCM(string );
 string convertSymbolToFXCM(string );
 string CmdGetCurrentPrice(string , string );
+string CmdGetNAV();
 string CmdGetBaseUnit(string );
 string CmdOpenMarketOrder(string , string , int );
 string CmdCloseMarketOrder(string , int );
@@ -253,6 +254,8 @@ string ProcessCommand(string sCmd) {
 				throw "Expected 1 argument";
 			}
 			sResponse = CmdGetBaseUnit(tokens[1].c_str());
+		} else if (tokens[0].compare("nav") == 0) {
+			sResponse = CmdGetNAV();
 		} else if (tokens[0].compare("openmarket") == 0) {
 			int i;
 			if (tokens.size() != 4) {
@@ -377,12 +380,23 @@ bool initCore() {
     return true;
 }
 
-_bstr_t GetAccountID() {
+FXCore::ITableAutPtr _GetAccountsTable() {
 	FXCore::ITableAutPtr pAcctTable = g_pTradeDesk->FindMainTable("Accounts");
 	long rowcount = pAcctTable->RowCount;
 	if (rowcount == 0) {
 		throw "No rows defined in Accounts table, cannot fetch AccountID and raise an open market order, perhaps this login belongs to a closed account ?";
 	}
+	return pAcctTable;
+}
+
+double GetAccountNAV() {
+	FXCore::ITableAutPtr pAcctTable = _GetAccountsTable();
+	_variant_t NAV = pAcctTable->CellValue(1,"Equity");
+	return NAV.dblVal;
+}
+
+_bstr_t GetAccountID() {
+	FXCore::ITableAutPtr pAcctTable = _GetAccountsTable();
 	_variant_t AcctID = pAcctTable->CellValue(1,"AccountID"); //Assumes only one account
 	
 	return (_bstr_t) AcctID.bstrVal;
@@ -402,6 +416,15 @@ string CmdGetCurrentPrice(string symbol, string sType) {
 	double price = GetCurrentPrice(symbol, sType);
 	string rv = "200 ";
 	os << price;
+	rv.append(os.str());
+	return rv;
+}
+
+string CmdGetNAV() {
+	ostringstream os;
+	double nav = GetAccountNAV();
+	string rv = "200 ";
+	os << nav;
 	rv.append(os.str());
 	return rv;
 }
