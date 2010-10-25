@@ -103,6 +103,7 @@ $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 foreach my $signal (@ARGV) {
 print "$signal\n----------------------\n" if ($verbose);
 foreach my $symbol ( @{$symbols} ) {
+    print "Testing $symbol\n" if ($verbose);
     my $data = $signal_processor->getSignalData(
         {
             'expr'            => $signal,
