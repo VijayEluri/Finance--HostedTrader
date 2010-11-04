@@ -210,13 +210,13 @@ my $direction = shift;
 my $maxLossPts;
 my $system = $self->{_system};
 
-    my $args = $system->{signals}->{enter}->{args};
-    my $signal = $system->{signals}->{enter}->{$direction};
+    my $args = $system->{signals}->{exit}->{args};
+    my $signal = $system->{signals}->{exit}->{$direction};
     my $maxLoss   = $account->getNav() * $system->{maxExposure} / 100;
     my $stopLoss = $self->{_signal_processor}->getIndicatorData( {
                 symbol  => $symbol,
                 tf      => $args->{timeframe},
-                fields  => 'datetime, ' . $system->{signals}->{exit}->{$direction}->{currentExitPoint},
+                fields  => 'datetime, ' . $signal->{currentExitPoint},
                 maxLoadedItems => $args->{maxLoadedItems},
                 numItems => 1,
                 debug => 0,
