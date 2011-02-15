@@ -13,6 +13,10 @@ Outputs SQL suitable to create tables to store symbol historical data in various
 
 =over 12
 
+=item C<--tableType=s>
+
+A valid mysql table type. Defaults to MYISAM.
+
 =item C<--timeframes=tfs>
 
 A comma separated list of timeframe ids to generate SQL for.
@@ -51,9 +55,10 @@ use Finance::HostedTrader::Config;
 use Pod::Usage;
 
 my ( $symbols_txt, $tfs_txt, $help );
+my ($table_type) = ('MYISAM');
 my $cfg = Finance::HostedTrader::Config->new();
 
-my $result = GetOptions( "symbols=s", \$symbols_txt, "timeframes=s", \$tfs_txt, "help", \$help)
+my $result = GetOptions( "symbols=s", \$symbols_txt, "timeframes=s", \$tfs_txt, "tableType=s", \$table_type, "help", \$help)
   or pod2usage(1);
 pod2usage(1) if ($help);
 
@@ -65,6 +70,7 @@ $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
 foreach my $symbol (@$symbols) {
     foreach my $tf (@$tfs) {
         print qq /
+DROP TABLE IF EXISTS `$symbol\_$tf`;
 CREATE TABLE IF NOT EXISTS `$symbol\_$tf` (
 `datetime` DATETIME NOT NULL ,
 `open` DECIMAL(9,4) NOT NULL ,
@@ -72,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `$symbol\_$tf` (
 `high` DECIMAL(9,4) NOT NULL ,
 `close` DECIMAL(9,4) NOT NULL ,
 PRIMARY KEY ( `datetime` )
-) TYPE = MYISAM ;
+) TYPE = $table_type ;
 /;
 
     }
