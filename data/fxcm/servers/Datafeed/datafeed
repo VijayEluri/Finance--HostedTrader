@@ -28,7 +28,7 @@ while [ 1 ]; do
 # There are probably race conditions lurking around
 # Not sure if RatePrinter locks the files exclusively while writting to them
   for tf in $TIMEFRAMES; do
-    if ls *_$tf &> /dev/null; then
+    if ls /dev/shm/*_$tf &> /dev/null; then
       ./load $tf
     fi
   done
