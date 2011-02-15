@@ -41,6 +41,7 @@ stop() {
 	touch ~/.wine/drive_c/RatePrinter.kill
     sleep 5
 	while ps aux | grep RatePrinter.exe | grep -v defunct | grep -v grep > /dev/null; do
+        echo Killing non responsive RatePrinter.exe
         killall RatePrinter.exe 2> /dev/null
 	done
     killall datafeed 2> /dev/null
