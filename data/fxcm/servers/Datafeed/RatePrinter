@@ -3,6 +3,8 @@
 . /etc/init.d/functions
 
 prog="FXCM RatePrinter"
+BASEDIR=~/fx/data/fxcm/servers
+RUNDIR=$BASEDIR/Datafeed
 
 start() {
 	echo -n $"Starting $prog: "	
@@ -20,7 +22,7 @@ start() {
 			return 1
 		fi
 	fi
-	./datafeed >> datafeed.log 2>> datafeed.log &
+	$RUNDIR/datafeed >> $RUNDIR/datafeed.log 2>&1 < /dev/null &
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch /tmp/var_lock_subsys_RatePrinter;
