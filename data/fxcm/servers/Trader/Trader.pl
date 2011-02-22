@@ -154,7 +154,6 @@ use MIME::Lite;
     my $msg = MIME::Lite->new(
         From     => 'fxhistor@fxhistoricaldata.com',
         To       => 'joaocosta@zonalivre.org',
-        Cc       => 'elad.sharf@gmail.com',
         Subject  => $subject,
         Data     => $content
     );
