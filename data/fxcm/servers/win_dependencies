@@ -1,0 +1,9 @@
+yum install wine
+wget http://winetricks.org/winetricks
+sh winetricks vcrun2005 (needed by FXCM API)
+sh winetricks vcrun2008 (needed by Server )
+sh winetricks vb6run ( needed by RatePrinter )
+
+Download API from:
+http://forexforums.dailyfx.com/order2go-com-trading-api/
+wine FXOrder2Go.EXE
