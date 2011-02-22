@@ -10,8 +10,7 @@ use Systems;
 
 my $positions = [
     {   symbol => 'XAGUSD', direction => 'long' },
-    {   symbol => 'EURJPY', direction => 'short' },
-    {   symbol => 'USDCHF', direction => 'short' },
+#    {   symbol => 'USDCAD', direction => 'short' },
 ];
 
 
@@ -28,7 +27,13 @@ print "Account Size: $accountSize\n";
 
 foreach my $position (@$positions) {
 
-    my ($pos_size, $entry, $exit) = $system->getTradeSize($account, $position->{symbol}, $position->{direction});
+    my ($pos_size, $entry, $exit);
+    eval {
+       ($pos_size, $entry, $exit) = $system->getTradeSize($account, $position->{symbol}, $position->{direction});
+       1;
+    } or do {
+       ($pos_size, $entry, $exit) = ('', '', '');
+    };
     print qq|
 Symbol: $position->{symbol}
 Direction: $position->{direction}
