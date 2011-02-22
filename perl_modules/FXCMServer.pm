@@ -142,7 +142,7 @@ sub closeMarket {
 =item C<baseUnit($symbol)>
 
 Returns the base unit at which the symbol trades.
-Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (15000 would be an invalid trade size).
+Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (eg, 15000 would be an invalid trade size).
 
 =cut
 
@@ -151,6 +151,12 @@ sub baseUnit {
 
     return $self->_sendCmd("baseunit $symbol");
 }
+
+=item C<nav()>
+
+Return the current net asset value in the account
+
+=cut
 
 sub nav {
     my ($self, $symbol) = @_;
