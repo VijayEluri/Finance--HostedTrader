@@ -34,7 +34,7 @@ Current Price:  $marketPrice
 |;
 }
 
-foreach my $system_name ( qw/trendfollow countertrend/ ) {
+foreach my $system_name ( qw/trendfollow/ ) {
     my $system = Systems->new( name => $system_name );
     my $data = $system->data;
     my $symbols = $data->{symbols};
