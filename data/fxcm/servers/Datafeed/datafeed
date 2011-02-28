@@ -14,15 +14,6 @@ wine ./RatePrinter.exe $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE 2004-01-01 0 $TIMEFR
 sleep 2
 
 while [ 1 ]; do
-  while ( ! ps aux | grep RatePrinter.exe | grep -v grep > /dev/null ); do
-      # If RatePrinter.exe stops running, sleep 30 seconds
-      # and try to restart it
-      sleep 30
-      wine ./RatePrinter.exe  $USERNAME $PASSWORD $TYPE 2004-01-01 0 $TIMEFRAMES &> /dev/null < /dev/null &
-  done
-
-
-
 # 2
 # This waits for data files written by RatePrinter.exe and loads them into MySQL
 # There are probably race conditions lurking around
