@@ -16,10 +16,11 @@ foreach my $tf qw(300 3600) {
     my $i=9;
 
     my $val = $mul{$tf};
+    my @dates;
     do {
-        my ($start, $end) = ( UnixDate( $i*$val . " days ago at midnight", "%Y-%m-%d" ), UnixDate( ($i-1)*$val." days ago at midnight", "%Y-%m-%d" ) );
-        print "wine RatePrinter.exe \"$ENV{FXCM_USER}\" \"$ENV{FXCM_PASSWORD}\" \"$ENV{FXCM_TYPE}\" \"$start\" \"$end\" \"$tf\"\n";
-        print "./load $tf\n";
-    } while (--$i > 0);
+        my ($start, $end) = ( UnixDate( $i*$val . " days ago", "%Y-%m-%d" ), UnixDate( ($i-1)*$val." days ago", "%Y-%m-%d" ) );
+        push @dates, "$start|$end";
+    } while ($i-- > 0);
+    print "$tf;" . join(',', @dates) . " ";
 
 }
