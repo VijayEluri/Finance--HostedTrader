@@ -16,6 +16,7 @@ symbols:
         - XAGUSD
     synthetic:
         - AUDJPY
+        - CHFJPY
 timeframes:
     natural:
         - 300
