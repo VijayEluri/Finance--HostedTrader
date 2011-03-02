@@ -9,8 +9,8 @@ use Finance::HostedTrader::Account;
 use Systems;
 
 my $positions = [
-    {   symbol => 'XAGUSD', direction => 'long' },
-#    {   symbol => 'USDCAD', direction => 'short' },
+    {   symbol => 'AUDUSD', direction => 'long' },
+    {   symbol => 'USDCAD', direction => 'short' },
 ];
 
 
@@ -32,6 +32,7 @@ foreach my $position (@$positions) {
        ($pos_size, $entry, $exit) = $system->getTradeSize($account, $position->{symbol}, $position->{direction});
        1;
     } or do {
+        print $@;
        ($pos_size, $entry, $exit) = ('', '', '');
     };
     print qq|
