@@ -149,9 +149,16 @@ sub closeMarket {
 =cut
 sub getAsk {
     my $self = shift;
+    my $symbol = shift;
+
     my $s = FXCMServer->new();
 
-    return $s->getAsk(@_);
+#TODO: Need to be based on the symbols available in the account provider instead of based on FXCM
+    if ($symbol eq 'GBPCAD') {
+        return $s->getAsk('GBPUSD') * $s->getAsk('USDCAD');
+    } else {
+        return $s->getAsk($symbol);
+    }
 }
 
 =item C<getBid>
@@ -160,9 +167,16 @@ sub getAsk {
 =cut
 sub getBid {
     my $self = shift;
+    my $symbol = shift;
+
     my $s = FXCMServer->new();
 
-    return $s->getBid(@_);
+#TODO: Need to be based on the symbols available in the account provider instead of based on FXCM
+    if ($symbol eq 'GBPCAD') {
+        return $s->getBid('GBPUSD') * $s->getBid('USDCAD');
+    } else {
+        return $s->getBid($symbol);
+    }
 }
 
 =item C<getBaseUnit>
