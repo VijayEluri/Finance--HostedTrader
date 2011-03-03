@@ -10,3 +10,4 @@ TODO
 server_*.log
 trader_*.log
 config_real.sh
+*.tradeable.yml
