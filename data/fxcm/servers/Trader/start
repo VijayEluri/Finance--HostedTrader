@@ -1,3 +1,9 @@
 #!/bin/sh
 
-./Trader.pl >> trader.log 2>&1 < /dev/null &
+RUNDIR=~/fx/data/fxcm/servers/Trader
+CONFIG_FILE=$1
+
+. $CONFIG_FILE
+
+cd $RUNDIR
+./Trader.pl --address=$SERVER_ADDRESS --port=$SERVER_PORT  >> trader_$FXCM_TYPE.log 2>&1 < /dev/null &

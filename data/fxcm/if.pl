@@ -6,7 +6,7 @@ use warnings;
 use Data::Dumper;
 use FXCMServer;
 
-    my $s = FXCMServer->new();
+    my $s = FXCMServer->new( address => '127.0.0.1', port => 1500 );
 
     print $s->getAsk("EURUSD"), "\n";
     print $s->getBid("EURUSD"), "\n";

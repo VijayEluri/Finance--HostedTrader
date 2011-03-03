@@ -15,9 +15,11 @@ use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Account;
 use Systems;
 
-my ($verbose, $help);
+my ($verbose, $help, $address, $port);
 
 my $result = GetOptions(
+    "address=s",\$address,
+    "port=i",   \$port,
     "verbose",  \$verbose,
     "help",     \$help,
 ) || pod2usage(2);
@@ -26,14 +28,11 @@ pod2usage(1) if ($help);
 
 logger("STARTUP");
 
-my $username = 'joaocosta';
-my $password = 'password';
-
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
 my $account = Finance::HostedTrader::Account->new(
-                username => $username,
-                password => $password,
+                address     => $address,
+                port        => $port,
               );
 
 my @systems =   (   
@@ -54,7 +53,7 @@ while (1) {
 # Updates symbol list every 15 minutes
         if ( time() - $system->symbolsLastUpdated() > 900 ) {
             logger("Update symbol list") if ($verbose);
-            $system->updateSymbols();
+            $system->updateSymbols($account);
         }
         eval {
             logger("Check signals long") if ($verbose);

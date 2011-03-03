@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ../config.sh
+. ../config_real.sh
 
 TIMEFRAMES=`perl -MData::Dumper -MConfig::Any -e 'my $cfg_all = Config::Any->load_files({ files => [qw(fx.yml)], use_ext => 1, flatten_to_hash => 1 } );print join(" ", @{$cfg_all->{"fx.yml"}->{timeframes}->{natural}})'`
 

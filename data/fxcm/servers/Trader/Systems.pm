@@ -3,7 +3,6 @@ package Systems;
 use strict;
 use warnings;
 
-use FXCMServer;
 use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Config;
 
@@ -42,19 +41,10 @@ sub symbolsLastUpdated {
 
 sub updateSymbols {
     my $self = shift;
-
-    sub _getCurrentTrades {
-#Call FXCMServer from limited scope
-#so that we release the TCP connection
-#to the single threaded server
-#as soon as possible
-# TODO this code should be agnostic to FXCMServer, instead should be using Finance::HostedTrader::Account
-    my $s = FXCMServer->new();
-        return $s->getTrades();
-    }
+    my $account = shift; #TODO 
 
     my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filters});
-    my $trades = _getCurrentTrades();
+    my $trades = $account->_getCurrentTrades();
     my $symbols = $self->_loadSymbols();#$self->{_system}->{symbols};
     #List of symbols for which there are open short positions
     my @symbols_to_keep_short = map {$_->{symbol}} grep {$_->{direction} eq 'short'} @{$trades}; 

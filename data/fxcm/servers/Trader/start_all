@@ -1,0 +1,7 @@
+#!/bin/sh
+
+BASEDIR=~/fx/data/fxcm/servers
+RUNDIR=$BASEDIR/Trader
+
+$RUNDIR/start $BASEDIR/config_demo.sh
+#$RUNDIR/start $BASEDIR/config_real.sh

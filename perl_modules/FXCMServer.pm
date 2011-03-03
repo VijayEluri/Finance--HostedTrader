@@ -6,7 +6,7 @@ package FXCMServer;
 =head1 SYNOPSIS
 
     use FXCMServer;
-    my $s = FXCMServer->new();
+    my $s = FXCMServer->new( address => '127.0.0.1', port => 1500 );
     print $s->getAsk('EURUSD');
     print $s->getBid('EURUSD');
 
@@ -36,6 +36,7 @@ port 1500 to access the Order2Go API.
 =cut
 
 use Moose;
+use Moose::Util::TypeConstraints;
 use IO::Socket;
 use IO::Select;
 use YAML::Syck;
@@ -51,11 +52,34 @@ use constant READ_TIMEOUT => 15;
 =over 12
 
 =cut
+
+=item C<address>
+
+The server address to connect to
+
+=cut
+has address => (
+    is      => 'ro',
+    isa     => 'Str',
+    required=> 1,
+);
+
+=item C<port>
+
+The server port to connect to
+
+=cut
+has port => (
+    is      => 'ro',
+    isa     => 'Int',
+    required=> 1,
+);
+
 sub BUILD {
     my $self = shift;
     my $sock = IO::Socket::INET->new(
-                    PeerAddr => '127.0.0.1',
-                    PeerPort => '1500',
+                    PeerAddr => $self->{address},
+                    PeerPort => $self->{port},
                     Proto    => 'tcp',
                     Timeout  => CONNECT_TIMEOUT,
                     ) or die($!);

@@ -1,7 +1,5 @@
 system.yml
-trader.log*
 t.log
-server.log*
 *.symbols.yml
 RatePrinter.log*
 datafeed.log*
@@ -9,3 +7,6 @@ cover_db
 LAST_DOWNLOADED
 TO_DOWNLOAD
 TODO
+server_*.log
+trader_*.log
+config_real.sh
