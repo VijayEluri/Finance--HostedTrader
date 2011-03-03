@@ -7,13 +7,15 @@ use Statistics::RankCorrelation;
 
 use Finance::HostedTrader::ExpressionParser;
 
-my @syms = qw/XAGUSD XAUUSD USDCHF AUDUSD EURCHF/;# XAUUSD AUDJPY USDCHF NZDUSD EURCAD AUDUSD EURJPY NZDJPY GBPUSD EURGBP USDJPY EURUSD/;
+#my @syms = qw/XAGUSD XAUUSD USDCHF AUDUSD EURCHF/;# XAUUSD AUDJPY USDCHF NZDUSD EURCAD AUDUSD EURJPY NZDJPY GBPUSD EURGBP USDJPY EURUSD/;
 
 my %tradeable;
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
+my $correlation_limit = 0.66;
 
-foreach my $newSym (@syms) {
+
+foreach my $newSym (@ARGV) {
     my $data=getData($newSym);
     my $maxCorrelation = 0;
 
@@ -23,10 +25,10 @@ foreach my $newSym (@syms) {
         print "$newSym\t$k\t$corr\n";
 
         $maxCorrelation = $corr if ($corr > $maxCorrelation);
-        last if ($maxCorrelation >= 0.8);
+        last if ($maxCorrelation >= $correlation_limit);
     }
 
-    $tradeable{$newSym} = $data if ($maxCorrelation < 0.8);
+    $tradeable{$newSym} = $data if ($maxCorrelation < $correlation_limit);
 }
 
 my @t = keys(%tradeable);
