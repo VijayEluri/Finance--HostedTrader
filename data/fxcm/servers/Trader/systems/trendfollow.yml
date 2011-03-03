@@ -12,10 +12,10 @@ signals:
   enter:
     long: 
       signal: crossoverup(close, min(ema(close,200)+6*atr(14), 50))
-      currentEntryPoint: min(ema(close,200)+6*atr(14), 50)
+      currentPoint: min(ema(close,200)+6*atr(14), 50)
     short:
       signal: crossoverdown(close, max(ema(close,200)-6*atr(14), 50))
-      currentEntryPoint: max(ema(close,200)-6*atr(14), 50)
+      currentPoint: max(ema(close,200)-6*atr(14), 50)
     args:
       timeframe: 5min
       maxLoadedItems: 2000
@@ -23,10 +23,10 @@ signals:
   exit:
     long:
       signal: low < previous(min(low,240),1)
-      currentExitPoint: previous(min(low,240),1)
+      currentPoint: previous(min(low,240),1)
     short:
       signal: high > previous(max(high,240),1)
-      currentExitPoint: previous(max(high,240),1)
+      currentPoint: previous(max(high,240),1)
     args:
       timeframe: 15min
       maxLoadedItems: 400

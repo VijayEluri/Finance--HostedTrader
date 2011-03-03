@@ -46,7 +46,7 @@ foreach my $system_name ( qw/trendfollow/ ) {
     my $currentExit = $processor->getIndicatorData( {
         symbol          => $symbol,
         numItems        => 1,
-        fields          =>  'datetime,' . $data->{signals}->{exit}->{$direction}->{currentExitPoint},
+        fields          =>  'datetime,' . $data->{signals}->{exit}->{$direction}->{currentPoint},
         maxLoadedItems  => $data->{signals}->{exit}->{args}->{maxLoadedItems},
         tf              => $data->{signals}->{exit}->{args}->{timeframe},
     } );
@@ -55,7 +55,7 @@ foreach my $system_name ( qw/trendfollow/ ) {
             my $currentEntry = $processor->getIndicatorData( {
                         symbol  => $symbol,
                         numItems => 1,
-                        fields          =>  'datetime,' . $data->{signals}->{enter}->{$direction}->{currentEntryPoint},
+                        fields          =>  'datetime,' . $data->{signals}->{enter}->{$direction}->{currentPoint},
                         maxLoadedItems  => $data->{signals}->{enter}->{args}->{maxLoadedItems},
                         tf              => $data->{signals}->{enter}->{args}->{timeframe},
             } );

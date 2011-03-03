@@ -135,6 +135,36 @@ sub _loadSymbols {
     return $yaml->[0]->{symbols};
 }
 
+sub getEntryValue {
+    my $self = shift;
+
+    return $self->_getSignalValue('enter', @_);
+}
+
+sub getExitValue {
+    my $self = shift;
+
+    return $self->_getSignalValue('exit', @_);
+}
+
+sub _getSignalValue {
+    my ($self, $action, $symbol, $tradeDirection) = @_;
+
+    my $system = $self->{_system};
+    my $args = $system->{signals}->{$action}->{args};
+    my $signal = $system->{signals}->{$action}->{$tradeDirection};
+    my $value = $self->{_signal_processor}->getIndicatorData( {
+                symbol  => $symbol,
+                tf      => $args->{timeframe},
+                fields  => 'datetime, ' . $signal->{currentPoint},
+                maxLoadedItems => $args->{maxLoadedItems},
+                numItems => 1,
+                debug => 0,
+    } );
+
+    return $value->[0]->[1];
+}
+
 sub checkEntrySignal {
     my $self = shift;
 
@@ -200,19 +230,10 @@ my $direction = shift;
 my $maxLossPts;
 my $system = $self->{_system};
 
-    my $args = $system->{signals}->{exit}->{args};
-    my $signal = $system->{signals}->{exit}->{$direction};
     my $maxLoss   = $account->getNav() * $system->{maxExposure} / 100;
-    my $stopLoss = $self->{_signal_processor}->getIndicatorData( {
-                symbol  => $symbol,
-                tf      => $args->{timeframe},
-                fields  => 'datetime, ' . $signal->{currentExitPoint},
-                maxLoadedItems => $args->{maxLoadedItems},
-                numItems => 1,
-                debug => 0,
-    } );
-    $stopLoss = $stopLoss->[0]->[1];
+    my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
     my $base = uc(substr($symbol, -3));
+
     if ($base ne "GBP") {
         $maxLoss *= $account->getAsk("GBP$base");
     }
