@@ -11,13 +11,13 @@ filters:
 signals:
   enter:
     long: 
-      signal: crossoverup(close, min(ema(close,200)+5*atr(14), 50))
-      currentEntryPoint: min(ema(close,200)+5*atr(14), 50)
+      signal: crossoverup(close, min(ema(close,200)+6*atr(14), 50))
+      currentEntryPoint: min(ema(close,200)+6*atr(14), 50)
     short:
-      signal: crossoverdown(close, max(ema(close,200)-5*atr(14), 50))
-      currentEntryPoint: max(ema(close,200)-5*atr(14), 50)
+      signal: crossoverdown(close, max(ema(close,200)-6*atr(14), 50))
+      currentEntryPoint: max(ema(close,200)-6*atr(14), 50)
     args:
-      timeframe: 15min
+      timeframe: 5min
       maxLoadedItems: 2000
       period: 1hour
   exit:
@@ -29,6 +29,6 @@ signals:
       currentExitPoint: previous(max(high,240),1)
     args:
       timeframe: 15min
-      maxLoadedItems: 2500
+      maxLoadedItems: 400
       period: 1hour
-maxExposure: 5
+maxExposure: 1.875
