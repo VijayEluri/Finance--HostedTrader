@@ -17,15 +17,22 @@ my $processor = Finance::HostedTrader::ExpressionParser->new();
 
 
 my $trades = $account->_getCurrentTrades();
+my $nav = $account->getNav();
+
+
+print "ACCOUNT NAV: " . $nav . "\n\n\n";
 
 
 print "TRADES:\n-------";
-    my $system = Systems->new( name => 'trendfollow' );
+my $system = Systems->new( name => 'trendfollow' );
 foreach my $trade (@$trades) {
     my $stopLoss = $system->getExitValue($trade->{symbol}, $trade->{direction});
     my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
     my $pl;
     $pl = ( $trade->{direction} eq 'long' ? $marketPrice - $trade->{openPrice} : $trade->{openPrice} - $marketPrice) * $trade->{size};
+    my $baseCurrencyPL = sprintf "%.4f", $account->convertToBaseCurrency($pl, substr($trade->{symbol}, 3));
+    my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $nav;
+
     print qq|
 Symbol: $trade->{symbol}
 Direction: $trade->{direction}
@@ -34,9 +41,11 @@ Open Price: $trade->{openPrice}
 Size: $trade->{size}
 Stop Loss: $stopLoss
 Current Price:  $marketPrice
-Current P/L: $pl
+Current P/L: $baseCurrencyPL ($percentPL%)
 |;
 }
+
+print "\n";
 
 foreach my $system_name ( qw/trendfollow/ ) {
     my $system = Systems->new( name => $system_name );

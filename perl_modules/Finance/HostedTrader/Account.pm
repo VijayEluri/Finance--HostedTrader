@@ -214,6 +214,36 @@ sub getBid {
     }
 }
 
+=item C<converToBaseCurrency>
+
+=cut
+
+sub convertToBaseCurrency {
+    my ($self, $amount, $currentCurrency, $bidask) = @_;
+    $bidask = 'ask' if (!$bidask);
+
+    my $baseCurrency = $self->getBaseCurrency();
+
+    return $amount if ($baseCurrency eq $currentCurrency);
+    my $pair = $baseCurrency . $currentCurrency;
+    if ($bidask eq 'ask') {
+        return $amount / $self->getAsk($pair);
+    } elsif ($bidask eq 'bid') {
+        return $amount / $self->getBid($pair);
+    } else {
+        die("Invalid value in bidask argument: '$bidask'");
+    }
+}
+
+=item C<getBaseCurrency>
+
+=cut
+sub getBaseCurrency {
+    my ($self) = @_;
+    return 'GBP'; #TODO
+
+}
+
 =item C<getBaseUnit>
 
 
