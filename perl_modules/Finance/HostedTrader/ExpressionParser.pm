@@ -43,6 +43,7 @@ $::RD_ERRORS = 1;
 sub new {
 
     my ( $class, $ds ) = @_;
+#TODO: grammar_indicators is a subset of grammar_signals. Having these duplicated is error prone.
     my $grammar_indicators = q {
 start:          statement /\Z/               {$item[1]}
 
