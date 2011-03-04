@@ -6,13 +6,12 @@ use warnings;
 use Data::Dumper;
 
 use Finance::HostedTrader::Account;
-use Finance::HostedTrader::ExpressionParser;
 use Systems;
 
 
 my $account = Finance::HostedTrader::Account->new(
-                username => 'none',
-                password => 'not implemented',
+                address => '127.0.0.1',
+                port => 1500,
               );
 my $processor = Finance::HostedTrader::ExpressionParser->new();
 
@@ -42,29 +41,12 @@ foreach my $system_name ( qw/trendfollow/ ) {
 
     foreach my $direction (qw /long short/) {
         foreach my $symbol (@{$symbols->{$direction}}) {
-
-    my $currentExit = $processor->getIndicatorData( {
-        symbol          => $symbol,
-        numItems        => 1,
-        fields          =>  'datetime,' . $data->{signals}->{exit}->{$direction}->{currentPoint},
-        maxLoadedItems  => $data->{signals}->{exit}->{args}->{maxLoadedItems},
-        tf              => $data->{signals}->{exit}->{args}->{timeframe},
-    } );
-    $currentExit = $currentExit->[0];
-
-            my $currentEntry = $processor->getIndicatorData( {
-                        symbol  => $symbol,
-                        numItems => 1,
-                        fields          =>  'datetime,' . $data->{signals}->{enter}->{$direction}->{currentPoint},
-                        maxLoadedItems  => $data->{signals}->{enter}->{args}->{maxLoadedItems},
-                        tf              => $data->{signals}->{enter}->{args}->{timeframe},
-            } );
-            $currentEntry = $currentEntry->[0];
-
+            my $currentExit = $system->getExitValue($symbol, $direction);
+            my $currentEntry = $system->getEntryValue($symbol, $direction);
 
             print $symbol, " ", 
                 ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)), "/",
-                $currentEntry->[1], "/", $currentExit->[1], " ", $direction,
+                $currentEntry, "/", $currentExit, " ", $direction,
                 "\n";
         }
     }
