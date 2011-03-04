@@ -24,7 +24,7 @@ http://tangentsoft.net/wskfaq/examples/basics/threaded-server.html
 
 using namespace std;
 
-#import "C:\\Programas\\CandleWorks\\FXOrder2Go\fxcore.dll" 
+#import "c:\\Programas\\Candleworks\\FXOrder2Go\\fxcore.dll" 
 
 #include <iostream>
 #include <sstream>
@@ -62,6 +62,7 @@ string CmdGetBaseUnit(string );
 string CmdOpenMarketOrder(string , string , int );
 string CmdCloseMarketOrder(string , int );
 string CmdGetTrades();
+string CmdGetInstruments();
 
 string sCommandData;
 ////////////////////////////////////////////////////////////////////////
@@ -274,6 +275,8 @@ string ProcessCommand(string sCmd) {
 				throw "argument 2 must be an integer";
 			}
 			sResponse = CmdCloseMarketOrder(tokens[1], i);
+		} else if (tokens[0].compare("instruments") == 0) {
+            sResponse = CmdGetInstruments();
 		} else if (tokens[0].compare("quit") == 0) {
 			g_IsRunning = false;
 			sResponse = "200";
@@ -555,6 +558,20 @@ string sTrades = "200 ";
 /*
                  "  openDate: " & Format$(trade.CellValue("Time"), "yyyy-mm-dd hh:nn:ss") & vbLf
 */
+}
+
+string CmdGetInstruments() {
+CheckTradeDeskLogin();
+string sInstruments = "200 ";
+
+    FXCore::IStringEnumAutPtr instruments = g_pTradeDesk->GetInstruments();
+
+    for (int i = 1; i <= instruments->Count; i++) {
+        _bstr_t symbol = instruments->Item(i);
+		sInstruments.append("- ").append(symbol).append("\n");
+    }
+
+    return sInstruments;
 }
 
 string CmdCloseMarketOrder(string sTradeID, int amount) {
