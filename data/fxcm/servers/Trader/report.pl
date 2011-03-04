@@ -20,16 +20,21 @@ my $trades = $account->_getCurrentTrades();
 
 
 print "TRADES:\n-------";
+    my $system = Systems->new( name => 'trendfollow' );
 foreach my $trade (@$trades) {
+    my $stopLoss = $system->getExitValue($trade->{symbol}, $trade->{direction});
     my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
+    my $pl;
+    $pl = ( $trade->{direction} eq 'long' ? $marketPrice - $trade->{openPrice} : $trade->{openPrice} - $marketPrice) * $trade->{size};
     print qq|
 Symbol: $trade->{symbol}
 Direction: $trade->{direction}
 Open Date: $trade->{openDate}
 Open Price: $trade->{openPrice}
 Size: $trade->{size}
-Stop Loss: 
+Stop Loss: $stopLoss
 Current Price:  $marketPrice
+Current P/L: $pl
 |;
 }
 
