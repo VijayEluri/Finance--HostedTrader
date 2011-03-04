@@ -15,8 +15,8 @@ my $positions = [
 
 
 my $account = Finance::HostedTrader::Account->new(
-                username => 'none',
-                password => 'not implemented',
+                address => '127.0.0.1',
+                port => '1500',
               );
 
 my $system = Systems->new( name => 'trendfollow' );
