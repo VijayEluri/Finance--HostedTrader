@@ -48,7 +48,6 @@ my $debug = 0;
 my $symbolsLastUpdated = 0;
 while (1) {
     foreach my $system (@systems) {
-        logger("Analyze " . $system->name) if ($verbose);
 # Applies system filters and updates list of symbols traded by this system
 # Updates symbol list every 15 minutes
         if ( time() - $system->symbolsLastUpdated() > 900 ) {
@@ -56,7 +55,6 @@ while (1) {
             $system->updateSymbols($account);
         }
         eval {
-            logger("Check signals long") if ($verbose);
             checkSystem($account, $system, 'long');
             1;
         } or do {
@@ -64,7 +62,6 @@ while (1) {
         };
 
         eval {
-            logger("Check signals short") if ($verbose);
             checkSystem($account, $system, 'short');
             1;
         } or do {
@@ -80,44 +77,41 @@ sub checkSystem {
     my $symbols = $system->symbols($direction);
 
     foreach my $symbol ( @$symbols ) {
-        my $pos_size = $account->getPosition($symbol)->size;
+        my $position = $account->getPosition($symbol);
+        my $posSize = $position->size;
+        my $numTrades = scalar(@{ $position->trades });
 
-        if (!$pos_size) {
-            logger("Checking ".$system->name." $symbol $direction") if ($verbose);
-            my $result = $system->checkEntrySignal($symbol, $direction);
-            if ($result) {
-                my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction);
-                logger("Adding position for $symbol $direction ($amount)");
-                logger(Dumper(\$result));
-                next if ($amount <= 0);
+        logger("Check ".$system->name." $symbol $direction [$numTrades]") if ($verbose);
+        if ($numTrades < 3 && $system->checkEntrySignal($symbol, $direction)) {
+            logger("Entry signal $symbol $direction");
+            my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction);
+            my $maxAmount = $account->convertBaseUnit($symbol, $posSize / 2); #If there are no trades opened, maxAmount=0, otherwise, it equals half the value of all other trades
+            $amount = $maxAmount if ($maxAmount && $amount > $maxAmount); #So when adding to a position, make sure we don't add more than 50% of what we already have
+            next if ($amount <= 0);
+            logger("Adding position $symbol $direction ($amount)");
 
-                TRY_OPENTRADE: foreach my $try (1..3) {
-                    eval {
-                        my ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
-                        logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate");
-                        1;
-                    } or do {
-                        logger($@);
-                        next;
-                    };
-                    sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
+            TRY_OPENTRADE: foreach my $try (1..3) {
+                eval {
+                    my ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
+                    logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate");
+                    1;
+                } or do {
+                    logger($@);
+                    next;
+                };
+                sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
 Instrument: $symbol
 Direction: $direction
 Amount: $amount
 Current Value: $value
 Stop Loss: $stopLoss
                 });
-                    last TRY_OPENTRADE;
-                }
+                last TRY_OPENTRADE;
             }
-        } else {
-            logger("Bypassing $symbol $direction. Position already opened.") if ($verbose);
-        }
-
-        if ($pos_size) {
+        } elsif ($posSize) {
             my $result = $system->checkExitSignal($symbol, $direction);
             if ($result) {
-                logger("Closing position for $symbol $direction ( $pos_size )");
+                logger("Closing position for $symbol $direction ( $posSize )");
                 $account->closeTrades($symbol, $direction);
                 my $value;
                 if ($direction eq "long") {
@@ -128,7 +122,7 @@ Stop Loss: $stopLoss
                 sendMail('Trading Robot - Close Trade ' . $symbol, qq {Close Trade:
 Instrument: $symbol
 Direction: $direction
-Position Size: $pos_size
+Position Size: $posSize
 Current Value: $value
                 });
             }
