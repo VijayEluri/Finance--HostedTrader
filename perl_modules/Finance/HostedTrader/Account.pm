@@ -255,6 +255,16 @@ sub getBaseUnit {
     return $s->baseUnit(@_);
 }
 
+=item C<convertBaseUnit>
+
+=cut
+sub convertBaseUnit {
+    my ($self, $symbol, $amount) = @_;
+    my $baseUnit = $self->getBaseUnit($symbol);
+
+    return int($amount / $baseUnit) * $baseUnit;
+}
+
 sub _getCurrentTrades {
     my $self = shift;
 #Call FXCMServer from limited scope

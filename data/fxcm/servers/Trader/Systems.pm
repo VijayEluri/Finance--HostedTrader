@@ -250,10 +250,8 @@ my $system = $self->{_system};
     if ( $maxLossPts <= 0 ) {
         die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
     }
-    my $baseUnit = $account->getBaseUnit($symbol); #This is the minimum amount that can be traded for the symbol
-    my $amount = ($maxLoss / $maxLossPts) / $baseUnit;
-    $amount = int($amount) * $baseUnit;
-    die("trade size amount is negative: amount=$amount, baseUnit=$baseUnit, maxLoss=$maxLoss, maxLossPts=$maxLossPts") if ($amount < 0);
+    my $amount = $account->convertBaseUnit($symbol, $maxLoss / $maxLossPts);
+    die("trade size amount is negative: amount=$amount, maxLoss=$maxLoss, maxLossPts=$maxLossPts") if ($amount < 0);
     return ($amount, $value, $stopLoss);
 }
 
