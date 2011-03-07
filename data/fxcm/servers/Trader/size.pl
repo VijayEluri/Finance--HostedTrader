@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use Getopt::Long;
 
 use Finance::HostedTrader::Account;
 use Systems;
@@ -14,9 +15,16 @@ my $positions = [
 ];
 
 
+my ($address, $port) = ('127.0.0.1', 1500);
+
+GetOptions(
+    "address=s" => \$address,
+    "port=i"    => \$port,
+);
+
 my $account = Finance::HostedTrader::Account->new(
-                address => '127.0.0.1',
-                port => '1500',
+                address => $address,
+                port => $port,
               );
 
 my $system = Systems->new( name => 'trendfollow' );

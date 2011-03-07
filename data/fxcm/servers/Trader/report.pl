@@ -4,14 +4,21 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use Getopt::Long;
 
 use Finance::HostedTrader::Account;
 use Systems;
 
+my ($address, $port) = ('127.0.0.1', 1500);
+
+GetOptions(
+    "address=s" => \$address,
+    "port=i"    => \$port,
+);
 
 my $account = Finance::HostedTrader::Account->new(
-                address => '127.0.0.1',
-                port => 1600,
+                address => $address,
+                port => $port,
               );
 my $processor = Finance::HostedTrader::ExpressionParser->new();
 
