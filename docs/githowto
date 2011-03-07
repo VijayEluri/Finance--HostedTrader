@@ -1,3 +1,6 @@
+#TIPS
+http://gitready.com/beginner/2009/01/11/reverting-files.html
+
 #Download repository from origin server
 git clone git@github.com:joaocosta/Finance--HostedTrader.git
 
