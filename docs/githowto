@@ -1,7 +1,16 @@
-Download repository from origin server: git clone git@github.com:joaocosta/Finance--HostedTrader.git
-Push changes to origin server: git push origin
-Pull changes from origin server to local master branch: git pull origin master
+#Download repository from origin server
+git clone git@github.com:joaocosta/Finance--HostedTrader.git
+
+#Push changes to origin server
+git push origin
+
+#Pull changes from origin server to local master branch
+git pull origin master
 
 To ignore files, create a .gitignore file in the relevant directory
 
-git checkout file #retrieve file
+#retrieve file
+git checkout file
+
+# Revert to previous version of a file:
+git checkout HEAD^ Trader.pl
