@@ -80,16 +80,18 @@ sub checkSystem {
     my $symbols = $system->symbols($direction);
 
     foreach my $symbol ( @$symbols ) {
-        my $pos_size = $account->getPosition($symbol)->size;
+        my $position = $account->getPosition($symbol);
+        my $posSize = $position->size;
+        my $numOpenTrades = scalar(@{$position->trades});
 
-        if (!$pos_size) {
+        if ($numOpenTrades < $system->maxNumberTrades) {
             logger("Checking ".$system->name." $symbol $direction") if ($verbose);
             my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
-                my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction);
-                logger("Adding position for $symbol $direction ($amount)");
+                my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction, $position);
                 logger(Dumper(\$result));
                 next if ($amount <= 0);
+                logger("Adding position for $symbol $direction ($amount)");
 
                 TRY_OPENTRADE: foreach my $try (1..3) {
                     eval {
@@ -110,14 +112,12 @@ Stop Loss: $stopLoss
                     last TRY_OPENTRADE;
                 }
             }
-        } else {
-            logger("Bypassing $symbol $direction. Position already opened.") if ($verbose);
         }
 
-        if ($pos_size) {
+        if ($posSize) {
             my $result = $system->checkExitSignal($symbol, $direction);
             if ($result) {
-                logger("Closing position for $symbol $direction ( $pos_size )");
+                logger("Closing position for $symbol $direction ( $posSize )");
                 $account->closeTrades($symbol, $direction);
                 my $value;
                 if ($direction eq "long") {
@@ -128,7 +128,7 @@ Stop Loss: $stopLoss
                 sendMail('Trading Robot - Close Trade ' . $symbol, qq {Close Trade:
 Instrument: $symbol
 Direction: $direction
-Position Size: $pos_size
+Position Size: $posSize
 Current Value: $value
                 });
             }

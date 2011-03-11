@@ -221,20 +221,40 @@ sub _loadSystem {
     $self->{_system} = $system;
 }
 
+sub maxNumberTrades {
+my ($self) = @_;
+
+my $exposurePerPosition = $self->{_system}->{maxExposure};
+die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
+return scalar(@{$exposurePerPosition});
+}
+
 sub getTradeSize {
 my $self = shift;
 my $account = shift;
 my $symbol = shift;
 my $direction = shift;
+my $position = shift;
 
 my $maxLossPts;
 my $system = $self->{_system};
+my $trades = $position->trades;
 
-    my $maxLoss   = $account->getNav() * $system->{maxExposure} / 100;
+
+    my $exposurePerPosition = $system->{maxExposure};
+    die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
+    return (0,undef,undef) if (scalar(@$trades) >= scalar(@{$exposurePerPosition}));
+
+    my $maxExposure = $exposurePerPosition->[@{$trades}];
+    die("max exposure is negative") if ($maxExposure <0);
+    my $nav = $account->getNav();
+    die("nav is negative") if ($nav < 0);
+
+    my $maxLoss   = $nav * $maxExposure / 100;
     my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
     my $base = uc(substr($symbol, -3));
 
-    if ($base ne "GBP") {
+    if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
         $maxLoss *= $account->getAsk("GBP$base");
     }
 
@@ -251,7 +271,8 @@ my $system = $self->{_system};
         die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
     }
     my $amount = $account->convertBaseUnit($symbol, $maxLoss / $maxLossPts);
-    die("trade size amount is negative: amount=$amount, maxLoss=$maxLoss, maxLossPts=$maxLossPts") if ($amount < 0);
+    $amount -= $position->size;
+    $amount = 0 if ($amount < 0);
     return ($amount, $value, $stopLoss);
 }
 
