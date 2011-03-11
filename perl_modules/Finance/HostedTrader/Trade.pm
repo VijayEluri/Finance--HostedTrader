@@ -157,6 +157,15 @@ sub close {
     $self->{closePrice} = $closePrice;
 }
 
+=item C<stopLoss>
+
+=cut
+sub exitValue {
+    my ($self, $system);
+
+    return $system->getExitValue($self->symbol, $self->direction);
+}
+
 __PACKAGE__->meta->make_immutable;
 1;
 

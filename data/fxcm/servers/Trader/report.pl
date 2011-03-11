@@ -37,7 +37,7 @@ foreach my $trade (@$trades) {
     my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
     my $pl;
     $pl = ( $trade->{direction} eq 'long' ? $marketPrice - $trade->{openPrice} : $trade->{openPrice} - $marketPrice) * $trade->{size};
-    my $baseCurrencyPL = sprintf "%.4f", $account->convertToBaseCurrency($pl, substr($trade->{symbol}, 3));
+    my $baseCurrencyPL = sprintf "%.4f", $account->convertToBaseCurrency($pl, $account->getSymbolBase($trade->{symbol}));
     my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $nav;
 
     print qq|

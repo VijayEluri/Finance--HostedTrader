@@ -265,6 +265,16 @@ sub convertBaseUnit {
     return int($amount / $baseUnit) * $baseUnit;
 }
 
+=item C<getSymbolBase>
+
+=cut
+sub getSymbolBase {
+    my ($self, $symbol) = @_;
+
+    my $s = FXCMServer->new( address => $self->address, port => $self->port );
+    return $s->getSymbolBase($symbol);
+}
+
 sub _getCurrentTrades {
     my $self = shift;
 #Call FXCMServer from limited scope
