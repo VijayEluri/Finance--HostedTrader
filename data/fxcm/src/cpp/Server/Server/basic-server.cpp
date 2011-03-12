@@ -24,7 +24,7 @@ http://tangentsoft.net/wskfaq/examples/basics/threaded-server.html
 
 using namespace std;
 
-#import "c:\\Programas\\Candleworks\\FXOrder2Go\\fxcore.dll" 
+#import "c:\\Program Files (x86)\\Candleworks\\FXOrder2Go\\fxcore.dll" 
 
 #include <iostream>
 #include <sstream>
@@ -54,8 +54,6 @@ const char* g_pcAcType;
 using namespace FXCore;
 
 bool initCore();
-string convertSymbolFromFXCM(string );
-string convertSymbolToFXCM(string );
 string CmdGetCurrentPrice(string , string );
 string CmdGetNAV();
 string CmdGetBaseUnit(string );
@@ -63,6 +61,11 @@ string CmdOpenMarketOrder(string , string , int );
 string CmdCloseMarketOrder(string , int );
 string CmdGetTrades();
 string CmdGetInstruments();
+string CmdGetBaseCurrency();
+string convertSymbolFromFXCM(string symbol);
+void CmdSetSymbolEnabled(string );
+void CmdSetSymbolDisabled(string );
+
 
 string sCommandData;
 ////////////////////////////////////////////////////////////////////////
@@ -275,8 +278,22 @@ string ProcessCommand(string sCmd) {
 				throw "argument 2 must be an integer";
 			}
 			sResponse = CmdCloseMarketOrder(tokens[1], i);
+		} else if (tokens[0].compare("basecurrency") == 0) {
+            sResponse = CmdGetBaseCurrency();
 		} else if (tokens[0].compare("instruments") == 0) {
             sResponse = CmdGetInstruments();
+		} else if (tokens[0].compare("symbolenable") == 0) {
+			if (tokens.size() != 2) {
+				throw "Expected 1 argument";
+			}
+			CmdSetSymbolEnabled(tokens[1].c_str());
+			sResponse = "200";
+		} else if (tokens[0].compare("symboldisable") == 0) {
+			if (tokens.size() != 2) {
+				throw "Expected 1 argument";
+			}
+			CmdSetSymbolDisabled(tokens[1].c_str());
+			sResponse = "200";
 		} else if (tokens[0].compare("quit") == 0) {
 			g_IsRunning = false;
 			sResponse = "200";
@@ -408,7 +425,7 @@ _bstr_t GetAccountID() {
 
 double GetCurrentPrice(string symbol, string sType) {
 	CheckTradeDeskLogin();
-	FXCore::IRowAutPtr offer = g_pTradeDesk->FindRowInTable("offers", "Instrument", convertSymbolToFXCM(symbol).c_str() );
+	FXCore::IRowAutPtr offer = g_pTradeDesk->FindRowInTable("offers", "Instrument", symbol.c_str() );
 	_variant_t rv = offer->CellValue(sType.c_str());
 	return rv.dblVal;
 }
@@ -437,7 +454,7 @@ string CmdGetBaseUnit(string symbol) {
 	string rv = "200 ";
 	CheckTradeDeskLogin();
 	_bstr_t AcctID = GetAccountID();
-	int baseUnit = g_pTradingSettings->GetBaseUnitSize(convertSymbolToFXCM(symbol).c_str(), AcctID);
+	int baseUnit = g_pTradingSettings->GetBaseUnitSize(symbol.c_str(), AcctID);
 
 	os << baseUnit;
 	rv.append(os.str());
@@ -463,7 +480,7 @@ string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 		bBuy = false;
 	}
 	dRate = GetCurrentPrice(symbol, sType);
-	g_pTradeDesk->CreateFixOrder2(g_pTradeDesk->FIX_OPEN, "", dRate, 0, "", AcctID, convertSymbolToFXCM(symbol).c_str(), bBuy, 
+	g_pTradeDesk->CreateFixOrder2(g_pTradeDesk->FIX_OPEN, "", dRate, 0, "", AcctID, symbol.c_str(), bBuy, 
 				iAmount, "", 0, &vOrderID, &vDealerInt);
 
 	rv = "200 ";// + vOrderID.bstrVal;// + " " + dRate;
@@ -520,6 +537,7 @@ string sTrades = "200 ";
 		{
 			std::ostringstream strs_Price;
 			std::ostringstream strs_Lot;
+			std::ostringstream strs_PL;
 			_bstr_t _symbol = pTradesTable->CellValue(l, "Instrument").bstrVal;
 			string symbol = (const char*) _symbol;
 			symbol = convertSymbolFromFXCM(symbol);
@@ -546,12 +564,16 @@ string sTrades = "200 ";
 			_variant_t _openDate = pTradesTable->CellValue(l, "Time");
 			string openDate = convertDate(_openDate);
 
+			double pl = pTradesTable->CellValue(l, "GrossPL").dblVal;
+			strs_PL << pl;
+
 			sTrades.append("- symbol: ").append(symbol).append("\n");
 			sTrades.append("  id: ").append(tradeID).append("\n");
 			sTrades.append("  direction: ").append(direction).append("\n");
 			sTrades.append("  openPrice: ").append(strs_Price.str()).append("\n");
 			sTrades.append("  size: ").append(strs_Lot.str()).append("\n");
 			sTrades.append("  openDate: ").append(openDate).append("\n");
+			sTrades.append("  pl: ").append(strs_PL.str()).append("\n");
 		}
 
 		return sTrades;
@@ -574,6 +596,17 @@ string sInstruments = "200 ";
     return sInstruments;
 }
 
+string CmdGetBaseCurrency() {
+CheckTradeDeskLogin();
+string sBaseCurrency = "200 ";
+
+	_variant_t out = g_pTradeDesk->GetSystemProperty("BASE_CRNCY");
+	_bstr_t bOut = out.bstrVal;
+	sBaseCurrency.append((const char *) bOut);
+
+    return sBaseCurrency;
+}
+
 string CmdCloseMarketOrder(string sTradeID, int amount) {
 _variant_t vOrderID = "", vDealerInt = "";
 
@@ -587,22 +620,19 @@ _variant_t vOrderID = "", vDealerInt = "";
 	return rv;
 }
 
+void CmdSetSymbolEnabled(string symbol) {
+	g_pTradeDesk->SetOfferSubscription(symbol.c_str(), "Enabled");
+}
+
+void CmdSetSymbolDisabled(string symbol) {
+	g_pTradeDesk->SetOfferSubscription(symbol.c_str(), "Disabled");
+}
+
 string convertSymbolFromFXCM(string symbol) {
 unsigned int i;
 string rv = symbol;
 	while ( (i = rv.find("/")) != string::npos ) {
 		rv.replace(i, 1, "");
-	}
-	return rv;
-}
-
-string convertSymbolToFXCM(string symbol) {
-string rv;
-
-	if (symbol.length() == 6) {
-		rv = symbol.substr(0,3).append("/").append(symbol.substr(3));
-	} else {
-		rv = symbol;
 	}
 	return rv;
 }
