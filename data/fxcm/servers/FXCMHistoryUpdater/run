@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ../config.sh
+. ../config_real.sh
 
 wine ./FXCMHistoryUpdater.exe $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE `./dates.pl` # &> /dev/null < /dev/null
 ../Datafeed/load 300 . 0001-01-01
