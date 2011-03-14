@@ -11,7 +11,6 @@ use Date::Manip;
 use Pod::Usage;
 
 
-use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Account;
 use Systems;
 
@@ -27,8 +26,6 @@ my $result = GetOptions(
 pod2usage(1) if ($help);
 
 logger("STARTUP");
-
-my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
 my $account = Finance::HostedTrader::Account->new(
                 address     => $address,
