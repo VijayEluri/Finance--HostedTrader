@@ -20,8 +20,6 @@ my $account = Finance::HostedTrader::Account->new(
                 address => $address,
                 port => $port,
               );
-my $processor = Finance::HostedTrader::ExpressionParser->new();
-
 
 my $trades = $account->_getCurrentTrades();
 my $nav = $account->getNav();
@@ -35,9 +33,7 @@ my $system = Systems->new( name => 'trendfollow' );
 foreach my $trade (@$trades) {
     my $stopLoss = $system->getExitValue($trade->{symbol}, $trade->{direction});
     my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
-    my $pl;
-    $pl = ( $trade->{direction} eq 'long' ? $marketPrice - $trade->{openPrice} : $trade->{openPrice} - $marketPrice) * $trade->{size};
-    my $baseCurrencyPL = sprintf "%.4f", $account->convertToBaseCurrency($pl, $account->getSymbolBase($trade->{symbol}));
+    my $baseCurrencyPL = $trade->{pl};
     my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $nav;
 
     print qq|
@@ -83,6 +79,9 @@ foreach my $system_name ( qw/trendfollow/ ) {
 
 
 ####OLD - Simpler and faster but less generic
+=pod
+use Finance::HostedTrader::ExpressionParser;
+
 sub _getSymbolsTrendFollow {
     my $symbols = getAllSymbols();
     my @results;
@@ -112,3 +111,4 @@ sub _getSymbolsTrendFollow {
     }
     return $rv;
 }
+=cut
