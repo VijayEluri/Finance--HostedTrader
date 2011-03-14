@@ -15,7 +15,7 @@ done
 
 
 #check if the FXCM API server is responding to requests
-RES=`echo ask XAUUSD | nc -w 10 localhost 1500`
+RES=`echo ask XAU/USD | nc -w 10 localhost 1500`
 if [[ "$RES" = "" ]]; then
     echo Server timeout
 else
