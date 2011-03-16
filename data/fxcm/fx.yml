@@ -1,6 +1,9 @@
 symbols:
     natural:
         - AUDUSD
+        - AUDJPY
+        - CHFJPY
+        - EURCAD
         - EURCHF
         - EURGBP
         - EURJPY
@@ -9,14 +12,13 @@ symbols:
         - GBPJPY
         - GBPUSD
         - NZDUSD
+        - NZDJPY
         - USDCAD
         - USDCHF
         - USDJPY
         - XAUUSD
         - XAGUSD
     synthetic:
-        - AUDJPY
-        - CHFJPY
 timeframes:
     natural:
         - 300
