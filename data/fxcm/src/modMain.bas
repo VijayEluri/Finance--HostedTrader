@@ -50,7 +50,7 @@ Public Sub Main()
         TfInfo(i).FXCore2GO_Code = UnmapTimeframe(Args(5 + i))
     Next
     
-    Symbols = Array("EUR/USD", "USD/JPY", "GBP/USD", "USD/CHF", "EUR/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "GBP/CHF", "XAU/USD", "XAG/USD") ', "USOil", "UKOil", "NAS100", "SPX500")
+    Symbols = Array("EUR/USD", "USD/JPY", "GBP/USD", "USD/CHF", "EUR/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "GBP/CHF", "XAU/USD", "XAG/USD", "USOil", "UKOil", "NAS100", "SPX500", "NZD/JPY", "CHF/JPY", "AUD/JPY", "EUR/CAD")
 
     username = Args(0)
     password = Args(1)
