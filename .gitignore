@@ -2,6 +2,7 @@ system.yml
 t.log
 *.symbols.yml
 RatePrinter.log*
+FXCMHistoryUpdater.log*
 datafeed.log*
 cover_db
 LAST_DOWNLOADED
