@@ -27,7 +27,7 @@ my $account = Finance::HostedTrader::Account->new(
                 port => $port,
               );
 
-my $system = Systems->new( name => 'trendfollow' );
+my $system = Systems->new( name => 'trendfollow', account => $account );
 my $accountSize = $account->getNav();
 
 
@@ -37,7 +37,7 @@ foreach my $position (@$positions) {
 
     my ($pos_size, $entry, $exit);
     eval {
-       ($pos_size, $entry, $exit) = $system->getTradeSize($account, $position->{symbol}, $position->{direction});
+       ($pos_size, $entry, $exit) = $system->getTradeSize($position->{symbol}, $position->{direction});
        1;
     } or do {
         print $@;

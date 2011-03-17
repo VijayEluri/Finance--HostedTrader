@@ -3,7 +3,6 @@ package Systems;
 use strict;
 use warnings;
 
-use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Config;
 
 
@@ -19,11 +18,16 @@ has 'name' => (
     required=>1,
 );
 
+has 'account' => (
+    is     => 'ro',
+    isa    => 'Finance::HostedTrader::Account',
+    required=>1,
+);
+
 sub BUILD {
     my $self = shift;
 
     $self-> _loadSystem();
-    $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
     $self->{_system}->{symbols} = $self->_loadSymbols();
     $self->{_symbolsLastUpdated} = 0;
 }
@@ -41,7 +45,7 @@ sub symbolsLastUpdated {
 
 sub updateSymbols {
     my $self = shift;
-    my $account = shift; #TODO 
+    my $account = $self->account;
 
     my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filters});
     my $trades = $account->_getCurrentTrades();
@@ -82,33 +86,27 @@ sub getSymbolsSignalFilter {
 
     my $long_symbols = $filters->{symbols}->{long};
     my $short_symbols = $filters->{symbols}->{short};
-    my $processor = $self->{_signal_processor};
+    my $account = $self->account;
 
     my $rv = { long => [], short => [] };
 
     my $filter=$filters->{signals}->[0];
 
     foreach my $symbol (@$long_symbols) {
-        if ($processor->checkSignal( {
-            'expr' => $filter->{longSignal},
-            'symbol' => $symbol,
-            'tf' => $filter->{args}->{tf},
-            'maxLoadedItems' => $filter->{args}->{maxLoadedItems},
-            'period' => $filter->{args}->{period},
-            'debug' => $filter->{args}->{debug},
-        })) {
+        if ($account->checkSignal(
+                $symbol,
+                $filter->{longSignal},
+                $filter->{args}
+        )) {
             push @{ $rv->{long} }, $symbol;
         }
     }
 
     foreach my $symbol (@$short_symbols) {
-        if ($processor->checkSignal( {
-            'expr' => $filter->{shortSignal},
-            'symbol' => $symbol,
-            'tf' => $filter->{args}->{tf},
-            'maxLoadedItems' => $filter->{args}->{maxLoadedItems},
-            'period' => $filter->{args}->{period},
-            'debug' => $filter->{args}->{debug},
+        if ($account->checkSignal( {
+            $symbol,
+            $filter->{shortSignal},
+            $filter->{args},
         })) {
             push @{ $rv->{short} }, $symbol;
         }
@@ -150,19 +148,13 @@ sub getExitValue {
 sub _getSignalValue {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
-    my $system = $self->{_system};
-    my $args = $system->{signals}->{$action}->{args};
-    my $signal = $system->{signals}->{$action}->{$tradeDirection};
-    my $value = $self->{_signal_processor}->getIndicatorData( {
-                symbol  => $symbol,
-                tf      => $args->{timeframe},
-                fields  => 'datetime, ' . $signal->{currentPoint},
-                maxLoadedItems => $args->{maxLoadedItems},
-                numItems => 1,
-                debug => 0,
-    } );
+    my $signal = $self->{_system}->{signals}->{$action};
 
-    return $value->[0]->[1];
+    return $self->account->getIndicatorValue(
+                $symbol, 
+                $signal->{$tradeDirection}->{currentPoint},
+                $signal->{args}
+    );
 }
 
 sub checkEntrySignal {
@@ -181,16 +173,12 @@ sub _checkSignalWithAction {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
     my $signal_definition = $self->{_system}->{signals}->{$action}->{$tradeDirection};
-    my $args = $self->{_system}->{signals}->{$action}->{args};
+    my $signal_args = $self->{_system}->{signals}->{$action}->{args};
 
-    return $self->{_signal_processor}->checkSignal(
-        {
-            'expr' => $signal_definition->{signal}, 
-            'symbol' => $symbol,
-            'tf' => $args->{timeframe},
-            'maxLoadedItems' => $args->{maxLoadedItems},
-            'period' => $args->{period},
-        }
+    return $self->account->checkSignal(
+                    $symbol,
+                    $signal_definition->{signal},
+                    $signal_args
     );
 }
 
@@ -231,7 +219,6 @@ return scalar(@{$exposurePerPosition});
 
 sub getTradeSize {
 my $self = shift;
-my $account = shift;
 my $symbol = shift;
 my $direction = shift;
 my $position = shift;
@@ -239,6 +226,7 @@ my $position = shift;
 my $maxLossPts;
 my $system = $self->{_system};
 my $trades = $position->trades;
+my $account = $self->account;
 
 
     my $exposurePerPosition = $system->{maxExposure};

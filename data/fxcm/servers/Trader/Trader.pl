@@ -33,7 +33,7 @@ my $account = Finance::HostedTrader::Account->new(
               );
 
 my @systems =   (   
-                    Systems->new( name => 'trendfollow' ),
+                    Systems->new( name => 'trendfollow', account => $account ),
 #                    Systems->new( name => 'countertrend' ),
                 );
 
@@ -50,7 +50,7 @@ while (1) {
 # Updates symbol list every 15 minutes
         if ( time() - $system->symbolsLastUpdated() > 900 ) {
             logger("Update symbol list") if ($verbose);
-            $system->updateSymbols($account);
+            $system->updateSymbols();
         }
         eval {
             logger("Check signals long") if ($verbose);
@@ -85,7 +85,7 @@ sub checkSystem {
             logger("Checking ".$system->name." $symbol $direction") if ($verbose);
             my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
-                my ($amount, $value, $stopLoss) = $system->getTradeSize($account, $symbol, $direction, $position);
+                my ($amount, $value, $stopLoss) = $system->getTradeSize($symbol, $direction, $position);
                 logger(Dumper(\$result));
                 next if ($amount <= 0);
                 logger("Adding position for $symbol $direction ($amount)");

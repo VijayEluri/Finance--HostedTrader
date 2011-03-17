@@ -22,6 +22,7 @@ use strict;
 use warnings;
 use Moose;
 use Moose::Util::TypeConstraints;
+use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Position;
 use Finance::HostedTrader::Trade;
 use FXCMServer;
@@ -99,6 +100,41 @@ has positions => (
     required=>0,
 );
 
+sub BUILD {
+    my $self = shift;
+
+    $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
+}
+
+sub checkSignal {
+    my ($self, $symbol, $signal_definition, $signal_args) = @_;
+
+    return $self->{_signal_processor}->checkSignal(
+        {
+            'expr' => $signal_definition, 
+            'symbol' => $symbol,
+            'tf' => $signal_args->{timeframe},
+            'maxLoadedItems' => $signal_args->{maxLoadedItems},
+            'period' => $signal_args->{period},
+            'debug' => $signal_args->{debug},
+        }
+    );
+}
+
+sub getIndicatorValue {
+    my ($self, $symbol, $indicator, $args) = @_;
+
+    my $value = $self->{_signal_processor}->getIndicatorData( {
+                symbol  => $symbol,
+                tf      => $args->{timeframe},
+                fields  => 'datetime, ' . $indicator,
+                maxLoadedItems => $args->{maxLoadedItems},
+                numItems => 1,
+                debug => $args->{debug},
+    } );
+
+    return $value->[0]->[1];
+}
 
 =item C<getNav>
 

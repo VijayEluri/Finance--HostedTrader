@@ -29,7 +29,7 @@ print "ACCOUNT NAV: " . $nav . "\n\n\n";
 
 
 print "TRADES:\n-------";
-my $system = Systems->new( name => 'trendfollow' );
+my $system = Systems->new( name => 'trendfollow', account => $account );
 foreach my $trade (@$trades) {
     my $stopLoss = $system->getExitValue($trade->{symbol}, $trade->{direction});
     my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
@@ -51,7 +51,7 @@ Current P/L: $baseCurrencyPL ($percentPL%)
 print "\n";
 
 foreach my $system_name ( qw/trendfollow/ ) {
-    my $system = Systems->new( name => $system_name );
+    my $system = Systems->new( name => $system_name, account => $account );
     my $data = $system->data;
     my $symbols = $data->{symbols};
     print "\nSystem $system_name Market Price/Entry Price/Exit Price:\n-------------\n";
