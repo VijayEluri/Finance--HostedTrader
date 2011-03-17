@@ -114,7 +114,7 @@ sub getIndicatorValue {
 
     my $value = $self->{_signal_processor}->getIndicatorData( {
                 symbol  => $symbol,
-                tf      => $args->{tf},
+                tf      => $args->{timeframe},
                 fields  => 'datetime, ' . $indicator,
                 maxLoadedItems => $args->{maxLoadedItems},
                 numItems => 1,

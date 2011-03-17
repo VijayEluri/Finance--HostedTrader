@@ -292,7 +292,7 @@ Returns the current bid(short) price for $symbol
 sub getBid {
     my ($self, $symbol) = @_;
 
-    $symbol = _$self->convertSymbolToFXCM($symbol);
+    $symbol = $self->_convertSymbolToFXCM($symbol);
     return $self->_sendCmd("bid $symbol");
 }
 
