@@ -36,7 +36,7 @@ port 1500 to access the Order2Go API.
 =cut
 
 use Moose;
-extends Finance::HostedTrader::Account;
+extends 'Finance::HostedTrader::Account';
 
 use Moose::Util::TypeConstraints;
 use IO::Socket;
@@ -245,6 +245,7 @@ sub _convertSymbolToFXCM {
 }
 
 sub _socket {
+    my ($self) = @_;
     my $sock = IO::Socket::INET->new(
                     PeerAddr => $self->{address},
                     PeerPort => $self->{port},
@@ -371,7 +372,7 @@ sub getBaseCurrency {
 
 sub _sendCmd {
     my ($self, $cmd) = @_;
-    my $sock = _socket();
+    my $sock = $self->_socket();
 
     my $select = IO::Select->new($sock);
 
