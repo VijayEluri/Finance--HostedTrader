@@ -6,7 +6,7 @@ filters:
       shortSignal: macd(close,12,26,9) - macdsig(close,12,26,9) > 0
       args:
         period: 16hours
-        tf: 2hour
+        timeframe: 2hour
         maxLoadedItems: 150
 signals:
   enter:

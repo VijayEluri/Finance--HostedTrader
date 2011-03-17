@@ -101,7 +101,7 @@ sub checkSignal {
         {
             'expr' => $signal_definition, 
             'symbol' => $symbol,
-            'tf' => $signal_args->{tf},
+            'tf' => $signal_args->{timeframe},
             'maxLoadedItems' => $signal_args->{maxLoadedItems},
             'period' => $signal_args->{period},
             'debug' => $signal_args->{debug},
