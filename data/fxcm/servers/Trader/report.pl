@@ -21,7 +21,7 @@ my $account = Finance::HostedTrader::Account->new(
                 port => $port,
               );
 
-my $trades = $account->_getCurrentTrades();
+my $trades = $account->getTrades();
 my $nav = $account->getNav();
 
 

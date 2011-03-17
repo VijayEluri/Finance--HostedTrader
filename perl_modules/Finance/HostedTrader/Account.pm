@@ -25,7 +25,6 @@ use Moose::Util::TypeConstraints;
 use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Position;
 use Finance::HostedTrader::Trade;
-use FXCMServer;
 
 
 use YAML::Syck;
@@ -54,17 +53,6 @@ has password => (
     isa    => 'Str',
     required=>0,
 );
-
-=item C<accountType>
-
-
-=cut
-#enum 'FXCMOrder2GOAccountType' => qw(DEMO REAL);
-#has accountType => (
-#    is     => 'ro',
-#    isa    => 'FXCMOrder2GOAccountType',
-#    required=>1,
-#);
 
 =item C<address>
 
@@ -138,13 +126,11 @@ sub getIndicatorValue {
 
 =item C<getNav>
 
+Return the current net asset value in the account
 
 =cut
 sub getNav {
-    my ($self) = @_;
-
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-    return $s->nav();
+    die("overrideme");
 }
 
 =item C<getPosition>
@@ -156,11 +142,7 @@ my ($self, $symbol) = @_;
 
 my $trades;
 
-{
-my $s = FXCMServer->new( address => $self->address, port => $self->port );
-$trades = $s->getTrades();
-#$s will go out of scope and close the TCP connection to the single threaded server
-}
+$trades = $self->getTrades();
 
 my %positions=();
 
@@ -182,10 +164,7 @@ my %positions=();
 
 =cut
 sub openMarket {
-    my $self = shift;
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-
-    return $s->openMarket(@_);
+    die("overrideme");
 }
 
 =item C<closeTrades>
@@ -196,10 +175,9 @@ sub closeTrades {
     my ($self, $symbol, $direction) = @_;
 
     my $position = $self->getPosition($symbol);
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
     foreach my $trade (@{ $position->trades }) {
         next if ($trade->direction ne $direction);
-        $s->closeMarket($trade->id, $trade->size);
+        $self->closeMarket($trade->id, $trade->size);
     }
 }
 
@@ -208,10 +186,7 @@ sub closeTrades {
 
 =cut
 sub closeMarket {
-    my $self = shift;
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-
-    return $s->closeMarket(@_);
+    die("overrideme");
 }
 
 =item C<getAsk>
@@ -219,17 +194,7 @@ sub closeMarket {
 
 =cut
 sub getAsk {
-    my $self = shift;
-    my $symbol = shift;
-
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-
-#TODO: Need to be based on the symbols available in the account provider instead of based on FXCM
-    if ($symbol eq 'GBPCAD') {
-        return $s->getAsk('GBPUSD') * $s->getAsk('USDCAD');
-    } else {
-        return $s->getAsk($symbol);
-    }
+    die("overrideme");
 }
 
 =item C<getBid>
@@ -237,17 +202,7 @@ sub getAsk {
 
 =cut
 sub getBid {
-    my $self = shift;
-    my $symbol = shift;
-
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-
-#TODO: Need to be based on the symbols available in the account provider instead of based on FXCM
-    if ($symbol eq 'GBPCAD') {
-        return $s->getBid('GBPUSD') * $s->getBid('USDCAD');
-    } else {
-        return $s->getBid($symbol);
-    }
+    die("overrideme");
 }
 
 =item C<converToBaseCurrency>
@@ -275,9 +230,7 @@ sub convertToBaseCurrency {
 
 =cut
 sub getBaseCurrency {
-    my ($self) = @_;
-    return 'GBP'; #TODO
-
+    die("overrideme");
 }
 
 =item C<getBaseUnit>
@@ -285,10 +238,7 @@ sub getBaseCurrency {
 
 =cut
 sub getBaseUnit {
-    my $self = shift;
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-
-    return $s->baseUnit(@_);
+    die("overrideme");
 }
 
 =item C<convertBaseUnit>
@@ -305,22 +255,8 @@ sub convertBaseUnit {
 
 =cut
 sub getSymbolBase {
-    my ($self, $symbol) = @_;
-
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-    return $s->getSymbolBase($symbol);
+    die("overrideme");
 }
-
-sub _getCurrentTrades {
-    my $self = shift;
-#Call FXCMServer from limited scope
-#so that we release the TCP connection
-#to the single threaded server
-#as soon as possible
-    my $s = FXCMServer->new( address => $self->address, port => $self->port );
-    return $s->getTrades();
-}
-
 
 sub _empty_hash {
     return {};

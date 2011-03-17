@@ -36,6 +36,8 @@ port 1500 to access the Order2Go API.
 =cut
 
 use Moose;
+extends Finance::HostedTrader::Account;
+
 use Moose::Util::TypeConstraints;
 use IO::Socket;
 use IO::Select;
@@ -74,6 +76,17 @@ has port => (
     isa     => 'Int',
     required=> 1,
 );
+
+=item C<accountType>
+
+
+=cut
+#enum 'FXCMOrder2GOAccountType' => qw(DEMO REAL);
+#has accountType => (
+#    is     => 'ro',
+#    isa    => 'FXCMOrder2GOAccountType',
+#    required=>1,
+#);
 
 my %symbolMap = (
     AUDCAD => 'AUD/CAD',
@@ -231,8 +244,7 @@ sub _convertSymbolToFXCM {
     return $symbolMap{$symbol};
 }
 
-sub BUILD {
-    my $self = shift;
+sub _socket {
     my $sock = IO::Socket::INET->new(
                     PeerAddr => $self->{address},
                     PeerPort => $self->{port},
@@ -240,7 +252,7 @@ sub BUILD {
                     Timeout  => CONNECT_TIMEOUT,
                     ) or die($!);
     $sock->autoflush(1);
-    $self->{_sock} = $sock;
+    return $sock;
 }
 
 =item C<getTrades()>
@@ -322,35 +334,44 @@ sub closeMarket {
     return $self->_sendCmd("closemarket $tradeID $amount");
 }
 
-=item C<baseUnit($symbol)>
+=item C<getBaseUnit($symbol)>
 
 Returns the base unit at which the symbol trades.
 Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (eg, 15000 would be an invalid trade size).
 
 =cut
 
-sub baseUnit {
+sub getBaseUnit {
     my ($self, $symbol) = @_;
 
     $symbol = $self->_convertSymbolToFXCM($symbol);
     return $self->_sendCmd("baseunit $symbol");
 }
 
-=item C<nav()>
+=item C<getNav()>
 
 Return the current net asset value in the account
 
 =cut
 
-sub nav {
+sub getNav {
     my ($self, $symbol) = @_;
 
     return $self->_sendCmd("nav");
 }
 
+=item C<getBaseCurrency>
+
+=cut
+sub getBaseCurrency {
+    my ($self) = @_;
+    return 'GBP'; #TODO
+
+}
+
 sub _sendCmd {
     my ($self, $cmd) = @_;
-    my $sock = $self->{_sock};
+    my $sock = _socket();
 
     my $select = IO::Select->new($sock);
 
@@ -377,14 +398,9 @@ sub _sendCmd {
         die("Timeout reading from server (cmd=$cmd)");
     }
 
-}
-
-sub DEMOLISH {
-    my $self = shift;
-
-    my $sock = $self->{_sock};
     close($sock);
 }
+
 1;
 
 =back

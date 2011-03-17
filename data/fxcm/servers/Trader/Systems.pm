@@ -48,7 +48,7 @@ sub updateSymbols {
     my $account = $self->account;
 
     my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filters});
-    my $trades = $account->_getCurrentTrades();
+    my $trades = $account->getTrades();
     my $symbols = $self->_loadSymbols();#$self->{_system}->{symbols};
     #List of symbols for which there are open short positions
     my @symbols_to_keep_short = map {$_->{symbol}} grep {$_->{direction} eq 'short'} @{$trades}; 
