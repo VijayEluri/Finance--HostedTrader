@@ -355,7 +355,7 @@ Return the current net asset value in the account
 =cut
 
 sub getNav {
-    my ($self, $symbol) = @_;
+    my ($self) = @_;
 
     return $self->_sendCmd("nav");
 }

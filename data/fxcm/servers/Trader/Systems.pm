@@ -103,11 +103,11 @@ sub getSymbolsSignalFilter {
     }
 
     foreach my $symbol (@$short_symbols) {
-        if ($account->checkSignal( {
+        if ($account->checkSignal(
             $symbol,
             $filter->{shortSignal},
             $filter->{args},
-        })) {
+        )) {
             push @{ $rv->{short} }, $symbol;
         }
     }

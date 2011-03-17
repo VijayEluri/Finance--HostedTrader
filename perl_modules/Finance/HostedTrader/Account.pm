@@ -101,7 +101,7 @@ sub checkSignal {
         {
             'expr' => $signal_definition, 
             'symbol' => $symbol,
-            'tf' => $signal_args->{timeframe},
+            'tf' => $signal_args->{tf},
             'maxLoadedItems' => $signal_args->{maxLoadedItems},
             'period' => $signal_args->{period},
             'debug' => $signal_args->{debug},
@@ -114,7 +114,7 @@ sub getIndicatorValue {
 
     my $value = $self->{_signal_processor}->getIndicatorData( {
                 symbol  => $symbol,
-                tf      => $args->{timeframe},
+                tf      => $args->{tf},
                 fields  => 'datetime, ' . $indicator,
                 maxLoadedItems => $args->{maxLoadedItems},
                 numItems => 1,
