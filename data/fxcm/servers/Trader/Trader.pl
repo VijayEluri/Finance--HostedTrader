@@ -11,7 +11,7 @@ use Date::Manip;
 use Pod::Usage;
 
 
-use Finance::HostedTrader::Account;
+use Finance::HostedTrader::Account::FXCM;
 use Systems;
 
 my ($verbose, $help, $address, $port);
@@ -27,7 +27,7 @@ pod2usage(1) if ($help);
 
 logger("STARTUP");
 
-my $account = Finance::HostedTrader::Account->new(
+my $account = Finance::HostedTrader::Account::FXCM->new(
                 address     => $address,
                 port        => $port,
               );

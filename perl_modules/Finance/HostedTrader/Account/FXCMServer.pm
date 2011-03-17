@@ -1,12 +1,12 @@
-package FXCMServer;
+package Finance::HostedTrader::Account::FXCM;
 =head1 NAME
 
-    FXCMServer - Interface to the FXCM broker
+    Finance::HostedTrader::Account::FXCM - Interface to the FXCM broker
 
 =head1 SYNOPSIS
 
-    use FXCMServer;
-    my $s = FXCMServer->new( address => '127.0.0.1', port => 1500 );
+    use FXCM;
+    my $s = Finance::HostedTrader::Account::FXCM->new( address => '127.0.0.1', port => 1500 );
     print $s->getAsk('EURUSD');
     print $s->getBid('EURUSD');
 

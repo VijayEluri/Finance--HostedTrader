@@ -6,7 +6,7 @@ use warnings;
 use Data::Dumper;
 use Getopt::Long;
 
-use Finance::HostedTrader::Account;
+use Finance::HostedTrader::Account::FXCM;
 use Systems;
 
 my ($address, $port) = ('127.0.0.1', 1500);
@@ -16,7 +16,7 @@ GetOptions(
     "port=i"    => \$port,
 );
 
-my $account = Finance::HostedTrader::Account->new(
+my $account = Finance::HostedTrader::Account::FXCM->new(
                 address => $address,
                 port => $port,
               );
