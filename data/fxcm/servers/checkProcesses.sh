@@ -23,3 +23,9 @@ else
         echo Server returned bad response "$RES"
     fi
 fi
+
+FREEMEM=`free -m | grep Mem | cut -b 36-42`
+if [ $FREEMEM -lt 350 ]; then
+    echo Running low on memory
+    free -m
+fi
