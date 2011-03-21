@@ -5,6 +5,7 @@ use warnings;
 
 use Data::Dumper;
 use Getopt::Long;
+use Text::ASCIITable;
 
 use Finance::HostedTrader::Account::FXCM;
 use Systems;
@@ -50,23 +51,25 @@ Current P/L: $baseCurrencyPL ($percentPL%)
 
 print "\n";
 
+
 foreach my $system_name ( qw/trendfollow/ ) {
+    my $t = Text::ASCIITable->new( {headingText => $system_name} );
+    $t->setCols('Symbol','Market','Entry','Exit','Direction');
     my $system = Systems->new( name => $system_name, account => $account );
     my $data = $system->data;
     my $symbols = $data->{symbols};
-    print "\nSystem $system_name Market Price/Entry Price/Exit Price:\n-------------\n";
 
     foreach my $direction (qw /long short/) {
         foreach my $symbol (@{$symbols->{$direction}}) {
             my $currentExit = $system->getExitValue($symbol, $direction);
             my $currentEntry = $system->getEntryValue($symbol, $direction);
 
-            print $symbol, " ", 
-                ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)), "/",
-                $currentEntry, "/", $currentExit, " ", $direction,
-                "\n";
+            $t->addRow( $symbol, 
+                        ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)),
+                        $currentEntry, $currentExit, $direction);
         }
     }
+    print $t;
 }
 
 
