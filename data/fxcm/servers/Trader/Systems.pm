@@ -233,7 +233,7 @@ my $account = $self->account;
     die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
     return (0,undef,undef) if (scalar(@$trades) >= scalar(@{$exposurePerPosition}));
 
-    my $maxExposure = $exposurePerPosition->[@{$trades}];
+    my $maxExposure = $exposurePerPosition->[scalar(@{$trades})];
     die("max exposure is negative") if ($maxExposure <0);
     my $nav = $account->getNav();
     die("nav is negative") if ($nav < 0);
