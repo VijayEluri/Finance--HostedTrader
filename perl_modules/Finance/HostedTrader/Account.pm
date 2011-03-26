@@ -54,29 +54,6 @@ has password => (
     required=>0,
 );
 
-=item C<address>
-
-The server address to connect to
-
-=cut
-has address => (
-    is      => 'ro',
-    isa     => 'Str',
-    required=> 1,
-);
-
-=item C<port>
-
-The server port to connect to
-
-=cut
-has port => (
-    is      => 'ro',
-    isa     => 'Int',
-    required=> 1,
-    default => 1500,
-);
-
 =item C<positions>
 
 
