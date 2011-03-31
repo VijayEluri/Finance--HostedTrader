@@ -7,20 +7,23 @@ use Data::Dumper;
 use Getopt::Long;
 use Text::ASCIITable;
 
-use Finance::HostedTrader::Account::FXCM;
+use Finance::HostedTrader::Factory::Account;
 use Systems;
 
-my ($address, $port) = ('127.0.0.1', 1500);
+my ($address, $port, $class) = ('127.0.0.1', 1500, 'FXCM');
 
 GetOptions(
+    "class=s"   => \$class,
     "address=s" => \$address,
     "port=i"    => \$port,
 );
 
-my $account = Finance::HostedTrader::Account::FXCM->new(
-                address => $address,
-                port => $port,
-              );
+my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
+
+#my $account = Finance::HostedTrader::Account::FXCM->new(
+#                address => $address,
+#                port => $port,
+#              );
 
 my $trades = $account->getTrades();
 my $nav = $account->getNav();

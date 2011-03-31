@@ -11,12 +11,13 @@ use Date::Manip;
 use Pod::Usage;
 
 
-use Finance::HostedTrader::Account::FXCM;
+use Finance::HostedTrader::Factory::Account;
 use Systems;
 
-my ($verbose, $help, $address, $port);
+my ($verbose, $help, $address, $port, $class) = (0, 0, '127.0.0.1', 1500, 'FXCM');
 
 my $result = GetOptions(
+    "class=s",  \$class,
     "address=s",\$address,
     "port=i",   \$port,
     "verbose",  \$verbose,
@@ -27,14 +28,10 @@ pod2usage(1) if ($help);
 
 logger("STARTUP");
 
-my $account = Finance::HostedTrader::Account::FXCM->new(
-                address     => $address,
-                port        => $port,
-              );
+my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
 
 my @systems =   (   
                     Systems->new( name => 'trendfollow', account => $account ),
-#                    Systems->new( name => 'countertrend' ),
                 );
 
 foreach my $system (@systems) {
