@@ -101,6 +101,12 @@ sub getIndicatorValue {
     return $value->[0]->[1];
 }
 
+sub waitForNextTrade {
+    my ($self, $system) = @_;
+
+    sleep(20);
+}
+
 =item C<getNav>
 
 Return the current net asset value in the account

@@ -338,7 +338,7 @@ return $sql;
 sub checkSignal {
     my ( $self, $args ) = @_;
 
-    my @good_args = qw( expr symbol tf maxLoadedItems debug period );
+    my @good_args = qw( expr symbol tf maxLoadedItems debug period simulatedNowValue);
 
     foreach my $key (keys %$args) {
         die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
@@ -350,8 +350,9 @@ sub checkSignal {
     my $maxLoadedItems = $args->{maxLoadedItems} || -1;
     my $debug = $args->{debug} || 0;
     my $period = $args->{period} || '1hour';
+    my $nowValue = $args->{simulatedNowValue} || 'now';
 
-    my $startPeriod = UnixDate(DateCalc('now', '- '.$period), '%Y-%m-%d %H:%M:%S');
+    my $startPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
     my $data = $self->getSignalData(
         {
             'expr'            => $expr,
