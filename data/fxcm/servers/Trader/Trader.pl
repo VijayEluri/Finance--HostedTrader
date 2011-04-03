@@ -65,7 +65,9 @@ while (1) {
             logger($@);
         };
     }
-    sleep(20);
+    $account->waitForNextTrade();
+    print Dumper(\$account);
+    exit;
 }
 
 sub checkSystem {
@@ -127,6 +129,10 @@ Current Value: $value
                 });
             }
         }
+    print "P=" . Dumper(\$account->positions);
+    $account->getPosition("XAGUSD");
+    print "P=" . Dumper(\$account->positions);
+    exit;
     }
 }
 
@@ -139,6 +145,7 @@ sub logger {
 
 
 sub sendMail {
+    return;
 my ($subject, $content) = @_;
 use MIME::Lite;
 

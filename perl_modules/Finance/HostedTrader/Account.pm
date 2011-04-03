@@ -121,25 +121,11 @@ sub getNav {
 
 =cut
 sub getPosition {
-my ($self, $symbol) = @_;
+    my ($self, $symbol) = @_;
 
-my $trades;
-
-$trades = $self->getTrades();
-
-my %positions=();
-
-    $self->{positions} = {};
-    foreach my $trade_data (@$trades) {
-        my $trade = Finance::HostedTrader::Trade->new(
-            $trade_data
-        );
-
-        my $position = $self->_getPosition($trade->symbol);
-        $position->addTrade($trade);
-    }
-
-    return $self->_getPosition($symbol);
+    my $positions = $self->positions;
+    return $positions->{$symbol} if (exists $positions->{$symbol});
+    return Finance::HostedTrader::Position->new( symbol => $symbol );
 }
 
 =item C<openMarket>
@@ -245,18 +231,6 @@ sub _empty_hash {
     return {};
 }
 
-
-sub _getPosition {
-    my ($self, $symbol) = @_;
-
-    my $position = $self->positions->{$symbol};
-
-    if (!defined($position)) {
-        $position = Finance::HostedTrader::Position->new( symbol => $symbol);
-        $self->positions->{$symbol} = $position;
-    }
-    return $position;
-}
 
 
 __PACKAGE__->meta->make_immutable;

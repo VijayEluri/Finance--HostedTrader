@@ -18,15 +18,6 @@ package Finance::HostedTrader::Account::UnitTest;
 
 =head1 DESCRIPTION
 
-Interfaces with the UnitTest Order2Go API.
-The Order2GO API is available as a windows COM object.
-
-In order to run this under Linux, I've written a windows application (Server.exe)
-in C++ which provides a proxy to Order2Go through sockets.
-
-Server.exe can be run
-on Linux under wine, and this module connects to a socket opened by Server.exe on
-port 1500 to access the Order2Go API.
 
 
 =head2 Properties
@@ -41,6 +32,7 @@ extends 'Finance::HostedTrader::Account';
 use Moose::Util::TypeConstraints;
 use Finance::HostedTrader::Trade;
 use Date::Manip;
+use Time::HiRes;
 
 =back
 
@@ -54,17 +46,6 @@ sub BUILD {
     my $self = shift;
 
     $self->{_now} = UnixDate(DateCalc('now', '- 2 week'), '%Y-%m-%d %H:%M:%S');
-}
-
-=item C<getTrades()>
-
-Returns a list of opened trades in the account
-
-=cut
-sub getTrades {
-    my ($self) = @_;
- 
-    return [];
 }
 
 sub checkSignal {
@@ -124,6 +105,24 @@ sub getBaseUnit {
 
 sub openMarket {
     my ($self, $symbol, $direction, $amount) = @_;
+
+    my $id = $$ . Time::HiRes::time();
+    my $rate = ($direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
+
+    my $trade = Finance::HostedTrader::Trade->new(
+            id          => $id,
+            symbol      => $symbol,
+            direction   => $direction,
+            openDate    => UnixDate($self->{_now}, '%Y-%m-%d %H:%M:%S'),
+            openPrice   => $rate,
+            size        => $amount,
+    );
+
+    my $position = $self->getPosition($symbol);
+    $position->addTrade($trade);
+    $self->positions->{$symbol} = $position;
+
+    return ($id, $rate);
 }
 
 sub closeMarket {

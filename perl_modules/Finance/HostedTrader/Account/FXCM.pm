@@ -256,18 +256,50 @@ sub _socket {
     return $sock;
 }
 
-=item C<getTrades()>
+=item C<_getTrades()>
 
 Returns a list of opened trades in the account
 
 =cut
-sub getTrades {
+sub _getTrades {
     my ($self) = @_;
     my $yml = $self->_sendCmd('trades');
 
     return if (!$yml);
     my $data = YAML::Syck::Load( $yml ) || die("Invalid yaml: $!");
     return $data;
+}
+
+sub getPosition {
+my ($self, $symbol) = @_;
+
+my $trades = $self->_getTrades();
+
+my %positions=();
+
+    $self->{positions} = {};
+    foreach my $trade_data (@$trades) {
+        my $trade = Finance::HostedTrader::Trade->new(
+            $trade_data
+        );
+
+        my $position = $self->_getPosition($trade->symbol);
+        $position->addTrade($trade);
+    }
+
+    return $self->_getPosition($symbol);
+}
+
+sub _getPosition {
+    my ($self, $symbol) = @_;
+
+    my $position = $self->positions->{$symbol};
+
+    if (!defined($position)) {
+        $position = Finance::HostedTrader::Position->new( symbol => $symbol);
+        $self->positions->{$symbol} = $position;
+    }
+    return $position;
 }
 
 =item C<getAsk($symbol)>
