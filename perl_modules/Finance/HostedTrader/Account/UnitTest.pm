@@ -11,10 +11,7 @@ package Finance::HostedTrader::Account::UnitTest;
     print $s->getBid('EURUSD');
 
     my ($openOrderID, $price) = $s->openMarket('EURUSD', 'long', 100000);
-    my $trades = $s->getTrades();
-
-    my $tradeID = $trades->[0]->{ID};
-    my $closeOrderID = $s->closeMarket($tradeID, 100000);
+    my $closeOrderID = $s->closeMarket($openOrderID, 100000);
 
 =head1 DESCRIPTION
 
@@ -120,9 +117,13 @@ sub openMarket {
 
     my $position = $self->getPosition($symbol);
     $position->addTrade($trade);
-    $self->positions->{$symbol} = $position;
+    $self->{_positions}->{$symbol} = $position;
 
     return ($id, $rate);
+}
+
+sub refreshPositions {
+# positions are kept in memory, so nothing to do during refresh
 }
 
 sub closeMarket {

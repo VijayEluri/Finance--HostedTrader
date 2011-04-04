@@ -256,50 +256,30 @@ sub _socket {
     return $sock;
 }
 
-=item C<_getTrades()>
+=item C<refreshPositions()>
 
-Returns a list of opened trades in the account
 
 =cut
-sub _getTrades {
+sub refreshPositions {
     my ($self) = @_;
+
+    $self->{_positions} = {};
     my $yml = $self->_sendCmd('trades');
 
     return if (!$yml);
-    my $data = YAML::Syck::Load( $yml ) || die("Invalid yaml: $!");
-    return $data;
-}
+    my $trades = YAML::Syck::Load( $yml ) || die("Invalid yaml: $!");
 
-sub getPosition {
-my ($self, $symbol) = @_;
-
-my $trades = $self->_getTrades();
-
-my %positions=();
-
-    $self->{positions} = {};
     foreach my $trade_data (@$trades) {
         my $trade = Finance::HostedTrader::Trade->new(
             $trade_data
         );
 
-        my $position = $self->_getPosition($trade->symbol);
-        $position->addTrade($trade);
+        if (!exists($self->{_positions}->{$trade->symbol})) {
+            $self->{_positions}->{$trade->symbol} = Finance::HostedTrader::Position->new(symbol => $symbol);
+        }
+        $self->{_position}->{$trade->symbol}->addTrade($trade);
     }
-
-    return $self->_getPosition($symbol);
-}
-
-sub _getPosition {
-    my ($self, $symbol) = @_;
-
-    my $position = $self->positions->{$symbol};
-
-    if (!defined($position)) {
-        $position = Finance::HostedTrader::Position->new( symbol => $symbol);
-        $self->positions->{$symbol} = $position;
-    }
-    return $position;
+    return $data;
 }
 
 =item C<getAsk($symbol)>

@@ -54,21 +54,11 @@ has password => (
     required=>0,
 );
 
-=item C<positions>
-
-
-=cut
-has positions => (
-    is     => 'ro',
-    isa    => 'HashRef[Finance::HostedTrader::Position]',
-    builder => '_empty_hash',
-    required=>0,
-);
-
 sub BUILD {
     my $self = shift;
 
     $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
+    $self->{_positions} = {};
 }
 
 sub checkSignal {
@@ -116,6 +106,10 @@ sub getNav {
     die("overrideme");
 }
 
+sub refreshPositions {
+    die("overrideme");
+}
+
 =item C<getPosition>
 
 
@@ -123,9 +117,19 @@ sub getNav {
 sub getPosition {
     my ($self, $symbol) = @_;
 
-    my $positions = $self->positions;
-    return $positions->{$symbol} if (exists $positions->{$symbol});
-    return Finance::HostedTrader::Position->new( symbol => $symbol );
+    $self->refreshPositions();
+    my $positions = $self->{_positions};
+    return $positions->{$symbol} || Finance::HostedTrader::Position->new(symbol=>$symbol);
+}
+
+=item C<getPositions>
+
+=cut
+sub getPositions {
+    my ($self) = @_;
+
+    $self->refreshPositions();
+    return $self->{_positions};
 }
 
 =item C<openMarket>
@@ -225,10 +229,6 @@ sub convertBaseUnit {
 =cut
 sub getSymbolBase {
     die("overrideme");
-}
-
-sub _empty_hash {
-    return {};
 }
 
 

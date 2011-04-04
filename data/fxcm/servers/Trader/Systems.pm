@@ -11,6 +11,7 @@ use Config::Any;
 use YAML::Tiny;
 use List::Compare::Functional qw( get_intersection );
 use Hash::Merge;
+use Data::Dumper;
 
 has 'name' => (
     is     => 'ro',
@@ -47,35 +48,45 @@ sub updateSymbols {
     my $self = shift;
     my $account = $self->account;
 
+    my %symbols = (
+        'long' => {},
+        'short' => {},
+    );
+
+
+# Trade symbols where there are open positions
+    my $positions = $account->getPositions();
+    foreach my $symbol (keys %{$positions}) {
+        my $position = $positions->{$symbol};
+        foreach my $trade (@{$position->trades}) {
+            next if ($trade->status ne 'open');
+            if ($trade->direction eq 'long') {
+                $symbols{long}->{$symbol} = 1;
+            } elsif ($trade->direction eq 'short') {
+                $symbols{short}->{$symbol} = 1;
+            } else {
+                die('Invalid trade direction: ' . $trade->direction);
+            }
+        }
+    }
+
+# And also symbols which match the system filter
     my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filters});
-    my $trades = $account->getTrades();
-    my $symbols = $self->_loadSymbols();#$self->{_system}->{symbols};
-    #List of symbols for which there are open short positions
-    my @symbols_to_keep_short = map {$_->{symbol}} grep {$_->{direction} eq 'short'} @{$trades}; 
-    #List of symbols for which there are open long positions
-    my @symbols_to_keep_long = map {$_->{symbol}} grep {$_->{direction} eq 'long'} @{$trades};
-
-    #Add symbols for which there are existing positions to the list
-    #If these are not kept in the trade list, open positions in these symbols will 
-    #not be closed by the system
-    #Only keep open trades if they were originally in this list already, otherwise the symbols were input by a different system instance
-    $symbols->{short} = [ get_intersection('--unsorted', [ \@symbols_to_keep_short, $symbols->{short} ] ) ];
-    $symbols->{long} = [ get_intersection('--unsorted', [ \@symbols_to_keep_long, $symbols->{long} ] ) ];
-
-    #Now add to the trade list symbols triggered by the system as trade opportunities
     foreach my $tradeDirection (qw /long short/ ) {
-    foreach my $symbol ( @{$newSymbols->{$tradeDirection}} ) {
-        #Don't add a symbol if it already exists in the list (avoid duplicates)
-        next if (grep {/$symbol/} @{ $symbols->{$tradeDirection} });
-        push @{ $symbols->{$tradeDirection} }, $symbol;
-    }
+        foreach my $symbol ( @{$newSymbols->{$tradeDirection}} ) {
+            $symbols{$tradeDirection}->{$symbol} = 1;
+        }
     }
 
+# Write the unique symbols to a yml file
+    $symbols{long} = [ keys %{$symbols{long}} ];
+    $symbols{short} = [ keys %{$symbols{short}} ];
+    print Dumper(\%symbols);
     my $yml = YAML::Tiny->new;
-    $yml->[0] = { name => $self->name, symbols => $symbols};
+    $yml->[0] = { name => $self->name, symbols => \%symbols};
     my $file = $self->_getSymbolFileName();
     $yml->write($file) || die("Failed to write symbols file $file. $!");
-    $self->{_system}->{symbols} = $symbols;
+    $self->{_system}->{symbols} = \%symbols;
     $self->{_symbolsLastUpdated} = time();
 }
 
