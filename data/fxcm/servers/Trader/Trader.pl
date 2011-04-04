@@ -66,8 +66,6 @@ while (1) {
         };
     }
     $account->waitForNextTrade();
-    print Dumper(\$account);
-    exit;
 }
 
 sub checkSystem {
@@ -129,10 +127,6 @@ Current Value: $value
                 });
             }
         }
-    print "P=" . Dumper(\$account->positions);
-    $account->getPosition("XAGUSD");
-    print "P=" . Dumper(\$account->positions);
-    exit;
     }
 }
 
