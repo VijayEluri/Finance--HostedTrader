@@ -275,11 +275,10 @@ sub refreshPositions {
         );
 
         if (!exists($self->{_positions}->{$trade->symbol})) {
-            $self->{_positions}->{$trade->symbol} = Finance::HostedTrader::Position->new(symbol => $symbol);
+            $self->{_positions}->{$trade->symbol} = Finance::HostedTrader::Position->new(symbol => $trade->symbol);
         }
-        $self->{_position}->{$trade->symbol}->addTrade($trade);
+        $self->{_positions}->{$trade->symbol}->addTrade($trade);
     }
-    return $data;
 }
 
 =item C<getAsk($symbol)>
