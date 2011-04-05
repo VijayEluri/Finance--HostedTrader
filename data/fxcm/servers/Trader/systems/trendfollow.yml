@@ -22,11 +22,11 @@ signals:
       period: 1hour
   exit:
     long:
-      signal: low < previous(min(low,1632),1)
-      currentPoint: previous(min(low,1632),1)
+      signal: low < previous(min(low,1584),1)
+      currentPoint: previous(min(low,1584),1)
     short:
-      signal: high > previous(max(high,1632),1)
-      currentPoint: previous(max(high,1632),1)
+      signal: high > previous(max(high,1584),1)
+      currentPoint: previous(max(high,1584),1)
     args:
       timeframe: 15min
       maxLoadedItems: 2000
