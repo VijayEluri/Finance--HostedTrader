@@ -121,6 +121,16 @@ has closePrice => (
     required=>0,
 );
 
+=item C<pl>
+
+
+=cut
+has pl => (
+    is     => 'ro',
+    isa    => 'Num',
+    required=>0,
+);
+
 =item C<profit>
 
 

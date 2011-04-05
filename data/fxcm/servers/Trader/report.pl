@@ -25,7 +25,7 @@ my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, 
 #                port => $port,
 #              );
 
-my $trades = $account->getTrades();
+my $trades = [];#$account->getTrades();
 my $nav = $account->getNav();
 
 
@@ -34,22 +34,29 @@ print "ACCOUNT NAV: " . $nav . "\n\n\n";
 
 print "TRADES:\n-------";
 my $system = Systems->new( name => 'trendfollow', account => $account );
-foreach my $trade (@$trades) {
-    my $stopLoss = $system->getExitValue($trade->{symbol}, $trade->{direction});
-    my $marketPrice = ($trade->{direction} eq 'short' ? $account->getAsk($trade->{symbol}) : $account->getBid($trade->{symbol}));
-    my $baseCurrencyPL = $trade->{pl};
+
+my $positions = $account->getPositions();
+
+foreach my $symbol (keys %$positions) {
+my $position = $positions->{$symbol};
+
+foreach my $trade (@{ $position->trades }) {
+    my $stopLoss = $system->getExitValue($trade->symbol, $trade->direction);
+    my $marketPrice = ($trade->direction eq 'short' ? $account->getAsk($trade->symbol) : $account->getBid($trade->symbol));
+    my $baseCurrencyPL = $trade->pl;
     my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $nav;
 
-    print qq|
-Symbol: $trade->{symbol}
-Direction: $trade->{direction}
-Open Date: $trade->{openDate}
-Open Price: $trade->{openPrice}
-Size: $trade->{size}
+    printf qq|
+Symbol: %s
+Direction: %s
+Open Date: %s
+Open Price: %s
+Size: %s
 Stop Loss: $stopLoss
 Current Price:  $marketPrice
-Current P/L: $baseCurrencyPL ($percentPL%)
-|;
+Current P/L: $baseCurrencyPL ($percentPL %%)
+|, $trade->symbol, $trade->direction, $trade->openDate, $trade->openPrice, $trade->size;
+}
 }
 
 print "\n";
