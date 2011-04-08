@@ -237,25 +237,6 @@ sub getSymbolBase {
     return $symbolBaseMap{$symbol};
 }
 
-sub _convertSymbolToFXCM {
-    my ($self, $symbol) = @_;
-
-    die("Unsupported symbol '$symbol'") if (!exists($symbolMap{$symbol}));
-    return $symbolMap{$symbol};
-}
-
-sub _socket {
-    my ($self) = @_;
-    my $sock = IO::Socket::INET->new(
-                    PeerAddr => $self->{address},
-                    PeerPort => $self->{port},
-                    Proto    => 'tcp',
-                    Timeout  => CONNECT_TIMEOUT,
-                    ) or die($!);
-    $sock->autoflush(1);
-    return $sock;
-}
-
 =item C<refreshPositions()>
 
 
@@ -381,9 +362,24 @@ sub getBaseCurrency {
 
 }
 
+sub _convertSymbolToFXCM {
+    my ($self, $symbol) = @_;
+
+    die("Unsupported symbol '$symbol'") if (!exists($symbolMap{$symbol}));
+    return $symbolMap{$symbol};
+}
+
+
 sub _sendCmd {
     my ($self, $cmd) = @_;
-    my $sock = $self->_socket();
+    my $sock = IO::Socket::INET->new(
+                    PeerAddr => $self->{address},
+                    PeerPort => $self->{port},
+                    Proto    => 'tcp',
+                    Timeout  => CONNECT_TIMEOUT,
+                    ) or die($!);
+   $sock->autoflush(1);
+
 
     my $select = IO::Select->new($sock);
 
