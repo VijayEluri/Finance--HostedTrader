@@ -29,13 +29,14 @@ my $trades = [];#$account->getTrades();
 my $nav = $account->getNav();
 
 
-print "ACCOUNT NAV: " . $nav . "\n\n\n";
 
 
-print "TRADES:\n-------";
 my $system = Systems->new( name => 'trendfollow', account => $account );
 
 my $positions = $account->getPositions();
+
+my $t = Text::ASCIITable->new( {headingText => 'Open Positions'} );
+$t->setCols('Symbol', 'Open Date','Size','Entry','Current','PL','%');
 
 foreach my $symbol (keys %$positions) {
 my $position = $positions->{$symbol};
@@ -46,18 +47,12 @@ foreach my $trade (@{ $position->trades }) {
     my $baseCurrencyPL = $trade->pl;
     my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $nav;
 
-    printf qq|
-Symbol: %s
-Direction: %s
-Open Date: %s
-Open Price: %s
-Size: %s
-Stop Loss: $stopLoss
-Current Price:  $marketPrice
-Current P/L: $baseCurrencyPL ($percentPL %%)
-|, $trade->symbol, $trade->direction, $trade->openDate, $trade->openPrice, $trade->size;
+    $t->addRow($trade->symbol, $trade->openDate, $trade->size, $trade->openPrice, $marketPrice, sprintf('%.2f', $baseCurrencyPL), $percentPL);
 }
 }
+
+print "ACCOUNT NAV: " . $nav . "\n\n";
+print $t;
 
 print "\n";
 
