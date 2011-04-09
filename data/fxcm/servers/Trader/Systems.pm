@@ -81,7 +81,7 @@ sub updateSymbols {
 # Write the unique symbols to a yml file
     $symbols{long} = [ keys %{$symbols{long}} ];
     $symbols{short} = [ keys %{$symbols{short}} ];
-    print Dumper(\%symbols);
+
     my $yml = YAML::Tiny->new;
     $yml->[0] = { name => $self->name, symbols => \%symbols};
     my $file = $self->_getSymbolFileName();

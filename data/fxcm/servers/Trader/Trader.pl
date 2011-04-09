@@ -139,7 +139,6 @@ sub logger {
 
 
 sub sendMail {
-    return;
 my ($subject, $content) = @_;
 use MIME::Lite;
 
