@@ -32,5 +32,5 @@ signals:
       maxLoadedItems: 2000
       period: 1hour
 maxExposure:
+    - 4
     - 2
-    - 1
