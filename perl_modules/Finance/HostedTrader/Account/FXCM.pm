@@ -330,8 +330,8 @@ sub closeMarket {
 =item C<getBaseUnit($symbol)>
 
 Returns the base unit at which the symbol trades.
-Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (eg, 15000 would be an invalid trade size).
 
+In FXCM, most symbols trade at multiples of 10.000, but some will vary ( XAGUSD uses multiples of 50 ).
 =cut
 
 sub getBaseUnit {

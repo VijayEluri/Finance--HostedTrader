@@ -45,6 +45,60 @@ sub BUILD {
     $self->{_now} = UnixDate(DateCalc('now', '- 2 week'), '%Y-%m-%d %H:%M:%S');
 }
 
+sub refreshPositions {
+# positions are kept in memory, so nothing to do during refresh
+}
+
+sub getAsk {
+    my ($self, $symbol) = @_;
+
+    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min' });
+}
+
+sub getBid {
+    my ($self, $symbol) = @_;
+
+    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min' });
+}
+
+sub openMarket {
+    my ($self, $symbol, $direction, $amount) = @_;
+
+    my $id = $$ . Time::HiRes::time();
+    my $rate = ($direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
+
+    my $trade = Finance::HostedTrader::Trade->new(
+            id          => $id,
+            symbol      => $symbol,
+            direction   => $direction,
+            openDate    => UnixDate($self->{_now}, '%Y-%m-%d %H:%M:%S'),
+            openPrice   => $rate,
+            size        => $amount,
+    );
+
+    my $position = $self->getPosition($symbol);
+    $position->addTrade($trade);
+    $self->{_positions}->{$symbol} = $position;
+
+    return ($id, $rate);
+}
+
+sub closeMarket {
+    my ($self, $tradeID, $amount) = @_;
+die("TODO closeMarket");
+}
+
+sub getBaseUnit {
+    my ($self, $symbol) = @_;
+
+    return 10000;
+}
+
+sub getNav {
+    my ($self) = @_;
+    return 50000;
+}
+
 sub checkSignal {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
 
@@ -75,60 +129,6 @@ sub getIndicatorValue {
     } );
 
     return $value->[0]->[1];
-}
-
-sub getNav {
-    my ($self) = @_;
-    return 50000;
-}
-
-sub getAsk {
-    my ($self, $symbol) = @_;
-
-    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min' });
-}
-
-sub getBid {
-    my ($self, $symbol) = @_;
-
-    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min' });
-}
-
-sub getBaseUnit {
-    my ($self, $symbol) = @_;
-
-    return 10000;
-}
-
-sub openMarket {
-    my ($self, $symbol, $direction, $amount) = @_;
-
-    my $id = $$ . Time::HiRes::time();
-    my $rate = ($direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
-
-    my $trade = Finance::HostedTrader::Trade->new(
-            id          => $id,
-            symbol      => $symbol,
-            direction   => $direction,
-            openDate    => UnixDate($self->{_now}, '%Y-%m-%d %H:%M:%S'),
-            openPrice   => $rate,
-            size        => $amount,
-    );
-
-    my $position = $self->getPosition($symbol);
-    $position->addTrade($trade);
-    $self->{_positions}->{$symbol} = $position;
-
-    return ($id, $rate);
-}
-
-sub refreshPositions {
-# positions are kept in memory, so nothing to do during refresh
-}
-
-sub closeMarket {
-    my ($self, $tradeID, $amount) = @_;
-
 }
 
 sub waitForNextTrade {

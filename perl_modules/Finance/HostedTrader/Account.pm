@@ -14,17 +14,15 @@ package Finance::HostedTrader::Account;
 
 =head2 METHODS
 
-=over 12
 
 =cut
+
 
 use strict;
 use warnings;
 use Moose;
-use Moose::Util::TypeConstraints;
 use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Position;
-use Finance::HostedTrader::Trade;
 
 
 use YAML::Syck;
@@ -34,26 +32,27 @@ YAML::Syck->VERSION( '0.70' );
 
 
 ##These should exist everywhere, regardless of broker
-=item C<username>
-
-
-=cut
-has username => (
-    is     => 'ro',
-    isa    => 'Str',
-    required=>0,
-);
-
-=item C<password>
-
-
-=cut
-has password => (
-    is     => 'ro',
-    isa    => 'Str',
-    required=>0,
-);
-
+#
+#=item C<username>
+#
+#
+#=cut
+#has username => (
+#    is     => 'ro',
+#    isa    => 'Str',
+#    required=>0,
+#);
+#
+#=item C<password>
+#
+#
+#=cut
+#has password => (
+#    is     => 'ro',
+#    isa    => 'Str',
+#    required=>0,
+#);
+#
 sub BUILD {
     my $self = shift;
 
@@ -61,6 +60,127 @@ sub BUILD {
     $self->{_positions} = {};
 }
 
+=head3 Must be overriden
+
+=over 12
+
+
+=item C<refreshPositions()>
+
+Must update $self->{_positions} with an hash ref keyed by symbol with a L<Finance::HostedTrader::Position> object as value.
+
+This method will typically have to read existing positions from the Account provider (eg: L<Finance::HostedTrader::Account::FXCM>)
+and store them in the Account object for local access.
+
+It gets called by getPosition and getPositions
+
+
+=cut
+sub refreshPositions() {
+    die("overrideme");
+}
+
+=item C<getSymbolBase>
+
+Returns the base currency for a symbol, useful for calculating profit/loss.
+
+Eg:
+ US Stocks => 'USD'
+ EURUSD => 'USD'
+ USDCHF => 'CHF'
+
+=cut
+sub getSymbolBase($symbol) {
+    die("overrideme");
+}
+
+=item C<getAsk($symbol)>
+
+Return the current ask price for $symbol.
+
+=cut
+sub getAsk() {
+    die("overrideme");
+}
+
+=item C<getBid>
+
+Return the current bid price for $symbol.
+
+=cut
+sub getBid {
+    die("overrideme");
+}
+
+=item C<openMarket($symbol, $direction, $amount>
+
+Opens a trade in $symbol at current market price.
+
+$direction can be either 'long' or 'short'
+
+Returns a list containing two elements:
+
+$tradeID - This can be passed to closeMarket. It can also be retrieved via getTrades
+$price   - The price at which the trade was executed.
+
+=cut
+
+sub openMarket {
+    die("overrideme");
+}
+
+=item C<closeMarket($tradeID, $amount)>
+
+Closes a trade at current market price.
+
+$tradeID is returned when calling openMarket(). It can also be retrieved via getTrades().
+
+Returns $closedTradeID
+
+=cut
+sub closeMarket {
+    die("overrideme");
+}
+
+=item C<getBaseUnit($symbol)>
+
+Returns the base unit at which the symbol trades.
+Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (15000 would be an invalid trade size).
+
+=cut
+sub getBaseUnit {
+    die("overrideme");
+}
+
+=item C<getNav()>
+
+Return the current net asset value in the account
+
+=cut
+sub getNav {
+    die("overrideme");
+}
+
+=item C<getBaseCurrency()>
+
+Returns the currency in which funds are held in this account. Useful to calculate profit/loss.
+
+=cut
+sub getBaseCurrency {
+    die("overrideme");
+}
+
+=back
+
+=head3 Implemented methods
+
+=over 12
+
+=item C<checkSignal($symbol, $signal, $args)>
+
+Returns true if the given $signal/$args occurs in $symbol
+
+=cut
 sub checkSignal {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
 
@@ -76,6 +196,11 @@ sub checkSignal {
     );
 }
 
+=item C<getIndicatorValue($symbol, $indicator, $args)
+
+Returns the indicator value of $indicator/$args on $symbol.
+
+=cut
 sub getIndicatorValue {
     my ($self, $symbol, $indicator, $args) = @_;
 
@@ -91,94 +216,23 @@ sub getIndicatorValue {
     return $value->[0]->[1];
 }
 
-sub waitForNextTrade {
+=item C<waitForNextTrades>
+
+Sleeps for 20 seconds. $system is ignored.
+
+This method is called by Trader.pl and is overriden by C<Finance::HostedTrader::Account::UnitTest>.
+It probably doesn't belong in the Account object.
+
+=cut
+sub waitForNextTrade($system) {
     my ($self, $system) = @_;
 
     sleep(20);
 }
 
-=item C<getNav>
+=item C<converToBaseCurrency($amount, $currentCurrency, $bidask>
 
-Return the current net asset value in the account
-
-=cut
-sub getNav {
-    die("overrideme");
-}
-
-sub refreshPositions {
-    die("overrideme");
-}
-
-=item C<getPosition>
-
-
-=cut
-sub getPosition {
-    my ($self, $symbol) = @_;
-
-    $self->refreshPositions();
-    my $positions = $self->{_positions};
-    return $positions->{$symbol} || Finance::HostedTrader::Position->new(symbol=>$symbol);
-}
-
-=item C<getPositions>
-
-=cut
-sub getPositions {
-    my ($self) = @_;
-
-    $self->refreshPositions();
-    return $self->{_positions};
-}
-
-=item C<openMarket>
-
-
-=cut
-sub openMarket {
-    die("overrideme");
-}
-
-=item C<closeTrades>
-
-
-=cut
-sub closeTrades {
-    my ($self, $symbol, $direction) = @_;
-
-    my $position = $self->getPosition($symbol);
-    foreach my $trade (@{ $position->trades }) {
-        next if ($trade->direction ne $direction);
-        $self->closeMarket($trade->id, $trade->size);
-    }
-}
-
-=item C<closeMarket>
-
-
-=cut
-sub closeMarket {
-    die("overrideme");
-}
-
-=item C<getAsk>
-
-
-=cut
-sub getAsk {
-    die("overrideme");
-}
-
-=item C<getBid>
-
-
-=cut
-sub getBid {
-    die("overrideme");
-}
-
-=item C<converToBaseCurrency>
+Converts $amount from $currentCurrency to the account's base currency, using either 'bid' or 'ask' price.
 
 =cut
 
@@ -199,22 +253,11 @@ sub convertToBaseCurrency {
     }
 }
 
-=item C<getBaseCurrency>
-
-=cut
-sub getBaseCurrency {
-    die("overrideme");
-}
-
-=item C<getBaseUnit>
-
-
-=cut
-sub getBaseUnit {
-    die("overrideme");
-}
-
 =item C<convertBaseUnit>
+
+Convert $amount to the base unit supported by $symbol.
+
+See the getBaseUnit method.
 
 =cut
 sub convertBaseUnit {
@@ -224,13 +267,46 @@ sub convertBaseUnit {
     return int($amount / $baseUnit) * $baseUnit;
 }
 
-=item C<getSymbolBase>
+=item C<getPosition($symbol)>
+
+Returns a C<Finance::HostedTrader::Position> object for $symbol.
+
+This object will contain information about all open trades in $symbol.
 
 =cut
-sub getSymbolBase {
-    die("overrideme");
+sub getPosition {
+    my ($self, $symbol) = @_;
+
+    $self->refreshPositions();
+    my $positions = $self->{_positions};
+    return $positions->{$symbol} || Finance::HostedTrader::Position->new(symbol=>$symbol);
 }
 
+=item C<getPositions>
+
+Returns a hashref whose key is a symbol and value a C<Finance::HostedTrader::Position> object for that symbol.
+=cut
+sub getPositions {
+    my ($self) = @_;
+
+    $self->refreshPositions();
+    return $self->{_positions};
+}
+
+=item C<closeTrades($symbol,$direction)>
+
+Closes all trades in the given $symbol/$direction at market values.
+
+=cut
+sub closeTrades {
+    my ($self, $symbol, $direction) = @_;
+
+    my $position = $self->getPosition($symbol);
+    foreach my $trade (@{ $position->trades }) {
+        next if ($trade->direction ne $direction);
+        $self->closeMarket($trade->id, $trade->size);
+    }
+}
 
 
 __PACKAGE__->meta->make_immutable;
@@ -249,6 +325,7 @@ Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 
+L<Finance::HostedTrader::Factory::Account>
 L<Finance::HostedTrader::Position>
 
 =cut
