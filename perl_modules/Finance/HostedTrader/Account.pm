@@ -76,11 +76,11 @@ It gets called by getPosition and getPositions
 
 
 =cut
-sub refreshPositions() {
+sub refreshPositions {
     die("overrideme");
 }
 
-=item C<getSymbolBase>
+=item C<getSymbolBase($symbol)>
 
 Returns the base currency for a symbol, useful for calculating profit/loss.
 
@@ -90,7 +90,7 @@ Eg:
  USDCHF => 'CHF'
 
 =cut
-sub getSymbolBase($symbol) {
+sub getSymbolBase {
     die("overrideme");
 }
 
@@ -99,7 +99,7 @@ sub getSymbolBase($symbol) {
 Return the current ask price for $symbol.
 
 =cut
-sub getAsk() {
+sub getAsk {
     die("overrideme");
 }
 
@@ -216,7 +216,7 @@ sub getIndicatorValue {
     return $value->[0]->[1];
 }
 
-=item C<waitForNextTrades>
+=item C<waitForNextTrades($system)>
 
 Sleeps for 20 seconds. $system is ignored.
 
@@ -224,7 +224,7 @@ This method is called by Trader.pl and is overriden by C<Finance::HostedTrader::
 It probably doesn't belong in the Account object.
 
 =cut
-sub waitForNextTrade($system) {
+sub waitForNextTrade {
     my ($self, $system) = @_;
 
     sleep(20);
@@ -253,7 +253,7 @@ sub convertToBaseCurrency {
     }
 }
 
-=item C<convertBaseUnit>
+=item C<convertBaseUnit($symbol, $amount)>
 
 Convert $amount to the base unit supported by $symbol.
 
@@ -282,7 +282,7 @@ sub getPosition {
     return $positions->{$symbol} || Finance::HostedTrader::Position->new(symbol=>$symbol);
 }
 
-=item C<getPositions>
+=item C<getPositions()>
 
 Returns a hashref whose key is a symbol and value a C<Finance::HostedTrader::Position> object for that symbol.
 =cut
