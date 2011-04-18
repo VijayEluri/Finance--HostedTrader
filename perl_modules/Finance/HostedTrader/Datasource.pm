@@ -72,11 +72,12 @@ has dbh => (
 
 sub _build_dbh {
     my $self = shift;
-    my $cfg = $self->cfg;;
+    my $cfg = $self->cfg;
     my $dbh = DBI->connect(
         'DBI:mysql:' . $cfg->db->dbname . ';host=' . $cfg->db->dbhost,
         $cfg->db->dbuser,
-        $cfg->db->dbpasswd
+        $cfg->db->dbpasswd,
+        { RaiseError => 1}
     ) || die($DBI::errstr);
 
     return $dbh;
