@@ -6,26 +6,25 @@ use warnings;
 use Data::Dumper;
 use Getopt::Long;
 
-use Finance::HostedTrader::Account;
+use Finance::HostedTrader::Factory::Account;
 use Systems;
 
 my $positions = [
     {   symbol => 'AUDUSD', direction => 'long' },
-    {   symbol => 'USDCAD', direction => 'short' },
+    {   symbol => 'XAGUSD', direction => 'long' },
 ];
 
 
-my ($address, $port) = ('127.0.0.1', 1500);
+my ($address, $port, $class) = ('127.0.0.1', 1500, 'FXCM');
 
 GetOptions(
+    "class=s"   => \$class,
     "address=s" => \$address,
     "port=i"    => \$port,
 );
 
-my $account = Finance::HostedTrader::Account->new(
-                address => $address,
-                port => $port,
-              );
+
+my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
 
 my $system = Systems->new( name => 'trendfollow', account => $account );
 my $accountSize = $account->getNav();

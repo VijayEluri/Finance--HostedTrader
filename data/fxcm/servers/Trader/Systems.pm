@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Finance::HostedTrader::Config;
+use Finance::HostedTrader::Position;
 
 
 use Moose;
@@ -232,7 +233,7 @@ sub getTradeSize {
 my $self = shift;
 my $symbol = shift;
 my $direction = shift;
-my $position = shift;
+my $position = shift || Finance::HostedTrader::Position->new(symbol => $symbol);
 
 my $maxLossPts;
 my $system = $self->{_system};
