@@ -229,6 +229,30 @@ die("no exposure coefficients in system definition") if (!$exposurePerPosition |
 return scalar(@{$exposurePerPosition});
 }
 
+sub positionRisk {
+    my $self = shift;
+    my $position = shift;
+    my $account = $self->account;
+    my $symbol = $position->symbol;
+
+    my $trades = $position->trades;
+    my $pl = 0; #ProfitLoss in symbols base currency 
+
+    foreach my $trade (@$trades) {
+        my $stopLoss = $self->_getSignalValue('exit', $symbol, $trade->direction);
+        my $plPts = $stopLoss - $trade->openPrice;
+        $pl += $plPts * $trade->size;
+    }
+
+    my $base = uc(substr($symbol, -3));
+
+    if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
+        $pl /= $account->getAsk("GBP$base");
+    }
+
+    return $pl;
+}
+
 sub getTradeSize {
 my $self = shift;
 my $symbol = shift;
@@ -240,6 +264,10 @@ my $system = $self->{_system};
 my $trades = $position->trades;
 my $account = $self->account;
 
+# This is wrong,
+# I need to take into account
+# how much is at risk in the existing positions
+# then add accordingly to the amount of risk left to take
 
     my $exposurePerPosition = $system->{maxExposure};
     die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));

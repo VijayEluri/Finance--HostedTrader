@@ -47,7 +47,15 @@ foreach my $trade (@{ $position->trades }) {
     my $baseCurrencyPL = $trade->pl;
     my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $nav;
 
-    $t->addRow($trade->symbol, $trade->openDate, $trade->size, $trade->openPrice, $marketPrice, sprintf('%.2f', $baseCurrencyPL), $percentPL);
+    $t->addRow(
+        $trade->symbol,
+        $trade->openDate,
+        $trade->size,
+        $trade->openPrice,
+        $marketPrice,
+        sprintf('%.2f', $baseCurrencyPL),
+        $percentPL
+    );
 }
 }
 
@@ -59,7 +67,7 @@ print "\n";
 
 foreach my $system_name ( qw/trendfollow/ ) {
     my $t = Text::ASCIITable->new( {headingText => $system_name} );
-    $t->setCols('Symbol','Market','Entry','Exit','Direction');
+    $t->setCols('Symbol','Market','Entry','Exit','Direction', 'Worst Case');
     my $system = Systems->new( name => $system_name, account => $account );
     my $data = $system->data;
     my $symbols = $data->{symbols};
@@ -71,7 +79,11 @@ foreach my $system_name ( qw/trendfollow/ ) {
 
             $t->addRow( $symbol, 
                         ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)),
-                        $currentEntry, $currentExit, $direction);
+                        $currentEntry,
+                        $currentExit,
+                        $direction,
+                        sprintf('%.2f',$system->positionRisk($account->getPosition($symbol)))
+            );
         }
     }
     print $t;
