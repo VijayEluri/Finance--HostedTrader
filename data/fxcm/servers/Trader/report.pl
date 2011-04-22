@@ -82,7 +82,7 @@ foreach my $system_name ( qw/trendfollow/ ) {
                         $currentEntry,
                         $currentExit,
                         $direction,
-                        sprintf('%.2f',$system->positionRisk($account->getPosition($symbol)))
+                        sprintf('%.2f',-1*$system->positionRisk($account->getPosition($symbol)))
             );
         }
     }
