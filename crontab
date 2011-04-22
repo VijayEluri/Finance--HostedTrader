@@ -1,0 +1,34 @@
+MAILTO=joaocosta@zonalivre.org
+# Minute   Hour   Day of Month       Month          Day of Week        Command
+# (0-59)  (0-23)     (1-31)    (1-12 or Jan-Dec)  (0-6 or Sun-Sat)
+
+#Update from forexite once a day
+2 7 * * * source ~/.bash_profile;cd ~/fx/data/forexite;./update 60
+
+#Check errors in fxcm data import once a day
+2 7 * * * cat /tmp/mysqlimport.errors 2> /dev/null
+
+#Produce currency score report on Saturdays
+13 8 * * 6 source ~/.bash_profile;~/fx/score.single.pl --timeframe=week | sort -g -k 2
+
+#Run unit tests on Saturdays
+52 10 * * 6 source ~/.bash_profile;~/fx/RunAllTests.sh
+
+#Check relevant FXCM API processes are running during market hours
+7,27,47 21-23 * * 0 ~/fx/data/fxcm/servers/checkProcesses.sh
+7,27,47 * * * 1-4 ~/fx/data/fxcm/servers/checkProcesses.sh
+7,37 0-19 * * 5 ~/fx/data/fxcm/servers/checkProcesses.sh
+
+#Start processes on sunday (doesn't work because it windows windowing)
+#3 21 * * 0 ~/fx/data/fxcm/servers/Datafeed/RatePrinter start
+#4 21 * * 0 ~/fx/data/fxcm/servers/Server/start
+
+# Produce report once a day during weekdays
+43 20 * * 1-5 source ~/.bash_profile;cd ~/fx/data/fxcm/servers/Trader;~/fx/data/fxcm/servers/Trader/report.pl
+
+#Report on existing trades/opportunities
+#36 */6 * * 1-4 source ~/.bash_profile;cd ~/fx/data/fxcm/servers/Trader;./report.pl
+
+37 */3 * * 1-4 source ~/.bash_profile;cd ~/fx/data/fxcm/servers/Trader;~/fx/t/dataUp2Date.pl
+
+45 22 * * 1-5 source ~/.bash_profile;cd ~/fx/data/fxcm/;testSignal.pl --start="3 days ago" "crossoverdown(low,previous(min(low,60),1)) AND min(previous(low,1),20) > previous(min(low,60),1)";testSignal.pl --start="3 days ago" "crossoverup(high,previous(max(high,60),1)) AND max(previous(high,1),20) < previous(max(high,60),1)"
