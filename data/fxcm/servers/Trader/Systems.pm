@@ -241,7 +241,7 @@ sub positionRisk {
     foreach my $trade (@$trades) {
         my $stopLoss = $self->_getSignalValue('exit', $symbol, $trade->direction);
         my $plPts = $stopLoss - $trade->openPrice;
-        $pl += $plPts * $trade->size;
+        $pl -= $plPts * $trade->size;
     }
 
     my $base = uc(substr($symbol, -3));
@@ -264,19 +264,18 @@ my $system = $self->{_system};
 my $trades = $position->trades;
 my $account = $self->account;
 
-# This is wrong,
-# I need to take into account
-# how much is at risk in the existing positions
-# then add accordingly to the amount of risk left to take
+
+    my $nav = $account->getNav() - $position->pl;
+    die("nav is negative") if ($nav < 0);
+    my $positionRisk = $self->positionRisk($position);
+    my $currentRisk = $positionRisk / $nav;
 
     my $exposurePerPosition = $system->{maxExposure};
     die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
     return (0,undef,undef) if (scalar(@$trades) >= scalar(@{$exposurePerPosition}));
 
-    my $maxExposure = $exposurePerPosition->[scalar(@{$trades})];
-    die("max exposure is negative") if ($maxExposure <0);
-    my $nav = $account->getNav();
-    die("nav is negative") if ($nav < 0);
+    my $maxExposure = $exposurePerPosition->[scalar(@{$trades})] - $currentRisk;
+    return (0,undef,undef) if ($maxExposure <= 0);
 
     my $maxLoss   = $nav * $maxExposure / 100;
     my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);

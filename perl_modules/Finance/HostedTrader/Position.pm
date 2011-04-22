@@ -74,6 +74,20 @@ sub size {
     return abs($size);
 }
 
+=item C<pl>
+
+Calculate total profit/loss of a given position
+
+=cut
+
+sub risk {
+    my ($self, $system) = @_;
+    my $pl=0;
+    foreach my $trade (@{$self->trades}) {
+        $pl += $trade->pl;
+    }
+    return $pl
+}
 
 sub _empty_list {
     return [];
