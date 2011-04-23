@@ -80,7 +80,7 @@ Calculate total profit/loss of a given position
 
 =cut
 
-sub risk {
+sub pl {
     my ($self, $system) = @_;
     my $pl=0;
     foreach my $trade (@{$self->trades}) {
