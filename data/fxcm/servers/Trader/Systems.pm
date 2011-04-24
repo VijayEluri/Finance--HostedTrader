@@ -279,7 +279,7 @@ my $account = $self->account;
 
     my $maxLoss   = $nav * $maxExposure / 100;
     my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
-    my $base = uc(substr($symbol, -3));
+    my $base = $account->getSymbolBase($symbol);
 
     if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
         $maxLoss *= $account->getAsk("GBP$base");
