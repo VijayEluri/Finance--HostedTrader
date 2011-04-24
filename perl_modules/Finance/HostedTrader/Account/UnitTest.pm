@@ -46,7 +46,24 @@ sub BUILD {
 }
 
 sub refreshPositions {
-# positions are kept in memory, so nothing to do during refresh
+    my $self = shift;
+# positions are kept in memory
+# Calculate current p/l for each open trade
+    my $positions = $self->{_positions};
+    foreach my $key (keys(%{$positions})) {
+        foreach my $trade (@{ $positions->{$key}->trades }) {
+            my $symbol = $trade->symbol;
+            my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
+            my $base = $self->getSymbolBase($symbol);
+            my $pl = ($rate - $trade->openPrice) * $trade->size;
+
+            if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
+                $pl /= $self->getAsk("GBP$base"); # TODO: this won't work for all cases( eg, if base is EUR)
+            }
+            $trade->pl($pl);
+        }
+    }
+
 }
 
 sub getAsk {
