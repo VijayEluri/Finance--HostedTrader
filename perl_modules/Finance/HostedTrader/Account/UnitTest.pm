@@ -69,13 +69,13 @@ sub refreshPositions {
 sub getAsk {
     my ($self, $symbol) = @_;
 
-    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min' });
+    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
 sub getBid {
     my ($self, $symbol) = @_;
 
-    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min' });
+    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
 sub openMarket {
