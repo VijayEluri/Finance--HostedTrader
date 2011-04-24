@@ -14,7 +14,7 @@ use Pod::Usage;
 use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::Systems;
 
-my ($verbose, $help, $address, $port, $class) = (0, 0, '127.0.0.1', 1500, 'FXCM');
+my ($verbose, $help, $address, $port, $class, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', '2 weeks ago', 'now');
 
 my $result = GetOptions(
     "class=s",  \$class,
@@ -30,7 +30,13 @@ pod2usage(1) if ($help);
 
 logger("STARTUP");
 
-my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
+my $account = Finance::HostedTrader::Factory::Account->new(
+                SUBCLASS => $class,
+                address => $address,
+                port => $port,
+                startDate => $startDate,
+                endDate => $endDate
+            )->create_instance();
 
 my @systems =   (   
                     Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account ),

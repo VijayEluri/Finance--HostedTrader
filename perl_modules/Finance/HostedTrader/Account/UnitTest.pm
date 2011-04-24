@@ -1,4 +1,14 @@
 package Finance::HostedTrader::Account::UnitTest;
+
+use Moose;
+extends 'Finance::HostedTrader::Account';
+
+use Moose::Util::TypeConstraints;
+use Finance::HostedTrader::Trade;
+use Date::Manip;
+use Time::HiRes;
+
+
 =head1 NAME
 
     Finance::HostedTrader::Account::UnitTest - Interface to the UnitTest broker
@@ -50,15 +60,6 @@ has interval => (
     required=>1,
     default => '60 seconds',
 );
-
-
-use Moose;
-extends 'Finance::HostedTrader::Account';
-
-use Moose::Util::TypeConstraints;
-use Finance::HostedTrader::Trade;
-use Date::Manip;
-use Time::HiRes;
 
 =back
 
