@@ -26,7 +26,6 @@ use Finance::HostedTrader::Position;
 
 
 use YAML::Syck;
-use Data::Dumper;
 
 YAML::Syck->VERSION( '0.70' );
 
@@ -307,6 +306,87 @@ sub closeTrades {
         $self->closeMarket($trade->id, $trade->size);
     }
 }
+
+my %symbolBaseMap = (
+    AUDCAD => 'CAD',
+    AUDCHF => 'CHF',
+    AUDJPY => 'JPY',
+    AUDNZD => 'NZD',
+    AUDUSD => 'USD',
+    AUS200 => 'AUD',
+    CADCHF => 'CHF',
+    CADJPY => 'JPY',
+    CHFJPY => 'JPY',
+    CHFNOK => 'NOK',
+    CHFSEK => 'SEK',
+    EURAUD => 'AUD',
+    EURCAD => 'CAD',
+    EURCHF => 'CHF',
+    EURDKK => 'DKK',
+    EURGBP => 'GBP',
+    EURJPY => 'JPY',
+    EURNOK => 'NOK',
+    EURNZD => 'NZD',
+    EURSEK => 'SEK',
+    EURTRY => 'TRY',
+    EURUSD => 'USD',
+    GBPAUD => 'AUD',
+    GBPCAD => 'CAD',
+    GBPCHF => 'CHF',
+    GBPJPY => 'JPY',
+    GBPNZD => 'NZD',
+    GBPSEK => 'SEK',
+    GBPUSD => 'USD',
+    HKDJPY => 'JPY',
+    NOKJPY => 'JPY',
+    NZDCAD => 'CAD',
+    NZDCHF => 'CHF',
+    NZDJPY => 'JPY',
+    NZDUSD => 'USD',
+    SEKJPY => 'JPY',
+    SGDJPY => 'JPY',
+    TRYJPY => 'JPY',
+    USDCAD => 'CAD',
+    USDCHF => 'CHF',
+    USDDKK => 'DKK',
+    USDHKD => 'HKD',
+    USDJPY => 'JPY',
+    USDMXN => 'MXN',
+    USDNOK => 'NOK',
+    USDSEK => 'SEK',
+    USDSGD => 'SGD',
+    USDTRY => 'TRY',
+    USDZAR => 'ZAR',
+    XAGUSD => 'USD',
+    XAUUSD => 'USD',
+    ZARJPY => 'JPY',
+    ESP35  => 'EUR',
+    FRA40  => 'EUR',
+    GER30  => 'EUR',
+    HKG33  => 'HKD',
+    ITA40  => 'EUR',
+    JPN225 => 'JPY',
+    NAS100 => 'USD',
+    SPX500 => 'USD',
+    SUI30  => 'CHF',
+    SWE30  => 'SEK',
+    UK100  => 'GBP',
+    UKOil  => 'GBP',
+    US30   => 'USD',
+    USOil  => 'USD',
+);
+=item C<getSymbolBase($symbol)>
+
+Returns the base currency of $symbol. eg, currency of profit/loss amount.
+
+=cut
+sub getSymbolBase {
+    my ($self, $symbol) = @_;
+
+    die("Unsupported symbol '$symbol'") if (!exists($symbolBaseMap{$symbol}));
+    return $symbolBaseMap{$symbol};
+}
+
 
 
 __PACKAGE__->meta->make_immutable;
