@@ -352,14 +352,14 @@ sub checkSignal {
     my $period = $args->{period} || '1hour';
     my $nowValue = $args->{simulatedNowValue} || 'now';
 
-    my $startPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
+    my $endPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
     my $data = $self->getSignalData(
         {
             'expr'            => $expr,
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $maxLoadedItems,
-            'startPeriod'     => $startPeriod,
+            'endPeriod'     => $endPeriod,
             'numItems'        => 1,
             'debug'           => $debug,
         }

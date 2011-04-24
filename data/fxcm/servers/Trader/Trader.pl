@@ -22,6 +22,8 @@ my $result = GetOptions(
     "port=i",   \$port,
     "verbose",  \$verbose,
     "help",     \$help,
+    "startDate",\$startDate,
+    "endDate",  \$endDate,
 ) || pod2usage(2);
 
 pod2usage(1) if ($help);
@@ -41,16 +43,29 @@ foreach my $system (@systems) {
 my $debug = 0;
 my $symbolsLastUpdated = 0;
 while (1) {
+    logger("Time is:" . $account->{_now}) if ($class eq 'UnitTest');
     foreach my $system (@systems) {
-        logger("Analyze " . $system->name) if ($verbose);
 # Applies system filters and updates list of symbols traded by this system
 # Updates symbol list every 15 minutes
         if ( time() - $system->symbolsLastUpdated() > 900 ) {
-            logger("Update symbol list") if ($verbose);
+            if ($verbose) {
+                my $symbols_long = $system->symbols('long');
+                my $symbols_short = $system->symbols('short');
+                logger("Current symbol list");
+                logger("long: " . join(',', @$symbols_long));
+                logger("short: " . join(',', @$symbols_short));
+            }
             $system->updateSymbols();
+            if ($verbose) {
+                my $symbols_long = $system->symbols('long');
+                my $symbols_short = $system->symbols('short');
+                logger("Updated symbol list");
+                logger("long: " . join(',', @$symbols_long));
+                logger("short: " . join(',', @$symbols_short));
+            }
+
         }
         eval {
-            logger("Check signals long") if ($verbose);
             checkSystem($account, $system, 'long');
             1;
         } or do {
@@ -58,7 +73,6 @@ while (1) {
         };
 
         eval {
-            logger("Check signals short") if ($verbose);
             checkSystem($account, $system, 'short');
             1;
         } or do {
@@ -66,8 +80,10 @@ while (1) {
         };
     }
     $account->waitForNextTrade();
-    logger($account->{_now}) if ($class eq 'UnitTest');
+    last if ( $class eq 'UnitTest' && $account->{_now} gt UnixDate($account->endDate, '%Y-%m-%d %H:%M:%S') );
 }
+
+print Dumper(\$account);
 
 sub checkSystem {
     my ($account, $system, $direction) = @_;
@@ -84,7 +100,9 @@ sub checkSystem {
             my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
                 my ($amount, $value, $stopLoss) = $system->getTradeSize($symbol, $direction, $position);
-                logger(Dumper(\$result));
+                if ($verbose && $result) {
+                    logger("Signal detected: " . $result->[0]);
+                }
                 next if ($amount <= 0);
                 logger("Adding position for $symbol $direction ($amount)");
 

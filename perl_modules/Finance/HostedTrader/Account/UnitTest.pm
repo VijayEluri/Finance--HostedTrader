@@ -21,7 +21,36 @@ package Finance::HostedTrader::Account::UnitTest;
 
 =over 12
 
+=item C<startDate>
+
 =cut
+has startDate => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+    default => '2 weeks ago',
+);
+
+=item C<endDate>
+
+=cut
+has endDate => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+    default => 'now',
+);
+
+=item C<interval>
+
+=cut
+has interval => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+    default => '60 seconds',
+);
+
 
 use Moose;
 extends 'Finance::HostedTrader::Account';
@@ -42,7 +71,7 @@ use Time::HiRes;
 sub BUILD {
     my $self = shift;
 
-    $self->{_now} = UnixDate(DateCalc('now', '- 2 week'), '%Y-%m-%d %H:%M:%S');
+    $self->{_now} = UnixDate($self->startDate, '%Y-%m-%d %H:%M:%S');
 }
 
 sub refreshPositions {
@@ -151,7 +180,7 @@ sub getIndicatorValue {
 sub waitForNextTrade {
     my ($self, $system) = @_;
 
-    $self->{_now} = UnixDate(DateCalc($self->{_now}, '30 seconds'), '%Y-%m-%d %H:%M:%S');
+    $self->{_now} = UnixDate(DateCalc($self->{_now}, $self->interval), '%Y-%m-%d %H:%M:%S');
 }
 
 1;
