@@ -79,20 +79,6 @@ sub refreshPositions {
     die("overrideme");
 }
 
-=item C<getSymbolBase($symbol)>
-
-Returns the base currency for a symbol, useful for calculating profit/loss.
-
-Eg:
- US Stocks => 'USD'
- EURUSD => 'USD'
- USDCHF => 'CHF'
-
-=cut
-sub getSymbolBase {
-    die("overrideme");
-}
-
 =item C<getAsk($symbol)>
 
 Return the current ask price for $symbol.
@@ -377,9 +363,16 @@ my %symbolBaseMap = (
 );
 =item C<getSymbolBase($symbol)>
 
-Returns the base currency of $symbol. eg, currency of profit/loss amount.
+Returns the base currency for a symbol, useful for calculating profit/loss.
+
+Eg:
+ US Stocks => 'USD'
+ EURUSD => 'USD'
+ USDCHF => 'CHF'
 
 =cut
+
+
 sub getSymbolBase {
     my ($self, $symbol) = @_;
 
