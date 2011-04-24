@@ -88,7 +88,7 @@ sub updateSymbols {
     my $file = $self->_getSymbolFileName();
     $yml->write($file) || die("Failed to write symbols file $file. $!");
     $self->{_system}->{symbols} = \%symbols;
-    $self->{_symbolsLastUpdated} = time();
+    $self->{_symbolsLastUpdated} = account->getServerEpoch();
 }
 
 #Return list of symbols to add to the system
@@ -308,7 +308,6 @@ sub symbols {
 
     return $self->{_system}->{symbols}->{$direction};
 }
-
 
 __PACKAGE__->meta->make_immutable;
 1;

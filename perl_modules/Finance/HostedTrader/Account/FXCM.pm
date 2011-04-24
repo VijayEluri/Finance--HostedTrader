@@ -329,6 +329,13 @@ sub _sendCmd {
     close($sock);
 }
 
+sub getServerEpoch {
+    my $self = shift;
+
+    return time();
+}
+
+
 1;
 
 =back

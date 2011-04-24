@@ -184,6 +184,12 @@ sub waitForNextTrade {
     $self->{_now} = UnixDate(DateCalc($self->{_now}, $self->interval), '%Y-%m-%d %H:%M:%S');
 }
 
+sub getServerEpoch {
+    my $self = shift;
+
+    return UnixDate($self->{_now}, '%s');
+}
+
 1;
 
 =back

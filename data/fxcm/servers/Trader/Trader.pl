@@ -49,11 +49,11 @@ foreach my $system (@systems) {
 my $debug = 0;
 my $symbolsLastUpdated = 0;
 while (1) {
-    logger("Time is:" . $account->{_now}) if ($class eq 'UnitTest');
+    logger("Time is:" . UnixDate($account->getServerEpoch(), '%Y-%m-%d %H:%M:%S')) if ($class eq 'UnitTest');
     foreach my $system (@systems) {
 # Applies system filters and updates list of symbols traded by this system
 # Updates symbol list every 15 minutes
-        if ( time() - $system->symbolsLastUpdated() > 900 ) {
+        if ( $account->getServerEpoch() - $system->symbolsLastUpdated() > 900 ) {
             if ($verbose) {
                 my $symbols_long = $system->symbols('long');
                 my $symbols_short = $system->symbols('short');
@@ -86,7 +86,7 @@ while (1) {
         };
     }
     $account->waitForNextTrade();
-    last if ( $class eq 'UnitTest' && $account->{_now} gt UnixDate($account->endDate, '%Y-%m-%d %H:%M:%S') );
+    last if ( $class eq 'UnitTest' && $account->getServerEpoch() > UnixDate($account->endDate, '%s') );
 }
 
 print Dumper(\$account);
