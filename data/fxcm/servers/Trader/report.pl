@@ -8,7 +8,7 @@ use Getopt::Long;
 use Text::ASCIITable;
 
 use Finance::HostedTrader::Factory::Account;
-use Systems;
+use Finance::HostedTrader::Systems;
 
 my ($address, $port, $class) = ('127.0.0.1', 1500, 'FXCM');
 
@@ -31,7 +31,7 @@ my $nav = $account->getNav();
 
 
 
-my $system = Systems->new( name => 'trendfollow', account => $account );
+my $system = Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account );
 
 my $positions = $account->getPositions();
 
@@ -68,7 +68,7 @@ print "\n";
 foreach my $system_name ( qw/trendfollow/ ) {
     my $t = Text::ASCIITable->new( {headingText => $system_name} );
     $t->setCols('Symbol','Market','Entry','Exit','Direction', 'Worst Case');
-    my $system = Systems->new( name => $system_name, account => $account );
+    my $system = Finance::HostedTrader::Systems->new( name => $system_name, account => $account );
     my $data = $system->data;
     my $symbols = $data->{symbols};
 

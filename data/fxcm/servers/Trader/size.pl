@@ -7,7 +7,7 @@ use Data::Dumper;
 use Getopt::Long;
 
 use Finance::HostedTrader::Factory::Account;
-use Systems;
+use Finance::HostedTrader::Systems;
 
 my $positions = [
     {   symbol => 'AUDUSD', direction => 'long' },
@@ -26,7 +26,7 @@ GetOptions(
 
 my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
 
-my $system = Systems->new( name => 'trendfollow', account => $account );
+my $system = Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account );
 my $accountSize = $account->getNav();
 
 
