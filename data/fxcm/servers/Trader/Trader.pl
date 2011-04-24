@@ -66,6 +66,7 @@ while (1) {
         };
     }
     $account->waitForNextTrade();
+    logger($account->{_now}) if ($class eq 'UnitTest');
 }
 
 sub checkSystem {
@@ -142,6 +143,7 @@ sub sendMail {
 my ($subject, $content) = @_;
 use MIME::Lite;
 
+    return if ($class eq 'UnitTest');
     logger($content);
     ### Create a new single-part message, to send a GIF file:
     my $msg = MIME::Lite->new(
