@@ -380,7 +380,9 @@ sub getSymbolBase {
     return $symbolBaseMap{$symbol};
 }
 
-
+sub getServerEpoch {
+    die("overrideme");
+}
 
 __PACKAGE__->meta->make_immutable;
 1;
