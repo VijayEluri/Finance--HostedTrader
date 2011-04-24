@@ -126,7 +126,7 @@ has closePrice => (
 
 =cut
 has pl => (
-    is     => 'ro',
+    is     => 'rw',
     isa    => 'Num',
     required=>0,
 );
