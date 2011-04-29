@@ -142,6 +142,12 @@ sub getBaseUnit {
 }
 
 sub getNav {
+    my $self = shift;
+
+    return $self->balance() + $self->pl();
+}
+
+sub balance {
     my ($self) = @_;
     return 50000;
 }

@@ -25,9 +25,11 @@ my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, 
 my $system = Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account );
 my $report = Finance::HostedTrader::Report->new( account => $account, system => $system, format => $format );
 my $nav = $account->getNav();
+my $balance = $account->balance();
 
 print "<html><body><p>" if ($format eq 'html');
 print "ACCOUNT NAV: " . $nav . "\n\n";
+print "ACCOUNT BALANCE: " . $balance . "\n\n";
 print "</p>" if ($format eq 'html');
 print $report->openPositions;
 print "\n";

@@ -319,6 +319,34 @@ sub closeTrades {
     }
 }
 
+=item C<pl()>
+
+Profit/Loss for currently open positions
+
+=cut
+sub pl {
+    my $self = shift;
+    my $pl = 0;
+
+    my $positions = $self->getPositions();
+    foreach my $symbol (keys %{$positions}) {
+        my $position = $positions->{$symbol};
+        $pl += $position->pl;
+    }
+
+    return $pl;
+}
+
+=item C<balance()>
+
+Current account balance, excluding profit/loss of open positions
+=cut
+sub balance {
+    my $self = shift;
+
+    return $self->getNav() - $self->pl();
+}
+
 my %symbolBaseMap = (
     AUDCAD => 'CAD',
     AUDCHF => 'CHF',

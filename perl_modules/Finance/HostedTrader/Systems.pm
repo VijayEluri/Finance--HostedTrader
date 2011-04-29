@@ -229,6 +229,14 @@ die("no exposure coefficients in system definition") if (!$exposurePerPosition |
 return scalar(@{$exposurePerPosition});
 }
 
+=item C<positionRisk($position)
+
+How much capital will be lost/gained if $ position closes at the stop loss
+level defined by this system.
+
+This returned value is relative to the opening price and does not take into
+account current profit/loss.
+=cut
 sub positionRisk {
     my $self = shift;
     my $position = shift;
@@ -265,10 +273,10 @@ my $trades = $position->trades;
 my $account = $self->account;
 
 
-    my $nav = $account->getNav() - $position->pl;
-    die("nav is negative") if ($nav < 0);
+    my $balance = $account->balance();
+    die("balance is negative") if ($balance < 0);
     my $positionRisk = $self->positionRisk($position);
-    my $currentRisk = $positionRisk / $nav;
+    my $currentRisk = $positionRisk / $balance;
 
     my $exposurePerPosition = $system->{maxExposure};
     die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
@@ -277,7 +285,7 @@ my $account = $self->account;
     my $maxExposure = $exposurePerPosition->[scalar(@{$trades})] - $currentRisk;
     return (0,undef,undef) if ($maxExposure <= 0);
 
-    my $maxLoss   = $nav * $maxExposure / 100;
+    my $maxLoss   = $balance * $maxExposure / 100;
     my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
     my $base = $account->getSymbolBase($symbol);
 
