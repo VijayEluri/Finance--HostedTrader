@@ -23,9 +23,15 @@ use Moose::Util::TypeConstraints;
 
 
 has [qw(SUBCLASS)] => ( is => 'ro', required => 1);
-has [qw(address port)] => ( is => 'ro', required => 0);
 
 
+sub BUILD {
+    my $self = shift;
+    my $args = shift;
+
+    delete $args->{SUBCLASS};
+    $self->{_args} = $args;
+}
 =back
 
 =head2 Methods
@@ -45,10 +51,10 @@ my $self = shift;
 
     if ($sc eq 'FXCM') {
         require Finance::HostedTrader::Account::FXCM;
-        return Finance::HostedTrader::Account::FXCM->new( address => $self->address, port => $self->port );
+        return Finance::HostedTrader::Account::FXCM->new( $self->{_args} );
     } elsif ($sc eq 'UnitTest') {
         require Finance::HostedTrader::Account::UnitTest;
-        return Finance::HostedTrader::Account::UnitTest->new( );
+        return Finance::HostedTrader::Account::UnitTest->new( $self->{_args} );
     } else {
         die("Don't know about Account class: $sc");
     }
