@@ -1,3 +1,11 @@
+Store trades locally
+Use non-fx instruments:
+Some files make assumptions in this regard:
+    ~/fx/data/fxcm/servers/Trader/report.pl (base currency)
+    ~/fx/data/fxcm/src/cpp/Server/Server/basic-server.cpp ( convertSymbolToFXCM )
+    ~/fx/perl_modules/Finance/HostedTrader/Datasource.pm (createSynthetic)
+
+
 .tidyrc
 test mysql udfs
 more indicators: http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators
