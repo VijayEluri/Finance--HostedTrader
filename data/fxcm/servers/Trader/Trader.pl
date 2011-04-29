@@ -7,12 +7,14 @@ $| = 1;
 #Proc::Daemon::Init;
 use Getopt::Long;
 use Data::Dumper;
+use Data::Compare;
 use Date::Manip;
 use Pod::Usage;
 
 
 use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::Systems;
+use Finance::HostedTrader::Report;
 
 my ($verbose, $help, $address, $port, $class, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', '2 weeks ago', 'now');
 
@@ -28,8 +30,6 @@ my $result = GetOptions(
 
 pod2usage(1) if ($help);
 
-logger("STARTUP");
-
 my $account = Finance::HostedTrader::Factory::Account->new(
                 SUBCLASS => $class,
                 address => $address,
@@ -42,6 +42,8 @@ my @systems =   (
                     Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account ),
                 );
 
+logger("STARTUP");
+
 foreach my $system (@systems) {
     logger("Loaded system " . $system->{name});
 }
@@ -49,44 +51,71 @@ foreach my $system (@systems) {
 my $debug = 0;
 my $symbolsLastUpdated = 0;
 while (1) {
-    logger("Time is:" . UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d %H:%M:%S')) if ($class eq 'UnitTest');
-    foreach my $system (@systems) {
-# Applies system filters and updates list of symbols traded by this system
-# Updates symbol list every 15 minutes
-        if ( $account->getServerEpoch() - $system->symbolsLastUpdated() > 900 ) {
-            if ($verbose) {
-                my $symbols_long = $system->symbols('long');
-                my $symbols_short = $system->symbols('short');
+    my $system = $systems[0];
+    # Applies system filters and updates list of symbols traded by this system
+    # Updates symbol list every 15 minutes
+    if ( $account->getServerEpoch() - $system->symbolsLastUpdated() > 900 ) {
+        my %current_symbols;
+        my %existing_symbols;
+        if ($verbose) {
+            my $symbols_long = $system->symbols('long');
+            my $symbols_short = $system->symbols('short');
+            if ($verbose > 1) {
                 logger("Current symbol list");
                 logger("long: " . join(',', @$symbols_long));
                 logger("short: " . join(',', @$symbols_short));
             }
-            $system->updateSymbols();
-            if ($verbose) {
-                my $symbols_long = $system->symbols('long');
-                my $symbols_short = $system->symbols('short');
+            $current_symbols{long} = $symbols_long;
+            $current_symbols{short} = $symbols_short;
+        }
+        $system->updateSymbols();
+        if ($verbose) {
+            my $symbols_long = $system->symbols('long');
+            my $symbols_short = $system->symbols('short');
+            if ($verbose > 1) {
                 logger("Updated symbol list");
                 logger("long: " . join(',', @$symbols_long));
                 logger("short: " . join(',', @$symbols_short));
             }
-
+            $existing_symbols{long} = $symbols_long;
+            $existing_symbols{short} = $symbols_short;
+            if (!Compare(\%current_symbols, \%existing_symbols)) {
+                logger("Symbols list updated");
+                logger("FROM: " . join(',', @{ $current_symbols{long} }, @{ $current_symbols{short} }));
+                logger("TO  : " . join(',', @{ $existing_symbols{long} }, @{ $existing_symbols{short} }));
+            }
         }
-        eval {
-            checkSystem($account, $system, 'long');
-            1;
-        } or do {
-            logger($@);
-        };
 
-        eval {
-            checkSystem($account, $system, 'short');
-            1;
-        } or do {
-            logger($@);
-        };
     }
+    # Actually test the system
+    eval {
+        checkSystem($account, $system, 'long');
+        1;
+    } or do {
+        logger($@);
+    };
+
+    eval {
+        checkSystem($account, $system, 'short');
+        1;
+    } or do {
+        logger($@);
+    };
+
+    my ($previousTime, $currentTime);
+    # get current time
+    $previousTime = UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d') if ($verbose);
+    # sleep for a bit
     $account->waitForNextTrade();
-    last if ( $class eq 'UnitTest' && $account->getServerEpoch() > UnixDate($account->endDate, '%s') );
+    if ($verbose) {
+        # print a report if the day changed
+        $currentTime = UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d');
+        my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
+        logger("NAV = " . $account->getNav) if ($previousTime ne $currentTime);
+        logger("\n".$report->openPositions) if ($previousTime ne $currentTime);
+        logger("\n".$report->systemEntryExit) if ($previousTime ne $currentTime);
+    }
+    last if ( $account->getServerEpoch() > UnixDate($account->endDate, '%s') );
 }
 
 print Dumper(\$account);
@@ -102,12 +131,12 @@ sub checkSystem {
         my $numOpenTrades = scalar(@{$position->trades});
 
         if ($numOpenTrades < $system->maxNumberTrades) {
-            logger("Checking ".$system->name." $symbol $direction") if ($verbose);
+            logger("Checking ".$system->name." $symbol $direction") if ($verbose > 1);
             my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
                 my ($amount, $value, $stopLoss) = $system->getTradeSize($symbol, $direction, $position);
                 if ($verbose && $result) {
-                    logger("Signal detected: " . $result->[0]);
+                    logger("$symbol $direction at " . $result->[0] . " Amount=" . $amount . " value=" . $value . " stopLoss=" . $stopLoss);
                 }
                 next if ($amount <= 0);
                 logger("Adding position for $symbol $direction ($amount)");
@@ -158,7 +187,7 @@ Current Value: $value
 sub logger {
     my $msg = shift;
 
-    my $datetimeNow = UnixDate('now', '%Y-%m-%d %H:%M:%S');
+    my $datetimeNow = UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d %H:%M:%S');
     print "[$datetimeNow] $msg\n";
 }
 
@@ -167,8 +196,8 @@ sub sendMail {
 my ($subject, $content) = @_;
 use MIME::Lite;
 
-    return if ($class eq 'UnitTest');
     logger($content);
+    return if ($class eq 'UnitTest');
     ### Create a new single-part message, to send a GIF file:
     my $msg = MIME::Lite->new(
         From     => 'fxhistor@fxhistoricaldata.com',

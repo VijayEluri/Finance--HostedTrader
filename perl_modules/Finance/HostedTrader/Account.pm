@@ -52,6 +52,32 @@ YAML::Syck->VERSION( '0.70' );
 #    required=>0,
 #);
 #
+
+=item C<startDate>
+
+The time the trading system starts trading
+
+=cut
+has startDate => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+    default => 'now',
+);
+
+=item C<endDate>
+
+The time the trading system stops trading
+
+=cut
+has endDate => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>1,
+    default => '-10 years ago',
+);
+
+
 sub BUILD {
     my $self = shift;
 

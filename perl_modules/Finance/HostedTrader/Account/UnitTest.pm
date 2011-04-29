@@ -58,7 +58,7 @@ has interval => (
     is     => 'ro',
     isa    => 'Str',
     required=>1,
-    default => '60 seconds',
+    default => '240 seconds',
 );
 
 =back
@@ -179,9 +179,11 @@ sub getIndicatorValue {
 }
 
 sub waitForNextTrade {
-    my ($self, $system) = @_;
+    my ($self) = @_;
 
-    $self->{_now} = UnixDate(DateCalc($self->{_now}, $self->interval), '%Y-%m-%d %H:%M:%S');
+    my ($sec, $min, $hr, $day, $month, $year, $weekday) = gmtime($self->getServerEpoch());
+    my $interval = ($weekday != 0 && $weekday != 6 ? $self->interval : '3 hours');
+    $self->{_now} = UnixDate(DateCalc($self->{_now}, $interval), '%Y-%m-%d %H:%M:%S');
 }
 
 sub getServerEpoch {
