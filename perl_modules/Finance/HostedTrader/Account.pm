@@ -141,7 +141,6 @@ $tradeID - This can be passed to closeMarket. It can also be retrieved via getTr
 $price   - The price at which the trade was executed.
 
 =cut
-
 sub openMarket {
     die("overrideme");
 }
@@ -240,7 +239,7 @@ sub getIndicatorValue {
     return $value->[0]->[1];
 }
 
-=item C<waitForNextTrades($system)>
+=item C<waitForNextTrade($system)>
 
 Sleeps for 20 seconds. $system is ignored.
 
@@ -254,12 +253,11 @@ sub waitForNextTrade {
     sleep(20);
 }
 
-=item C<converToBaseCurrency($amount, $currentCurrency, $bidask>
+=item C<convertToBaseCurrency($amount, $currentCurrency, $bidask>
 
 Converts $amount from $currentCurrency to the account's base currency, using either 'bid' or 'ask' price.
 
 =cut
-
 sub convertToBaseCurrency {
     my ($self, $amount, $currentCurrency, $bidask) = @_;
     $bidask = 'ask' if (!$bidask);
@@ -428,6 +426,7 @@ my %symbolBaseMap = (
     US30   => 'USD',
     USOil  => 'USD',
 );
+
 =item C<getSymbolBase($symbol)>
 
 Returns the base currency for a symbol, useful for calculating profit/loss.
