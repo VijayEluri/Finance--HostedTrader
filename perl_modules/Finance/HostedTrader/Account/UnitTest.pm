@@ -6,6 +6,7 @@ extends 'Finance::HostedTrader::Account';
 use Moose::Util::TypeConstraints;
 use Finance::HostedTrader::Trade;
 use Date::Manip;
+use Date::Calc qw (Add_Delta_DHMS);
 use Time::HiRes;
 
 
@@ -33,13 +34,16 @@ use Time::HiRes;
 
 =item C<interval>
 
+Number of seconds (in simulated time) to sleep between trades
+
 =cut
 has interval => (
     is     => 'ro',
-    isa    => 'Str',
+    isa    => 'Int',
     required=>1,
-    default => '240 seconds',
+    default => 240,
 );
+
 
 =back
 
@@ -53,6 +57,7 @@ sub BUILD {
     my $self = shift;
 
     $self->{_now} = UnixDate($self->startDate, '%Y-%m-%d %H:%M:%S');
+    $self->{_now_epoch} = UnixDate($self->{_now}, '%s');
     $self->{_signal_cache} = {};
 }
 
@@ -122,7 +127,7 @@ sub openMarket {
             id          => $id,
             symbol      => $symbol,
             direction   => $direction,
-            openDate    => UnixDate($self->{_now}, '%Y-%m-%d %H:%M:%S'),
+            openDate    => $self->{_now},
             openPrice   => $rate,
             size        => $amount,
     );
@@ -202,7 +207,7 @@ sub checkSignal {
             'symbol' => $symbol,
             'tf' => $signal_args->{timeframe},
             'startPeriod' => UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S'),
-            'endPeriod' => UnixDate($self->endDate, '%Y-%m-%d %H:%M:%S'),
+            'endPeriod' => $self->endDate,
         });
 
     }
@@ -212,20 +217,21 @@ sub checkSignal {
 
     my $signal;
     my $signal_date = 0;
-    my $now = $self->getServerEpoch();
     my $period = $signal_args->{period} || '1hour';
-    my $signal_valid_from = UnixDate(DateCalc($self->{_now}, '- '.$period), '%s');
+    my $secs_in_period =  Delta_Format(ParseDateDelta($period), 0, "%st");
+    my $date=$self->{_now};
+    my $signal_valid_from = sprintf('%d-%02d-%02d %02d:%02d:%02d', Add_Delta_DHMS(substr($date,0,4),substr($date,5,2),substr($date,8,2),substr($date,11,2),substr($date,14,2),substr($date,17,2),0,0,0,$secs_in_period*(-1)));
 
     while(1) {
         $signal = $signal_list->[0];
         last if (!defined($signal));
-        $signal_date = UnixDate($signal->[0], '%s');
-        last if ( $signal_valid_from < $signal_date && ( !defined($signal_list->[1]) || UnixDate($signal_list->[1]->[0], '%s') > $now ));
+        $signal_date = $signal->[0];
+        last if ( $signal_valid_from lt $signal_date && ( !defined($signal_list->[1]) || $signal_list->[1]->[0] gt $self->{_now} ));
         shift @{ $signal_list };
     }
     
 
-    if ($signal_date > $now || $signal_date < $signal_valid_from) {
+    if ($signal_date gt $self->{_now} || $signal_date lt $signal_valid_from) {
         $signal = undef;
     }
 
@@ -263,14 +269,16 @@ sub waitForNextTrade {
     my ($self) = @_;
 
     my ($sec, $min, $hr, $day, $month, $year, $weekday) = gmtime($self->getServerEpoch());
-    my $interval = ($weekday != 0 && $weekday != 6 ? $self->interval : '3 hours');
-    $self->{_now} = UnixDate(DateCalc($self->{_now}, $interval), '%Y-%m-%d %H:%M:%S');
+    my $interval = ($weekday != 0 && $weekday != 6 ? $self->interval : 10800);
+    my $date = $self->{_now};
+    $self->{_now} = sprintf('%d-%02d-%02d %02d:%02d:%02d', Add_Delta_DHMS(substr($date,0,4),substr($date,5,2),substr($date,8,2),substr($date,11,2),substr($date,14,2),substr($date,17,2),0,0,0,$interval));
+    $self->{_now_epoch} += $interval;
 }
 
 sub getServerEpoch {
     my $self = shift;
 
-    return UnixDate($self->{_now}, '%s');
+    return $self->{_now_epoch};
 }
 
 1;
