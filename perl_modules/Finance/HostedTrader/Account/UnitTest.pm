@@ -73,6 +73,7 @@ sub BUILD {
     my $self = shift;
 
     $self->{_now} = UnixDate($self->startDate, '%Y-%m-%d %H:%M:%S');
+    $self->{_signal_cache} = {};
 }
 
 sub refreshPositions {
@@ -142,11 +143,17 @@ sub getBaseUnit {
 }
 
 sub getNav {
+    my $self = shift;
+
+    return $self->balance() + $self->pl();
+}
+
+sub balance {
     my ($self) = @_;
     return 50000;
 }
 
-sub checkSignal {
+sub checkSignal_slow {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
 
     return $self->{_signal_processor}->checkSignal(
@@ -160,6 +167,59 @@ sub checkSignal {
             'simulatedNowValue' => $self->{_now},
         }
     );
+}
+
+sub checkSignal {
+    my ($self, $symbol, $signal_definition, $signal_args) = @_;
+    my $cache = $self->{_signal_cache};
+
+#Get all signals for this symbol/signal_definition in the relevant time period and cache them
+    if (!$cache->{$symbol} || !$cache->{$symbol}->{$signal_definition}) {
+        $cache->{$symbol}->{$signal_definition} = $self->{_signal_processor}->getSignalData( {
+            'expr' => $signal_definition, 
+            'symbol' => $symbol,
+            'tf' => $signal_args->{timeframe},
+            'startPeriod' => UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S'),
+        });
+
+    }
+
+    my $signal_list = $cache->{$symbol}->{$signal_definition};
+    return undef if (!$signal_list || scalar(@$signal_list) == 0);
+
+    my $signal;
+    my $signal_date = 0;
+    my $now = $self->getServerEpoch();
+    my $period = $signal_args->{period} || '1hour';
+    my $signal_valid_from = UnixDate(DateCalc($self->{_now}, '- '.$period), '%s');
+
+    while(1) {
+        $signal = $signal_list->[0];
+        last if (!defined($signal));
+        $signal_date = UnixDate($signal->[0], '%s');
+        last if ( $signal_valid_from < $signal_date && ( !defined($signal_list->[1]) || UnixDate($signal_list->[1]->[0], '%s') > $now ));
+        shift @{ $signal_list };
+    }
+    
+
+    if ($signal_date > $now || $signal_date < $signal_valid_from) {
+        $signal = undef;
+    }
+
+=pod
+my $old_value = $self->checkSignal_slow($symbol, $signal_definition, $signal_args);
+use Data::Compare;
+    if (!Compare(\$signal, \$old_value)) {
+        print $self->{_now}, "\n";
+        print "$symbol $signal_definition\n";
+        print Dumper(\$signal_args);
+        print Dumper(\$signal);
+        print Dumper(\$old_value);
+        print Dumper(\$signal_list);
+        use Data::Dumper;exit;
+    }
+=cut
+    return $signal;
 }
 
 sub getIndicatorValue {
