@@ -305,8 +305,8 @@ my ($self, $args) = @_;
     my $select_fields = join( ', ', @fields );
     $select_fields = ',' . $select_fields if ($select_fields);
 
-    my $WHERE_FILTER = '';
-    $WHERE_FILTER = 'WHERE dayofweek(datetime) <> 1' if ( $tf != 604800 );
+    my $WHERE_FILTER = " WHERE datetime <= '$endPeriod'";
+    $WHERE_FILTER .= ' AND dayofweek(datetime) <> 1' if ( $tf != 604800 );
 
     my $sql = qq(
 SELECT $fields FROM (
@@ -352,14 +352,16 @@ sub checkSignal {
     my $period = $args->{period} || '1hour';
     my $nowValue = $args->{simulatedNowValue} || 'now';
 
-    my $endPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
+    my $startPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
+    my $endPeriod = UnixDate($nowValue, '%Y-%m-%d %H:%M:%S');
     my $data = $self->getSignalData(
         {
             'expr'            => $expr,
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $maxLoadedItems,
-            'endPeriod'     => $endPeriod,
+            'startPeriod'     => $startPeriod,
+            'endPeriod'       => $endPeriod,
             'numItems'        => 1,
             'debug'           => $debug,
         }
