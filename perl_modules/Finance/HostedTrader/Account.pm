@@ -12,9 +12,6 @@ package Finance::HostedTrader::Account;
 =head1 DESCRIPTION
 
 
-=head2 METHODS
-
-
 =cut
 
 
@@ -24,6 +21,8 @@ use Moose;
 use Finance::HostedTrader::ExpressionParser;
 use Finance::HostedTrader::Position;
 
+use Date::Manip;
+
 
 use YAML::Syck;
 
@@ -31,27 +30,10 @@ YAML::Syck->VERSION( '0.70' );
 
 
 ##These should exist everywhere, regardless of broker
-#
-#=item C<username>
-#
-#
-#=cut
-#has username => (
-#    is     => 'ro',
-#    isa    => 'Str',
-#    required=>0,
-#);
-#
-#=item C<password>
-#
-#
-#=cut
-#has password => (
-#    is     => 'ro',
-#    isa    => 'Str',
-#    required=>0,
-#);
-#
+
+=head2 Properties
+
+=over 12
 
 =item C<startDate>
 
@@ -59,7 +41,7 @@ The time the trading system starts trading
 
 =cut
 has startDate => (
-    is     => 'ro',
+    is     => 'rw',
     isa    => 'Str',
     required=>1,
     default => 'now',
@@ -71,19 +53,43 @@ The time the trading system stops trading
 
 =cut
 has endDate => (
-    is     => 'ro',
+    is     => 'rw',
     isa    => 'Str',
     required=>1,
     default => '-10 years ago',
 );
 
+=back
 
+=head2 Constructor
+
+=over 12
+
+=item C<BUILD>
+
+Constructor.
+
+Converts {start,end}Date to 'YYYY-MM-DD hh:mm:ss' format.
+Validates dates.
+=cut
 sub BUILD {
     my $self = shift;
 
+    my $startDate = UnixDate($self->startDate, '%Y-%m-%d %H:%M:%S');
+    die("Invalid date format: " . $self->startDate) if (!$startDate);
+    my $endDate = UnixDate($self->endDate, '%Y-%m-%d %H:%M:%S');
+    die("Invalid date format: " . $self->endDate) if (!$endDate);
+    die("End date cannot be earlier than start date") if ( $endDate lt $startDate);
+    $self->startDate($startDate);
+    $self->endDate($endDate);
     $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
     $self->{_positions} = {};
 }
+
+=back
+
+=head2 METHODS
+
 
 =head3 Must be overriden
 
@@ -178,6 +184,13 @@ Returns the currency in which funds are held in this account. Useful to calculat
 
 =cut
 sub getBaseCurrency {
+    die("overrideme");
+}
+
+=item C<getServerEpoch()>
+
+=cut
+sub getServerEpoch {
     die("overrideme");
 }
 
@@ -425,17 +438,11 @@ Eg:
  USDCHF => 'CHF'
 
 =cut
-
-
 sub getSymbolBase {
     my ($self, $symbol) = @_;
 
     die("Unsupported symbol '$symbol'") if (!exists($symbolBaseMap{$symbol}));
     return $symbolBaseMap{$symbol};
-}
-
-sub getServerEpoch {
-    die("overrideme");
 }
 
 __PACKAGE__->meta->make_immutable;

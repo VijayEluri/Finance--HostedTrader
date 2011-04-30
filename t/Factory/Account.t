@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Test::Exception;
 use Data::Dumper;
 
@@ -24,6 +24,7 @@ $acc = Finance::HostedTrader::Factory::Account->new(
         endDate     => '2030-06-24 06:00:00',
 	)->create_instance();
 isa_ok($acc,'Finance::HostedTrader::Account::UnitTest');
+can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertToBaseCurrency convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
 is($acc->startDate, '2020-06-24 06:00:00', 'Factory set startDate argument appropriately');
 is($acc->endDate, '2030-06-24 06:00:00', 'Factory set endDate argument appropriately');
 
@@ -46,6 +47,7 @@ throws_ok {
             port        => '1500',
     	)->create_instance();
 isa_ok($acc,'Finance::HostedTrader::Account::FXCM');
+can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertToBaseCurrency convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
 is($acc->address, '127.0.0.1', 'Factory set address argument appropriately');
 is($acc->port, '1500', 'Factory set port argument appropriately');
 

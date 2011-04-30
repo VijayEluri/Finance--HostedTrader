@@ -31,26 +31,6 @@ use Time::HiRes;
 
 =over 12
 
-=item C<startDate>
-
-=cut
-has startDate => (
-    is     => 'ro',
-    isa    => 'Str',
-    required=>1,
-    default => '2 weeks ago',
-);
-
-=item C<endDate>
-
-=cut
-has endDate => (
-    is     => 'ro',
-    isa    => 'Str',
-    required=>1,
-    default => 'now',
-);
-
 =item C<interval>
 
 =cut
