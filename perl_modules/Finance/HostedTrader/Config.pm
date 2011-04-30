@@ -41,7 +41,7 @@ package Finance::HostedTrader::Config;
 =head1 DESCRIPTION
 
 
-=head2 METHODS
+=head2 Properties
 
 =over 12
 
@@ -109,9 +109,15 @@ has timeframes => (
     required => 1,
 );
 
-=item C<new>
+=back 
 
-Constructor. See SYNOPSIS for available options.
+=head2 Constructor
+
+=over 12
+
+=item C<BUILDARGS>
+
+See SYNOPSIS for available options.
 
 =cut
 around BUILDARGS => sub {
