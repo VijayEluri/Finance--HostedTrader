@@ -180,6 +180,7 @@ sub checkSignal {
             'symbol' => $symbol,
             'tf' => $signal_args->{timeframe},
             'startPeriod' => UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S'),
+            'endPeriod' => UnixDate($self->endDate, '%Y-%m-%d %H:%M:%S'),
         });
 
     }
