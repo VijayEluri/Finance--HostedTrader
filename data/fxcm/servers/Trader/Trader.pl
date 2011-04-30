@@ -8,7 +8,6 @@ $| = 1;
 use Getopt::Long;
 use Data::Dumper;
 use Data::Compare;
-use Date::Manip;
 use Pod::Usage;
 
 
@@ -104,18 +103,18 @@ while (1) {
 
     my ($previousTime, $currentTime);
     # get current time
-    $previousTime = UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d') if ($verbose);
+    $previousTime = substr($account->getServerDateTime, 0, 10) if ($verbose);
     # sleep for a bit
     $account->waitForNextTrade();
     if ($verbose) {
         # print a report if the day changed
-        $currentTime = UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d');
+        $currentTime = substr($account->getServerDateTime, 0, 10) if ($verbose);
         my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
         logger("NAV = " . $account->getNav) if ($previousTime ne $currentTime);
         logger("\n".$report->openPositions) if ($previousTime ne $currentTime);
         logger("\n".$report->systemEntryExit) if ($previousTime ne $currentTime);
     }
-    last if ( $account->getServerEpoch() > UnixDate($account->endDate, '%s') );
+    last if ( $account->getServerDateTime() gt $account->endDate );
 }
 
 sub checkSystem {
@@ -185,7 +184,7 @@ Current Value: $value
 sub logger {
     my $msg = shift;
 
-    my $datetimeNow = UnixDate(ParseDateString('epoch ' . $account->getServerEpoch()), '%Y-%m-%d %H:%M:%S');
+    my $datetimeNow = $account->getServerDateTime;
     print "[$datetimeNow] $msg\n";
 }
 
