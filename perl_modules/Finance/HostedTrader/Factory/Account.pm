@@ -6,14 +6,21 @@ package Finance::HostedTrader::Factory::Account;
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Factory::Account;
-    my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => 'FXCM', address => $address, port => $port)->create_instance();
+
+    my $account = Finance::HostedTrader::Factory::Account->new(
+                        SUBCLASS    => 'FXCM',
+                        address     => $address,
+                        port        => $port
+                  )->create_instance();
+
+    my $test = Finance::HostedTrader::Factory::Account->new(
+                        SUBCLASS    => 'UnitTest',
+                        startDate   => '2000-01-01 00:00:00',
+                        endDate     => '2020-01-01 00:00:00',
+                  )->create_instance();
 
 =head1 DESCRIPTION
 
-
-=head2 Properties
-
-=over 12
 
 =cut
 
@@ -21,10 +28,33 @@ use Moose;
 
 use Moose::Util::TypeConstraints;
 
+=head2 Properties
 
+=over 12
+
+=item C<SUBCLASS>
+
+Readonly. Required.
+
+The type of account to instantiate.
+
+Supported values are:
+    - FXCM
+    - UnitTest
+
+=cut
 has [qw(SUBCLASS)] => ( is => 'ro', required => 1);
 
+=back
 
+=head2 Constructor
+
+=item C<BUILD>
+
+The constructor takes all arguments passed onto Factory::Account
+and passes them to the target class defined by SUBCLASS.
+
+=cut
 sub BUILD {
     my $self = shift;
     my $args = shift;
@@ -40,7 +70,9 @@ sub BUILD {
 
 =cut
 
-=item C<create_instance>
+=item C<create_instance()>
+
+Return an account instance of type SUBCLASS
 
 =cut
 
