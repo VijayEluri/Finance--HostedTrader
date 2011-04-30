@@ -118,8 +118,6 @@ while (1) {
     last if ( $account->getServerEpoch() > UnixDate($account->endDate, '%s') );
 }
 
-print Dumper(\$account);
-
 sub checkSystem {
     my ($account, $system, $direction) = @_;
 
