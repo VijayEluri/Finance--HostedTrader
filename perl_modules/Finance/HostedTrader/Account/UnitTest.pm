@@ -43,12 +43,12 @@ has interval => (
 
 =back
 
-=head2 Methods
+=head2 Constructor
 
-=over 12
+=item C<BUILD>
 
+Initializes internal structures
 =cut
-
 sub BUILD {
     my $self = shift;
 
@@ -56,6 +56,16 @@ sub BUILD {
     $self->{_signal_cache} = {};
 }
 
+
+=head2 Methods
+
+=over 12
+
+=item C<refreshPositions()>
+
+Positions are kept in memory.
+This method calculates profit/loss of existing trades to keep data consistent
+=cut
 sub refreshPositions {
     my $self = shift;
 # positions are kept in memory
@@ -77,18 +87,31 @@ sub refreshPositions {
 
 }
 
+=item C<getAsk($symbol)>
+
+Reads the close of $symbol in the 5min timeframe. For the UnitTest class, getBid and getAsk return the same value.
+=cut
 sub getAsk {
     my ($self, $symbol) = @_;
 
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
+=item C<getBid($symbol)>
+
+Reads the close of $symbol in the 5min timeframe. For the UnitTest class, getBid and getAsk return the same value.
+=cut
 sub getBid {
     my ($self, $symbol) = @_;
 
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
+=item C<openMarket($symbol, $direction, $amount)
+
+Creates a new position in $symbol if one does not exist yet.
+Adds a new trade to the position in $symbol.
+=cut
 sub openMarket {
     my ($self, $symbol, $direction, $amount) = @_;
 
@@ -111,44 +134,63 @@ sub openMarket {
     return ($id, $rate);
 }
 
+=item C<closeMarket($tradeID, $amount)>
+
+TODO
+=cut
 sub closeMarket {
     my ($self, $tradeID, $amount) = @_;
 die("TODO closeMarket");
 }
 
+=item C<getBaseUnit($symbol)>
+
+TODO. Always returns base unit as 10.000, however this is not always gonna be right.
+=cut
 sub getBaseUnit {
     my ($self, $symbol) = @_;
 
     return 10000;
 }
 
+=item C<getNav()>
+
+    Returns account balance + account profit/loss
+=cut
 sub getNav {
     my $self = shift;
 
     return $self->balance() + $self->pl();
 }
 
+=item C<balance>
+
+TODO. Hardcoded to 50000.
+=cut
 sub balance {
     my ($self) = @_;
     return 50000;
 }
 
-sub checkSignal_slow {
-    my ($self, $symbol, $signal_definition, $signal_args) = @_;
+#sub checkSignal_slow {
+#    my ($self, $symbol, $signal_definition, $signal_args) = @_;
+#
+#    return $self->{_signal_processor}->checkSignal(
+#        {
+#            'expr' => $signal_definition, 
+#            'symbol' => $symbol,
+#            'tf' => $signal_args->{timeframe},
+#            'maxLoadedItems' => $signal_args->{maxLoadedItems},
+#            'period' => $signal_args->{period},
+#            'debug' => $signal_args->{debug},
+#            'simulatedNowValue' => $self->{_now},
+#        }
+#    );
+#}
 
-    return $self->{_signal_processor}->checkSignal(
-        {
-            'expr' => $signal_definition, 
-            'symbol' => $symbol,
-            'tf' => $signal_args->{timeframe},
-            'maxLoadedItems' => $signal_args->{maxLoadedItems},
-            'period' => $signal_args->{period},
-            'debug' => $signal_args->{debug},
-            'simulatedNowValue' => $self->{_now},
-        }
-    );
-}
+=item C<checkSignal($symbol, $signal_definition, $signal_args)>a
 
+=cut
 sub checkSignal {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
     my $cache = $self->{_signal_cache};
@@ -187,19 +229,17 @@ sub checkSignal {
         $signal = undef;
     }
 
-=pod
-my $old_value = $self->checkSignal_slow($symbol, $signal_definition, $signal_args);
-use Data::Compare;
-    if (!Compare(\$signal, \$old_value)) {
-        print $self->{_now}, "\n";
-        print "$symbol $signal_definition\n";
-        print Dumper(\$signal_args);
-        print Dumper(\$signal);
-        print Dumper(\$old_value);
-        print Dumper(\$signal_list);
-        use Data::Dumper;exit;
-    }
-=cut
+#my $old_value = $self->checkSignal_slow($symbol, $signal_definition, $signal_args);
+#use Data::Compare;
+#    if (!Compare(\$signal, \$old_value)) {
+#        print $self->{_now}, "\n";
+#        print "$symbol $signal_definition\n";
+#        print Dumper(\$signal_args);
+#        print Dumper(\$signal);
+#        print Dumper(\$old_value);
+#        print Dumper(\$signal_list);
+#        use Data::Dumper;exit;
+#    }
     return $signal;
 }
 

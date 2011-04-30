@@ -12,7 +12,7 @@ package Finance::HostedTrader::Position;
 =head1 DESCRIPTION
 
 
-=head2 METHODS
+=head2 Properties
 
 =over 12
 
@@ -44,19 +44,41 @@ has trades => (
     required=>0,
 );
 
-=item C<addTrade>
+=back
 
+=head2 Methods
+
+=over 12
+
+=item C<addTrade($trade)>
+
+Adds the L<Finance::HostedTrader::Trade> object to this position.
+
+Dies if the symbol of $trade is different than the symbol of this position object instance.
 
 =cut
 sub addTrade {
     my ($self, $trade) = @_;
 
+    die("Trade has symbol " . $trade->symbol . " but position has symbol " . $self->symbol ) if ($self->symbol ne $trade->symbol);
     push @{$self->trades}, $trade;
 }
 
-=item C<size>
+=item C<size()>
 
+Returns the aggregate size of all trades in this position.
 
+Eg1:
+  short 10000
+  long  20000
+
+  size = 10000
+
+Eg2:
+  short 10000
+  short 10000
+
+  size = -20000
 =cut
 sub size {
     my ($self) = @_;
@@ -79,7 +101,6 @@ sub size {
 Calculate total profit/loss of a given position
 
 =cut
-
 sub pl {
     my ($self, $system) = @_;
     my $pl=0;

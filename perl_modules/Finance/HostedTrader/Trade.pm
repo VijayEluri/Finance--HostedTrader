@@ -12,7 +12,7 @@ package Finance::HostedTrader::Trade;
 =head1 DESCRIPTION
 
 
-=head2 METHODS
+=head2 Properties
 
 =over 12
 
@@ -131,6 +131,12 @@ has pl => (
     required=>0,
 );
 
+=back
+
+=head2 Methods
+
+=over 12
+
 =item C<profit>
 
 
@@ -167,7 +173,7 @@ sub close {
     $self->{closePrice} = $closePrice;
 }
 
-=item C<stopLoss>
+=item C<exitValue>
 
 =cut
 sub exitValue {
