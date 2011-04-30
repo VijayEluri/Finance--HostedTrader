@@ -281,6 +281,12 @@ sub getServerEpoch {
     return $self->{_now_epoch};
 }
 
+sub getServerDateTime {
+    my $self = shift;
+
+    return $self->{_now};
+}
+
 1;
 
 =back

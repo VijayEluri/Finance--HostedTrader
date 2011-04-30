@@ -193,6 +193,13 @@ sub getServerEpoch {
     die("overrideme");
 }
 
+=item C<getServerDateTime()>
+
+=cut
+sub getServerDateTime {
+    die("overrideme");
+}
+
 =back
 
 =head3 Implemented methods

@@ -335,6 +335,14 @@ sub getServerEpoch {
     return time();
 }
 
+sub getServerDateTime {
+    my $self = shift;
+
+    my @v = gmtime();
+
+    return sprintf('%d-%02d-%02d %02d:%02d:%02d', $v[5]+1900,$v[4]+1,$v[3],$v[2],$v[1],$v[0]);
+}
+
 
 1;
 
