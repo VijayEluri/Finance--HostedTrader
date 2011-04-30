@@ -341,7 +341,7 @@ sub checkSignal {
     my @good_args = qw( expr symbol tf maxLoadedItems debug period simulatedNowValue);
 
     foreach my $key (keys %$args) {
-        die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
+        die("invalid arg in checkSignal: $key") unless grep { /$key/ } @good_args;
     }
 
     my $expr = $args->{expr} || die("expr argument missing in checkSignal");
