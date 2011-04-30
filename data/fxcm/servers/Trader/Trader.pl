@@ -24,8 +24,8 @@ my $result = GetOptions(
     "port=i",   \$port,
     "verbose",  \$verbose,
     "help",     \$help,
-    "startDate",\$startDate,
-    "endDate",  \$endDate,
+    "startDate=s",\$startDate,
+    "endDate=s",  \$endDate,
 ) || pod2usage(2);
 
 pod2usage(1) if ($help);
