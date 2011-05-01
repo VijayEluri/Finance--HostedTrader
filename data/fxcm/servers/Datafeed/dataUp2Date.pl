@@ -1,1 +1,1 @@
-/home/fxhistor/fx/t/dataUp2Date.pl
+../../../../t/dataUp2Date.pl
