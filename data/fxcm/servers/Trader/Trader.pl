@@ -112,7 +112,13 @@ while (1) {
         logger("\n".$report->openPositions) if ($previousTime ne $currentTime);
         logger("\n".$report->systemEntryExit) if ($previousTime ne $currentTime);
     }
-    last if ( $account->getServerDateTime() gt $account->endDate );
+    if ( $account->getServerDateTime() gt $account->endDate ) {
+        my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
+        logger("NAV = " . $account->getNav);
+        logger("\n".$report->openPositions);
+        logger("\n".$report->systemEntryExit);
+        last;
+    }
 }
 
 sub checkSystem {
