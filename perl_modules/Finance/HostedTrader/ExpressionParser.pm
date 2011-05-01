@@ -153,7 +153,7 @@ function:
 sub getIndicatorData {
     my ( $self, $args ) = @_;
 
-    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug);
+    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug reverse);
 
     foreach my $key (keys %$args) {
         die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
@@ -169,6 +169,9 @@ sub getIndicatorData {
         || $args->{maxLoadedItems} == -1 );
     my $displayEndDate   = $args->{endPeriod} || '9999-12-31';
     my $displayStartDate = $args->{startPeriod} || '0001-01-31';
+    my $reverse = $args->{reverse};
+    my $order_ext = $reverse ? 'DESC' : 'ASC';
+    my $order_int = $reverse ? 'ASC' : 'DESC';
     my $itemCount = $args->{numItems} || $maxLoadedItems;
     my $expr      = $args->{fields}          || die("No fields set for indicator");
     my $symbol    = $args->{symbol}          || die("No symbol set for indicator");
@@ -198,8 +201,11 @@ sub getIndicatorData {
 
     $select_fields = ',' . $select_fields if ($select_fields);
 
-    my $WHERE_FILTER = "WHERE datetime <= '$displayEndDate'";
+    my $WHERE_FILTER = "WHERE ";
+    $WHERE_FILTER .= ($reverse ? "datetime >= '$displayStartDate'" : "datetime <= '$displayEndDate'");
     $WHERE_FILTER .= ' AND dayofweek(datetime) <> 1' if ( $tf != 604800 );
+
+    my $EXT_WHERE = ($reverse ? "datetime <= '$displayEndDate'" : "datetime >= '$displayStartDate'");
 
     my $sql = qq(
 SELECT * FROM (
@@ -209,17 +215,17 @@ FROM (
     SELECT * FROM (
         SELECT * FROM $symbol\_$tf
         $WHERE_FILTER
-        ORDER BY datetime desc
+        ORDER BY datetime $order_int
         LIMIT $maxLoadedItems
     ) AS T_LIMIT
     ORDER BY datetime
 ) AS T_INNER
 ) AS T_OUTER
-WHERE datetime >= '$displayStartDate'
-ORDER BY datetime desc
+WHERE $EXT_WHERE
+ORDER BY datetime $order_int
 LIMIT $itemCount
 ) AS DT
-ORDER BY datetime
+ORDER BY datetime $order_ext
 );
 
     print $sql if ($args->{debug});
