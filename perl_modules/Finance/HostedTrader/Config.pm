@@ -140,7 +140,7 @@ around BUILDARGS => sub {
         { files => \@files, use_ext => 1, flatten_to_hash => 1 } );
     my $cfg = {};
 
-
+    die("No config files found.\nCreate one of these to continue:\n\t" . join("\n\t", @files) . "\n") if scalar(keys(%{$cfg_all})) == 0;
 
 	my $merge = Hash::Merge->new('custom_merge');
 
