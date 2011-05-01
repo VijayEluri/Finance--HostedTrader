@@ -13,7 +13,7 @@ my %mul = (
 );
 
 foreach my $tf qw(300 3600) {
-    my $i=9;
+    my $i=21; #retrieves 22 days worth of data
 
     my $val = $mul{$tf};
     my @dates;
