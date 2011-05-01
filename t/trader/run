@@ -1,8 +1,10 @@
 #!/bin/sh
 
+HOMEDIR=~/Finance--HostedTrader
+
 START_DATE="2010-07-18 06:00:00"
 END_DATE="2010-08-29 16:00:00"
 
-nice -n 19 perl ~/fx/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
-#nice -n 19 perl -MDevel::Cover ~/fx/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
-#nice -n 19 perl -d:NYTProf ~/fx/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
+nice -n 19 perl $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
+#nice -n 19 perl -MDevel::Cover $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
+#nice -n 19 perl -d:NYTProf $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
