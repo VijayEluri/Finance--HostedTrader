@@ -72,6 +72,7 @@ sub openPositions {
     my $positions = $account->getPositions();
 
     my $t = $self->_table_factory( format=> $self->format, headingText => 'Open Positions', cols => ['Symbol', 'Open Date','Size','Entry','Current','PL','%'] );
+    my $balance = $account->balance;
 
     foreach my $symbol (keys %$positions) {
     my $position = $positions->{$symbol};
@@ -80,7 +81,7 @@ sub openPositions {
         my $stopLoss = $system->getExitValue($trade->symbol, $trade->direction);
         my $marketPrice = ($trade->direction eq 'short' ? $account->getAsk($trade->symbol) : $account->getBid($trade->symbol));
         my $baseCurrencyPL = $trade->pl;
-        my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $account->getNav;
+        my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $balance;
 
         $t->addRow(
             $trade->symbol,
