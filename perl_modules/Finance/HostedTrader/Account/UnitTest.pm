@@ -80,7 +80,7 @@ sub refreshPositions {
 # Calculate current p/l for each open trade
     my $positions = $self->{_positions};
     foreach my $key (keys(%{$positions})) {
-        foreach my $trade (@{ $positions->{$key}->trades }) {
+        foreach my $trade (@{ $positions->{$key}->getTradeList }) {
             my $symbol = $trade->symbol;
             my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
             my $base = $self->getSymbolBase($symbol);

@@ -64,6 +64,25 @@ sub addTrade {
     push @{$self->trades}, $trade;
 }
 
+=item C<numOpenTrades()>
+    Returns the number of open trades in this position
+=cut
+sub numOpenTrades {
+    my $self = shift;
+    
+    return scalar(@{$self->trades});    
+}
+
+=item C<getTradeList()>
+    Returns a reference to a list of trades in this position.
+    There is no particular order in the returned data.
+=cut
+sub getTradeList {
+    my $self = shift;
+    
+    return $self->trades;
+}
+
 =item C<size()>
 
 Returns the aggregate size of all trades in this position.

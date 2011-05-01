@@ -125,7 +125,7 @@ sub checkSystem {
     foreach my $symbol ( @$symbols ) {
         my $position = $account->getPosition($symbol);
         my $posSize = $position->size;
-        my $numOpenTrades = scalar(@{$position->trades});
+        my $numOpenTrades = $position->numOpenTrades();
 
         if ($numOpenTrades < $system->maxNumberTrades) {
             logger("Checking ".$system->name." $symbol $direction") if ($verbose > 1);

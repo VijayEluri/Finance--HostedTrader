@@ -77,7 +77,7 @@ sub openPositions {
     foreach my $symbol (keys %$positions) {
     my $position = $positions->{$symbol};
 
-    foreach my $trade (@{ $position->trades }) {
+    foreach my $trade (@{ $position->getTradeList }) {
         my $stopLoss = $system->getExitValue($trade->symbol, $trade->direction);
         my $marketPrice = ($trade->direction eq 'short' ? $account->getAsk($trade->symbol) : $account->getBid($trade->symbol));
         my $baseCurrencyPL = $trade->pl;
