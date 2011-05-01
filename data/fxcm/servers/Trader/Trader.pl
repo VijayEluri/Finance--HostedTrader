@@ -3,8 +3,6 @@
 use strict;
 use warnings;
 $| = 1;
-#use Proc::Daemon;
-#Proc::Daemon::Init;
 use Getopt::Long;
 use Data::Dumper;
 use Data::Compare;
@@ -106,7 +104,7 @@ while (1) {
     $previousTime = substr($account->getServerDateTime, 0, 10) if ($verbose);
     # sleep for a bit
     $account->waitForNextTrade();
-    if ($verbose) {
+    if ($verbose && 0) {
         # print a report if the day changed
         $currentTime = substr($account->getServerDateTime, 0, 10) if ($verbose);
         my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
@@ -132,10 +130,13 @@ sub checkSystem {
             my $result = $system->checkEntrySignal($symbol, $direction);
             if ($result) {
                 my ($amount, $value, $stopLoss) = $system->getTradeSize($symbol, $direction, $position);
-                if ($verbose && $result) {
+                if ($verbose > 1 && $result) {
                     logger("$symbol $direction at " . $result->[0] . " Amount=" . $amount . " value=" . $value . " stopLoss=" . $stopLoss);
                 }
                 next if ($amount <= 0);
+                my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
+                logger("Positions before open trade\n" . $report->openPositions);
+                logger("\n".$report->systemEntryExit);
                 logger("Adding position for $symbol $direction ($amount)");
 
                 TRY_OPENTRADE: foreach my $try (1..3) {
@@ -154,6 +155,8 @@ Amount: $amount
 Current Value: $value
 Stop Loss: $stopLoss
                 });
+                    logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
+                    logger("\n".$report->systemEntryExit);
                     last TRY_OPENTRADE;
                 }
             }
@@ -176,6 +179,9 @@ Direction: $direction
 Position Size: $posSize
 Current Value: $value
                 });
+                my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
+                logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
+                logger("\n".$report->systemEntryExit);
             }
         }
     }
