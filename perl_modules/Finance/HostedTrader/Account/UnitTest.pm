@@ -5,8 +5,10 @@ extends 'Finance::HostedTrader::Account';
 
 use Moose::Util::TypeConstraints;
 use Finance::HostedTrader::Trade;
+use Finance::HostedTrader::Config;
+
 use Date::Manip;
-use Date::Calc qw (Add_Delta_DHMS);
+use Date::Calc qw (Add_Delta_DHMS Delta_DHMS);
 use Time::HiRes;
 
 
@@ -59,6 +61,7 @@ sub BUILD {
     $self->{_now} = UnixDate($self->startDate, '%Y-%m-%d %H:%M:%S');
     $self->{_now_epoch} = UnixDate($self->{_now}, '%s');
     $self->{_signal_cache} = {};
+    $self->{_price_cache} = {};
 }
 
 
@@ -98,6 +101,66 @@ Reads the close of $symbol in the 5min timeframe. For the UnitTest class, getBid
 =cut
 sub getAsk {
     my ($self, $symbol) = @_;
+
+    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
+
+    sub loadCache {
+        my ($self, $symbol) = @_;
+        my $date = $self->{_now};
+        my $initDate = sprintf( '%d-%02d-%02d %02d:%02d:%02d',
+                                Add_Delta_DHMS( substr($date,0,4),
+                                                substr($date,5,2),
+                                                substr($date,8,2),
+                                                substr($date,11,2),
+                                                substr($date,14,2),
+                                                substr($date,17,2),
+                                                0,0,0,$self->interval*(-1)
+                                               )
+                                );
+        $date = $self->endDate;
+        my $endDate = sprintf( '%d-%02d-%02d %02d:%02d:%02d',
+                                Add_Delta_DHMS( substr($date,0,4),
+                                                substr($date,5,2),
+                                                substr($date,8,2),
+                                                substr($date,11,2),
+                                                substr($date,14,2),
+                                                substr($date,17,2),
+                                                0,0,0,$self->interval
+                                               )
+                                );
+
+        return $self->{_signal_processor}->getIndicatorData( {
+                    symbol  => $symbol,
+                    tf      => '5min',
+                    fields  => 'datetime, close',
+                    maxLoadedItems => 50,
+                    numItems => 50,
+                    debug => 1,
+                    startPeriod => $initDate,
+                    endPeriod => $endDate,
+                    reverse => 1,
+        } );
+
+    }
+
+
+    my $cache = $self->{_price_cache};
+
+    $cache->{$symbol} = loadCache($self, $symbol) if (!$cache->{$symbol} || scalar(@{ $cache->{$symbol} }) == 0);
+    die('could not find values') if (!$cache->{$symbol} || scalar(@{ $cache->{$symbol} }) == 0);
+
+    my $values = $cache->{$symbol};
+    my $value;
+    print Dumper(\$values);use Data::Dumper;exit;
+    while (1) {
+        $value = $values->[@$values-1];
+        last if (!defined($value));
+        my $indicator_date = $value->[0];
+        $value = $value->[1];
+        #last if ( $signal_valid_from lt $indicator_date && ( !defined($signal_list->[1]) || $signal_list->[1]->[0] gt $self->{_now} ));
+        #shift @{ $signal_list };
+    }
+
 
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
@@ -202,12 +265,39 @@ sub checkSignal {
 
 #Get all signals for this symbol/signal_definition in the relevant time period and cache them
     if (!$cache->{$symbol} || !$cache->{$symbol}->{$signal_definition}) {
+
+#calculating max_loaded_periods adds a lot of code  but is important for performance
+        my $startDate = UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S');
+        my $date = $self->endDate;
+        my @d1 = (  substr($date,0,4),
+                    substr($date,5,2),
+                    substr($date,8,2),
+                    substr($date,11,2),
+                    substr($date,14,2),
+                    substr($date,17,2)
+                );
+
+        $date = $startDate;
+        my @d2 = (  substr($date,0,4),
+                    substr($date,5,2),
+                    substr($date,8,2),
+                    substr($date,11,2),
+                    substr($date,14,2),
+                    substr($date,17,2)
+                );
+        my @r = Delta_DHMS(@d2,@d1);
+        my $seconds_between_dates = ($r[0]*86400 + $r[1]*3600 + $r[2]*60 + $r[3]);
+        my $seconds_in_tf = Finance::HostedTrader::Config->new()->timeframes->getTimeframeID($signal_args->{timeframe});
+        my $max_loaded_periods = int(($seconds_between_dates / $seconds_in_tf) + 0.5) + $signal_args->{maxLoadedItems};
+
+
         $cache->{$symbol}->{$signal_definition} = $self->{_signal_processor}->getSignalData( {
             'expr' => $signal_definition, 
             'symbol' => $symbol,
             'tf' => $signal_args->{timeframe},
-            'startPeriod' => UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S'),
+            'startPeriod' => $startDate,
             'endPeriod' => $self->endDate,
+            'maxLoadedItems' => $max_loaded_periods,
         });
 
     }
