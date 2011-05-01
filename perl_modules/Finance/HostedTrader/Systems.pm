@@ -138,7 +138,11 @@ sub _loadSymbols {
     my $file = $self->_getSymbolFileName;
 
     my $yaml = YAML::Tiny->new;
-    $yaml = YAML::Tiny->read( $file ) || die("Cannot read symbols from $file. $!");
+    if (-e $file) {
+        $yaml = YAML::Tiny->read( $file ) || die("Cannot read symbols from $file. $!");
+    } else {
+        return { long => [], short => []};
+    }
 
     die("invalid name in symbol file $file") if ($self->name ne $yaml->[0]->{name});
 
