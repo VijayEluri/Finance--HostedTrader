@@ -213,12 +213,12 @@ die("TODO closeMarket");
 
 =item C<getBaseUnit($symbol)>
 
-TODO. Always returns base unit as 10.000, however this is not always gonna be right.
+TODO. Always returns base unit as 50.
 =cut
 sub getBaseUnit {
     my ($self, $symbol) = @_;
 
-    return 10000;
+    return 50;
 }
 
 =item C<getNav()>
