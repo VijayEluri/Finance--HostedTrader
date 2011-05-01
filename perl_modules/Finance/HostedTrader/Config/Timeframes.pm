@@ -7,10 +7,7 @@ package Finance::HostedTrader::Config::Timeframes;
 
     use Finance::HostedTrader::Config::Timeframes;
     my $obj = Finance::HostedTrader::Config::Timeframes->new(
-                    'dbhost'   => server_name,
-                    'dbname'   => dbname,
-                    'dbuser'   => dbuser,
-                    'dbpasswd' => dbpasswd
+                    natural => [60, 300],
                 );
 
 =head1 DESCRIPTION
