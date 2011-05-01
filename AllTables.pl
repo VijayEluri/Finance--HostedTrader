@@ -36,6 +36,6 @@ next if ($tf == 60);
 my $tableName = $symbol.'_'.$tf;
 my $s = $sql;
 $s =~ s/TABLE_NAME/$tableName/g;
-print $s,";\n";
+print $s,"\n";
 }
 }
