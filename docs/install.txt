@@ -11,3 +11,12 @@ Perl modules
 	List::Compare::Functional
 	MIME::Lite
 	Text::ASCIITable
+	Devel::Cover
+	Date::Manip
+	Date::Calc
+HostedTrader
+	Need a config file, eg: ~/.fx.yml
+MySQL
+	If using partitioned tables (eg, minutes timeframe tables can be very large and it makes sense to partition them)
+	may need to set this in my.cnf (mysqld section)
+	open-files-limit=10000
