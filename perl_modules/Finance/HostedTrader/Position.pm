@@ -66,6 +66,24 @@ sub addTrade {
     $self->trades->{$trade->id} = $trade;
 }
 
+=item C<deleteTrade($id)>
+=cut
+sub deleteTrade {
+    my $self = shift;
+    my $tradeID = shift;
+    
+    delete $self->trades->{$tradeID};    
+}
+
+=item C<getTrade($id)>
+=cut
+sub getTrade {
+    my $self = shift;
+    my $id = shift;
+    
+    return $self->trades->{$id};
+}
+
 =item C<numOpenTrades()>
     Returns the number of open trades in this position
 =cut

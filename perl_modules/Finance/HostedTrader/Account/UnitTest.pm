@@ -62,6 +62,10 @@ sub BUILD {
     $self->{_now_epoch} = UnixDate($self->{_now}, '%s');
     $self->{_signal_cache} = {};
     $self->{_price_cache} = {};
+    
+    $self->{_account_data} = {
+        balance => 50000,
+    };
 }
 
 
@@ -81,18 +85,31 @@ sub refreshPositions {
     my $positions = $self->{_positions};
     foreach my $key (keys(%{$positions})) {
         foreach my $trade (@{ $positions->{$key}->getTradeList }) {
-            my $symbol = $trade->symbol;
-            my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
-            my $base = $self->getSymbolBase($symbol);
-            my $pl = ($rate - $trade->openPrice) * $trade->size;
+            my $pl = $self->_calculatePL($trade, $trade->size);
 
-            if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
-                $pl /= $self->getAsk("GBP$base"); # TODO: this won't work for all cases( eg, if base is EUR)
-            }
             $trade->pl($pl);
         }
     }
 
+}
+
+sub _calculatePL {
+    my $self = shift;
+    my $trade = shift;
+    my $size = shift;
+    
+    die("size parameter cannot be larger than trade->size") if ($size > $trade->size);
+    my $symbol = $trade->symbol;
+    my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
+    my $base = $self->getSymbolBase($symbol);
+    my $openPrice = $trade->openPrice;
+    
+    my $pl = ($rate - $openPrice) * $size;
+    if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
+        $pl /= $self->getAsk("GBP$base"); # TODO: this won't work for all cases( eg, if base is EUR)
+    }
+    
+    return $pl;
 }
 
 =item C<getAsk($symbol)>
@@ -204,11 +221,25 @@ sub openMarket {
 
 =item C<closeMarket($tradeID, $amount)>
 
-TODO
 =cut
 sub closeMarket {
     my ($self, $tradeID, $amount) = @_;
-die("TODO closeMarket");
+
+    my $positions = $self->getPositions();
+    foreach my $key (keys %{$positions}) {
+        my $position = $positions->{$key};
+        my $trade = $position->getTrade($tradeID);
+        die("Tried to close $amount which is more than trade size " . $trade->size) if ($amount > $trade->size);
+
+        my $pl = $self->_calculatePL($trade, $amount);
+        $self->{_account_data}->{balance} += $pl;
+
+        if ($trade->size == $amount) {
+            $position->deleteTrade($trade->id);
+        } else {
+            $trade->size($trade->size-$amount);
+        }
+    }
 }
 
 =item C<getBaseUnit($symbol)>
@@ -217,8 +248,13 @@ TODO. Always returns base unit as 50.
 =cut
 sub getBaseUnit {
     my ($self, $symbol) = @_;
-
-    return 50;
+    
+    my %base_units = (
+        'XAGUSD' => 50,
+    );
+    
+    return $base_units{$symbol} if (exists($base_units{$symbol}));
+    return 10000;
 }
 
 =item C<getNav()>
@@ -233,11 +269,10 @@ sub getNav {
 
 =item C<balance>
 
-TODO. Hardcoded to 50000.
 =cut
 sub balance {
     my ($self) = @_;
-    return 50000;
+    return $self->{_account_data}->{balance};
 }
 
 #sub checkSignal_slow {

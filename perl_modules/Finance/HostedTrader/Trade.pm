@@ -95,7 +95,7 @@ has openPrice => (
 
 =cut
 has size => (
-    is     => 'ro',
+    is     => 'rw',#TODO once initialized, trade size can only decrease. enforce this in the Trade object
     isa    => 'positiveInt',
     required=>1,
 );
