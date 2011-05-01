@@ -1,0 +1,13 @@
+Eclipse plugins
+	http://download.eclipse.org/egit/updates
+	http://e-p-i-c.sf.net/updates/testing
+Perl modules
+	Rec::ParseDescent
+	Config::Any
+	Hash::Merge
+	Test::Exception
+	Data::Compare
+	YAML::Tiny
+	List::Compare::Functional
+	MIME::Lite
+	Text::ASCIITable
