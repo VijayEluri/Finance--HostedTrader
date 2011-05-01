@@ -26,20 +26,20 @@ throws_ok {
 
 throws_ok {
     $acc = Finance::HostedTrader::Account->new(
-            startDate   => '9999-01-01 00:00:00',
-            endDate     => '0001-01-01 00:00:00',
+            startDate   => '3000-01-01 00:00:00',
+            endDate     => '1000-01-01 00:00:00',
     	);
 } qr /End date cannot be earlier than start date/, 'Dies with end date smaller than start date';
 
     $acc = Finance::HostedTrader::Account->new(
-            startDate     => '0001-01-01 00:00:00',
-            endDate   => '9999-01-01 00:00:00',
+            startDate     => '1001-01-01 00:00:00',
+            endDate   => '3001-01-01 00:00:00',
     	);
 
 isa_ok($acc,'Finance::HostedTrader::Account');
 
-is($acc->startDate, '0001-01-01 00:00:00', 'start date defined');
-is($acc->endDate, '9999-01-01 00:00:00', 'end date defined');
+is($acc->startDate, '1001-01-01 00:00:00', 'start date defined');
+is($acc->endDate, '3001-01-01 00:00:00', 'end date defined');
 
 can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertToBaseCurrency convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
 
