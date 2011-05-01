@@ -252,6 +252,7 @@ sub positionRisk {
 
     foreach my $trade (@$trades) {
         my $stopLoss = $self->_getSignalValue('exit', $symbol, $trade->direction);
+        die("Could not get stop loss for $symbol " . $trade->direction) if (!defined($stopLoss));
         my $plPts = $stopLoss - $trade->openPrice;
         $pl -= $plPts * $trade->size;
     }
