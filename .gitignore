@@ -12,3 +12,6 @@ server_*.log
 trader_*.log
 config_real.sh
 *.tradeable.yml
+.includepath
+.project
+.settings
