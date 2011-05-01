@@ -39,8 +39,8 @@ has symbol => (
 =cut
 has trades => (
     is     => 'ro',
-    isa    => 'ArrayRef[Finance::HostedTrader::Trade]',
-    builder => '_empty_list',
+    isa    => 'HashRef[Finance::HostedTrader::Trade]',
+    builder => '_empty_hash',
     required=>0,
 );
 
@@ -54,14 +54,16 @@ has trades => (
 
 Adds the L<Finance::HostedTrader::Trade> object to this position.
 
-Dies if the symbol of $trade is different than the symbol of this position object instance.
+Dies if another trade object with the same ID has already been added before
+Dies if the symbol of $trade is different than the symbol of this position object instance
 
 =cut
 sub addTrade {
     my ($self, $trade) = @_;
 
     die("Trade has symbol " . $trade->symbol . " but position has symbol " . $self->symbol ) if ($self->symbol ne $trade->symbol);
-    push @{$self->trades}, $trade;
+    die("Trade already exists in position") if (exists($self->trades->{$trade->id}));
+    $self->trades->{$trade->id} = $trade;
 }
 
 =item C<numOpenTrades()>
@@ -70,7 +72,7 @@ sub addTrade {
 sub numOpenTrades {
     my $self = shift;
     
-    return scalar(@{$self->trades});    
+    return scalar(keys(%{$self->trades}));    
 }
 
 =item C<getTradeList()>
@@ -80,7 +82,8 @@ sub numOpenTrades {
 sub getTradeList {
     my $self = shift;
     
-    return $self->trades;
+    my @trades = values(%{$self->trades});
+    return \@trades;
 }
 
 =item C<size()>
@@ -104,7 +107,7 @@ sub size {
 
     my $size = 0;
 
-    foreach my $trade (@{ $self->trades }) {
+    foreach my $trade (@{ $self->getTradeList }) {
         if ($trade->direction eq 'long') {
             $size += $trade->size();
         } else {
@@ -123,14 +126,14 @@ Calculate total profit/loss of a given position
 sub pl {
     my ($self, $system) = @_;
     my $pl=0;
-    foreach my $trade (@{$self->trades}) {
+    foreach my $trade (@{$self->getTradeList}) {
         $pl += $trade->pl;
     }
     return $pl
 }
 
-sub _empty_list {
-    return [];
+sub _empty_hash {
+    return {};
 }
 
 __PACKAGE__->meta->make_immutable;
