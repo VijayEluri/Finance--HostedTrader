@@ -23,13 +23,6 @@ has 'account' => (
     required=>1,
 );
 
-
-sub symbolsLastUpdated {
-    my $self = shift;
-
-    return $self->system->{_symbolsLastUpdated};
-}
-
 sub updateSymbols {
     my $self = shift;
     my $account = $self->account;

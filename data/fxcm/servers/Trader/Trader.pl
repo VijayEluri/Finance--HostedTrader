@@ -55,7 +55,7 @@ while (1) {
     my $systemTrader = $systems[0];
     # Applies system filters and updates list of symbols traded by this system
     # Updates symbol list every 15 minutes
-    if ( $account->getServerEpoch() - $systemTrader->symbolsLastUpdated() > 900 ) {
+    if ( $account->getServerEpoch() - $systemTrader->system->symbolsLastUpdated() > 900 ) {
         my %current_symbols;
         my %existing_symbols;
         if ($verbose) {

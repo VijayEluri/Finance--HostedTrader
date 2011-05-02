@@ -50,6 +50,11 @@ sub BUILD {
     $self->{_symbolsLastUpdated} = 0;
 }
 
+sub symbolsLastUpdated {
+    my $self = shift;
+
+    return $self->{_symbolsLastUpdated};
+}
 
 =head2 Methods
 
