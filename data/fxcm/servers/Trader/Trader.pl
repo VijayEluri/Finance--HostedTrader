@@ -114,6 +114,7 @@ while (1) {
     }
     if ( $account->getServerDateTime() gt $account->endDate ) {
         my $report = Finance::HostedTrader::Report->new( account => $account, system => $system );
+        logger("Final report");
         logger("NAV = " . $account->getNav);
         logger("\n".$report->openPositions);
         logger("\n".$report->systemEntryExit);
