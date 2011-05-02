@@ -12,7 +12,7 @@ MAILTO=joaocosta@zonalivre.org
 13 8 * * 6 source ~/.bash_profile;~/fx/score.single.pl --timeframe=week | sort -g -k 2
 
 #Run unit tests on Saturdays
-52 10 * * 6 source ~/.bash_profile;~/fx/RunAllTests.sh
+52 10 * * 6 source ~/.bash_profile;~/fx/RunAllTests.sh -c
 
 #Check relevant FXCM API processes are running during market hours
 7,27,47 21-23 * * 0 ~/fx/data/fxcm/servers/checkProcesses.sh
