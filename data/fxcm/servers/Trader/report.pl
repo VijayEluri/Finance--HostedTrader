@@ -24,8 +24,8 @@ GetOptions(
 
 my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
 my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
-my $system = Finance::HostedTrader::SystemTrader->new( system => $trendfollow, account => $account );
-my $report = Finance::HostedTrader::Report->new( account => $account, system => $system, format => $format );
+my $systemTrader = Finance::HostedTrader::SystemTrader->new( system => $trendfollow, account => $account );
+my $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader, format => $format );
 my $nav = $account->getNav();
 my $balance = $account->balance();
 
