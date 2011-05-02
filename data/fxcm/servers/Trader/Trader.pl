@@ -10,7 +10,7 @@ use Pod::Usage;
 
 
 use Finance::HostedTrader::Factory::Account;
-use Finance::HostedTrader::Systems;
+use Finance::HostedTrader::SystemTrader;
 use Finance::HostedTrader::Report;
 
 my ($verbose, $help, $address, $port, $class, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'now', '10 years');
@@ -36,7 +36,7 @@ my $account = Finance::HostedTrader::Factory::Account->new(
             )->create_instance();
 
 my @systems =   (   
-                    Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account ),
+                    Finance::HostedTrader::SystemTrader->new( name => 'trendfollow', account => $account ),
                 );
 
 logger("STARTUP");

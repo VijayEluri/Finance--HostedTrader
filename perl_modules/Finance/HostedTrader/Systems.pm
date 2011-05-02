@@ -1,4 +1,4 @@
-package Finance::HostedTrader::Systems;
+package Finance::HostedTrader::SystemTrader;
 
 use strict;
 use warnings;

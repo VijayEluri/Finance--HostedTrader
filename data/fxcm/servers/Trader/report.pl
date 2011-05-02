@@ -7,7 +7,7 @@ use Data::Dumper;
 use Getopt::Long;
 
 use Finance::HostedTrader::Factory::Account;
-use Finance::HostedTrader::Systems;
+use Finance::HostedTrader::SystemTrader;
 use Finance::HostedTrader::Report;
 
 
@@ -22,7 +22,7 @@ GetOptions(
 
 
 my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
-my $system = Finance::HostedTrader::Systems->new( name => 'trendfollow', account => $account );
+my $system = Finance::HostedTrader::SystemTrader->new( name => 'trendfollow', account => $account );
 my $report = Finance::HostedTrader::Report->new( account => $account, system => $system, format => $format );
 my $nav = $account->getNav();
 my $balance = $account->balance();
