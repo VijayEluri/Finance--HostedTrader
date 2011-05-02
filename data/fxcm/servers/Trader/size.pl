@@ -8,6 +8,7 @@ use Getopt::Long;
 
 use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::SystemTrader;
+use Finance::HostedTrader::System;
 
 my $positions = [
     {   symbol => 'AUDUSD', direction => 'long' },
@@ -23,10 +24,10 @@ GetOptions(
     "port=i"    => \$port,
 );
 
-
+my $trendfollow = Finance::HostedTrader::SystemTrader->new( name => 'trendfollow' );
 my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
 
-my $system = Finance::HostedTrader::SystemTrader->new( name => 'trendfollow', account => $account );
+my $system = Finance::HostedTrader::SystemTrader->new( system => $trendfollow, account => $account );
 my $accountSize = $account->getNav();
 
 

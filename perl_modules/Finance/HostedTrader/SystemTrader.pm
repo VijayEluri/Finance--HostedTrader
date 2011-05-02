@@ -5,18 +5,15 @@ use warnings;
 
 use Finance::HostedTrader::Config;
 use Finance::HostedTrader::Position;
+use Finance::HostedTrader::System;
 
 
 use Moose;
-use Config::Any;
-use YAML::Tiny;
 use List::Compare::Functional qw( get_intersection );
-use Hash::Merge;
-use Data::Dumper;
 
-has 'name' => (
+has 'system' => (
     is     => 'ro',
-    isa    => 'Str',
+    isa    => 'Finance::HostedTrader::System',
     required=>1,
 );
 
@@ -26,17 +23,12 @@ has 'account' => (
     required=>1,
 );
 
+
+
 sub BUILD {
     my $self = shift;
 
-    $self-> _loadSystem();
-    $self->{_system}->{symbols} = $self->_loadSymbols();
     $self->{_symbolsLastUpdated} = 0;
-}
-
-sub data {
-    my $self = shift;
-    return $self->{_system};
 }
 
 sub symbolsLastUpdated {
@@ -72,7 +64,7 @@ sub updateSymbols {
     }
 
 # And also symbols which match the system filter
-    my $newSymbols = $self->getSymbolsSignalFilter($self->{_system}->{filters});
+    my $newSymbols = $self->getSymbolsSignalFilter($self->system->{filters});
     foreach my $tradeDirection (qw /long short/ ) {
         foreach my $symbol ( @{$newSymbols->{$tradeDirection}} ) {
             $symbols{$tradeDirection}->{$symbol} = 1;
@@ -84,10 +76,10 @@ sub updateSymbols {
     $symbols{short} = [ keys %{$symbols{short}} ];
 
     my $yml = YAML::Tiny->new;
-    $yml->[0] = { name => $self->name, symbols => \%symbols};
-    my $file = $self->_getSymbolFileName();
+    $yml->[0] = { name => $self->system->name, symbols => \%symbols};
+    my $file = $self->system->_getSymbolFileName();
     $yml->write($file) || die("Failed to write symbols file $file. $!");
-    $self->{_system}->{symbols} = \%symbols;
+    $self->system->{symbols} = \%symbols;
     $self->{_symbolsLastUpdated} = $account->getServerEpoch();
 }
 
@@ -127,28 +119,6 @@ sub getSymbolsSignalFilter {
     return $rv;
 }
 
-sub _getSymbolFileName {
-    my ($self) = @_;
-
-    return 'systems/'.$self->name.'.symbols.yml';
-}
-
-sub _loadSymbols {
-    my $self = shift;
-    my $file = $self->_getSymbolFileName;
-
-    my $yaml = YAML::Tiny->new;
-    if (-e $file) {
-        $yaml = YAML::Tiny->read( $file ) || die("Cannot read symbols from $file. $!");
-    } else {
-        return { long => [], short => []};
-    }
-
-    die("invalid name in symbol file $file") if ($self->name ne $yaml->[0]->{name});
-
-    return $yaml->[0]->{symbols};
-}
-
 sub getEntryValue {
     my $self = shift;
 
@@ -164,7 +134,7 @@ sub getExitValue {
 sub _getSignalValue {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
-    my $signal = $self->{_system}->{signals}->{$action};
+    my $signal = $self->system->{signals}->{$action};
 
     return $self->account->getIndicatorValue(
                 $symbol, 
@@ -188,8 +158,8 @@ sub checkExitSignal {
 sub _checkSignalWithAction {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
-    my $signal_definition = $self->{_system}->{signals}->{$action}->{$tradeDirection};
-    my $signal_args = $self->{_system}->{signals}->{$action}->{args};
+    my $signal_definition = $self->system->{signals}->{$action}->{$tradeDirection};
+    my $signal_args = $self->system->{signals}->{$action}->{args};
 
     return $self->account->checkSignal(
                     $symbol,
@@ -198,37 +168,11 @@ sub _checkSignalWithAction {
     );
 }
 
-sub _loadSystem {
-    my $self = shift;
-
-    my $file = "systems/".$self->name.".tradeable.yml";
-    my $tradeable_filter = "systems/".$self->name.".yml";
-    my @files = ($file, $tradeable_filter);
-    my $system_all = Config::Any->load_files(
-        {
-            files => \@files,
-            use_ext => 1,
-            flatten_to_hash => 1,
-        }
-    );
-    my $system = {};
-
-	my $merge = Hash::Merge->new('custom_merge'); #The custom_merge behaviour is defined in Finance::HostedTrader::Config
-    foreach my $file (@files) {
-        next unless ( $system_all->{$file} );
-        my $new_system = $merge->merge($system_all->{$file}, $system);
-        $system=$new_system;
-    }
-
-    die("failed to load system from $file. $!") unless defined($system_all);
-    die("invalid name in symbol file $file") if ($self->name ne $system->{name});
-    $self->{_system} = $system;
-}
 
 sub maxNumberTrades {
 my ($self) = @_;
 
-my $exposurePerPosition = $self->{_system}->{maxExposure};
+my $exposurePerPosition = $self->system->{maxExposure};
 die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
 return scalar(@{$exposurePerPosition});
 }
@@ -273,7 +217,7 @@ my $direction = shift;
 my $position = shift || Finance::HostedTrader::Position->new(symbol => $symbol);
 
 my $maxLossPts;
-my $system = $self->{_system};
+my $system = $self->system;
 my $trades = $position->getTradeList;
 my $account = $self->account;
 
@@ -314,12 +258,6 @@ my $account = $self->account;
     $amount -= $position->size;
     $amount = 0 if ($amount < 0);
     return ($amount, $value, $stopLoss);
-}
-
-sub symbols {
-    my ($self, $direction) = @_;
-
-    return $self->{_system}->{symbols}->{$direction};
 }
 
 __PACKAGE__->meta->make_immutable;

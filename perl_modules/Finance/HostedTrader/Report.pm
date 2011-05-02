@@ -8,7 +8,7 @@ package Finance::HostedTrader::Report;
     use Finance::HostedTrader::Report;
     my $report = Finance::HostedTrader::Report->new(
                     account => $account,
-                    system  => $system,
+                    systemTrader  => $systemTrader,
                 );
     print $report->openPositions;
     print $report->systemEntryExit;
@@ -39,10 +39,10 @@ has account => (
     required=>1,
 );
 
-=item C<system>
+=item C<systemTrader>
 
 =cut
-has system => (
+has systemTrader => (
     is      => 'ro',
     isa     => 'Finance::HostedTrader::SystemTrader',
     required=> 1,
@@ -68,7 +68,7 @@ has format => (
 sub openPositions {
     my $self = shift;
     my $account = $self->account;
-    my $system = $self->system;
+    my $systemTrader = $self->systemTrader;
     my $positions = $account->getPositions();
 
     my $t = $self->_table_factory( format=> $self->format, headingText => 'Open Positions', cols => ['Symbol', 'Open Date','Size','Entry','Current','PL','%'] );
@@ -78,7 +78,7 @@ sub openPositions {
     my $position = $positions->{$symbol};
 
     foreach my $trade (@{ $position->getTradeList }) {
-        my $stopLoss = $system->getExitValue($trade->symbol, $trade->direction);
+        my $stopLoss = $systemTrader->getExitValue($trade->symbol, $trade->direction);
         my $marketPrice = ($trade->direction eq 'short' ? $account->getAsk($trade->symbol) : $account->getBid($trade->symbol));
         my $baseCurrencyPL = $trade->pl;
         my $percentPL = sprintf "%.2f", 100 * $baseCurrencyPL / $balance;
@@ -100,17 +100,15 @@ sub openPositions {
 sub systemEntryExit {
     my $self = shift;
     my $account = $self->account;
-    my $system = $self->system;
+    my $systemTrader = $self->systemTrader;
 
-    my $t = $self->_table_factory( format => $self->format, headingText => $system->name, cols => ['Symbol','Market','Entry','Exit','Direction', 'Worst Case', '%']);
-    my $data = $system->data;
-    my $symbols = $data->{symbols};
+    my $t = $self->_table_factory( format => $self->format, headingText => $systemTrader->system->name, cols => ['Symbol','Market','Entry','Exit','Direction', 'Worst Case', '%']);
 
     foreach my $direction (qw /long short/) {
-        foreach my $symbol (@{$symbols->{$direction}}) {
-            my $currentExit = $system->getExitValue($symbol, $direction);
-            my $currentEntry = $system->getEntryValue($symbol, $direction);
-            my $positionRisk = -1*$system->positionRisk($account->getPosition($symbol));
+        foreach my $symbol (@{$systemTrader->system->symbols($direction)}) {
+            my $currentExit = $systemTrader->getExitValue($symbol, $direction);
+            my $currentEntry = $systemTrader->getEntryValue($symbol, $direction);
+            my $positionRisk = -1*$systemTrader->positionRisk($account->getPosition($symbol));
 
             $t->addRow( $symbol, 
                         ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)),
