@@ -24,17 +24,10 @@ has 'account' => (
 );
 
 
-
-sub BUILD {
-    my $self = shift;
-
-    $self->{_symbolsLastUpdated} = 0;
-}
-
 sub symbolsLastUpdated {
     my $self = shift;
 
-    return $self->{_symbolsLastUpdated};
+    return $self->system->{_symbolsLastUpdated};
 }
 
 sub updateSymbols {
@@ -80,7 +73,7 @@ sub updateSymbols {
     my $file = $self->system->_getSymbolFileName();
     $yml->write($file) || die("Failed to write symbols file $file. $!");
     $self->system->{symbols} = \%symbols;
-    $self->{_symbolsLastUpdated} = $account->getServerEpoch();
+    $self->system->{_symbolsLastUpdated} = $account->getServerEpoch();
 }
 
 #Return list of symbols to add to the system

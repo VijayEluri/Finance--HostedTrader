@@ -47,6 +47,7 @@ sub BUILD {
 
     $self-> _loadSystem();
     $self->{symbols} = $self->_loadSymbols();
+    $self->{_symbolsLastUpdated} = 0;
 }
 
 
