@@ -13,7 +13,7 @@ use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::Systems;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $address, $port, $class, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', '2 weeks ago', 'now');
+my ($verbose, $help, $address, $port, $class, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'now', '10 years');
 
 my $result = GetOptions(
     "class=s",  \$class,
