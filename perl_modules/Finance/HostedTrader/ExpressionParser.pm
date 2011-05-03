@@ -144,7 +144,8 @@ function:
         '_parser_i' => $parser_indicators,
         '_parser_s' => $parser_signals,
         '_ds'       => ( $ds ? $ds : Finance::HostedTrader::Datasource->new() ),
-        '_cache'    => {},
+        '_cache'    => {}, # caches parsing of expressions
+        '_result_cache' => {}, # caches actual indicator values
     };
 
     return bless( $self, $class );
@@ -169,12 +170,18 @@ sub getIndicatorData {
         || $args->{maxLoadedItems} == -1 );
     my $displayEndDate   = $args->{endPeriod} || '9999-12-31';
     my $displayStartDate = $args->{startPeriod} || '0001-01-31';
-    my $reverse = $args->{reverse};
+    my $reverse = $args->{reverse} || 0;
     my $order_ext = $reverse ? 'DESC' : 'ASC';
     my $order_int = $reverse ? 'ASC' : 'DESC';
     my $itemCount = $args->{numItems} || $maxLoadedItems;
     my $expr      = $args->{fields}          || die("No fields set for indicator");
     my $symbol    = $args->{symbol}          || die("No symbol set for indicator");
+
+    my $cache_key = "$symbol-$tf-$expr-$maxLoadedItems-$itemCount-$reverse";
+    my $cached_result = $self->{_result_cache}->{$cache_key};
+    if ($cached_result && $cached_result->[0] eq "$displayStartDate/$displayEndDate") {
+        return $cached_result->[1];
+    }
 
     my ( $result, $select_fields );
     my $cache = $self->{_cache}->{$expr};
@@ -241,6 +248,8 @@ ORDER BY datetime $order_ext
           @{$data}[ $lastItemIndex - $itemCount + 1 .. $lastItemIndex ];
         return \@slice;
     }
+    
+    $self->{_result_cache}->{$cache_key} = [ "$displayStartDate/$displayEndDate", $data ];
     return $data;
 }
 
