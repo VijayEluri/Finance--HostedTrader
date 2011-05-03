@@ -34,6 +34,13 @@ has 'name' => (
     required=>1,
 );
 
+has symbolUpdateInterval => (
+    is     => 'ro',
+    isa    => 'Int',
+    default=> 900,
+    required=>1,
+);
+
 =back
 
 =head2 Constructor
@@ -54,6 +61,12 @@ sub symbolsLastUpdated {
     my $self = shift;
 
     return $self->{_symbolsLastUpdated};
+}
+
+sub getSymbolsNextUpdate {
+    my $self = shift;
+    
+    return $self->{_symbolsLastUpdated} + $self->symbolUpdateInterval();
 }
 
 =head2 Methods
