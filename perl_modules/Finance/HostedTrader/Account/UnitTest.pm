@@ -8,7 +8,7 @@ use Finance::HostedTrader::Trade;
 use Finance::HostedTrader::Config;
 
 use Date::Manip;
-use Date::Calc qw (Add_Delta_DHMS Delta_DHMS);
+use Date::Calc qw (Add_Delta_DHMS Delta_DHMS Date_to_Time);
 use Time::HiRes;
 
 
@@ -46,6 +46,16 @@ has interval => (
     default => 240,
 );
 
+=item C<system>
+
+System being traded by this instance of the unit test account.
+This is needed to optimize test runs.
+=cut
+has system => (
+    is     => 'ro',
+    isa    => 'Finance::HostedTrader::System',
+    required=>1,
+); 
 
 =back
 
@@ -120,10 +130,9 @@ sub getAsk {
     my ($self, $symbol) = @_;
 
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
-
     sub loadCache {
-        my ($self, $symbol) = @_;
-        my $date = $self->{_now};
+        my ($self, $symbol, $date) = @_;
+
         my $initDate = sprintf( '%d-%02d-%02d %02d:%02d:%02d',
                                 Add_Delta_DHMS( substr($date,0,4),
                                                 substr($date,5,2),
@@ -145,14 +154,14 @@ sub getAsk {
                                                 0,0,0,$self->interval
                                                )
                                 );
-
+        #print "Return data from $initDate to $endDate";
         return $self->{_signal_processor}->getIndicatorData( {
                     symbol  => $symbol,
                     tf      => '5min',
                     fields  => 'datetime, close',
-                    maxLoadedItems => 50,
-                    numItems => 50,
-                    debug => 1,
+                    maxLoadedItems => 1000,
+                    numItems => 1000,
+                    debug => 0,
                     startPeriod => $initDate,
                     endPeriod => $endDate,
                     reverse => 1,
@@ -163,7 +172,63 @@ sub getAsk {
 
     my $cache = $self->{_price_cache};
 
-    $cache->{$symbol} = loadCache($self, $symbol) if (!$cache->{$symbol} || scalar(@{ $cache->{$symbol} }) == 0);
+
+    my $date = $self->getServerDateTime();
+    my $requested_period = sprintf("%s-%s-%s %s:%02d:00",
+                substr($date,0,4),
+                substr($date,5,2),
+                substr($date,8,2),
+                substr($date,11,2),
+                int(substr($date,14,2)/5)*5);
+#    print "Search for $requested_period\n";
+#    print Dumper(\$cache);use Data::Dumper;exit;
+    
+    my $loop_count = 0;
+    my $loadFrom = $self->{_now};
+    while (1) {
+        $cache->{$symbol} = loadCache($self, $symbol, $loadFrom) if (!$cache->{$symbol} || scalar(@{ $cache->{$symbol} }) <= 1);
+        $date = $cache->{$symbol};
+        if ($loop_count) {
+#            print Dumper(\$date);
+#            print Dumper(\$requested_period);
+            print "exit loop" and exit if ($loop_count > 2);
+        }
+        last if (!$date || scalar(@$date) <= 1);
+        
+        for (my $i = scalar(@$date)-1; $i >= 0; $i--) {
+            my $lastDate = $date->[$i];
+            if ($lastDate->[0] eq $requested_period) {
+                splice @$date, ($i > 0 ? $i+1 : 2);
+#                my $realValue = $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
+#                if ($lastDate->[1] ne $realValue) {
+#                    print Dumper(\$date);
+#                    print Dumper(\$requested_period);
+#                    print "bad return of $lastDate->[1]($lastDate->[0]) instead of $realValue ";
+#                    exit;
+#                }
+                return $lastDate->[1];
+            } elsif ($lastDate->[0] gt $requested_period) {
+                my $lastDate = $date->[$i-1];
+                splice @$date, ($i > 0 ? $i+1 : 2);
+#                my $realValue = $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
+#                if ($lastDate->[1] ne $realValue) {
+#                    print Dumper(\$date);
+#                    print Dumper(\$requested_period);
+#                    print "bad return of $lastDate->[1]($lastDate->[0]) instead of $realValue ";
+#                    exit;
+#                }
+                return $lastDate->[1];
+            }
+        }
+        $loadFrom = $date->[0]->[0];
+        $cache->{$symbol} = undef;
+        $loop_count++;
+        #print "Loop $loop_count\n";
+    }
+
+    die("Could not find date, sorry");
+    return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
+
     die('could not find values') if (!$cache->{$symbol} || scalar(@{ $cache->{$symbol} }) == 0);
 
     my $values = $cache->{$symbol};
@@ -394,10 +459,42 @@ sub waitForNextTrade {
     my ($self) = @_;
 
     my ($sec, $min, $hr, $day, $month, $year, $weekday) = gmtime($self->getServerEpoch());
-    my $interval = ($weekday != 0 && $weekday != 6 ? $self->interval : 10800);
+    my $interval = $self->interval;
     my $date = $self->{_now};
-    $self->{_now} = sprintf('%d-%02d-%02d %02d:%02d:%02d', Add_Delta_DHMS(substr($date,0,4),substr($date,5,2),substr($date,8,2),substr($date,11,2),substr($date,14,2),substr($date,17,2),0,0,0,$interval));
-    $self->{_now_epoch} += $interval;
+    my $nextSignalDate = $self->_getNextSignalDate();
+
+#Adjust next signal date to take into account the signal check interval
+    if ($nextSignalDate) {    
+        my $periods = int(delta_dates($nextSignalDate, $date) / $interval);
+        $nextSignalDate = delta_add($date, $periods*$interval);
+    }
+
+    my $normalWaitDate = delta_add($date, $interval);
+    my $nowWillBe = ($nextSignalDate && $nextSignalDate gt $normalWaitDate ? $nextSignalDate : $normalWaitDate);
+    
+    $self->{_now} = $nowWillBe;
+    $self->{_now_epoch} = date_to_epoch($self->{_now});
+}
+
+# Returns the date of the next future signal
+sub _getNextSignalDate {
+    my $self = shift;
+    my $date = $self->{_now};
+
+    my $nextSymbolUpdateDate = epoch_to_date($self->system->getSymbolsNextUpdate);
+
+    my $signals = $self->{_signal_cache};
+    my @next_signals = ($nextSymbolUpdateDate);
+    foreach my $symbol (keys(%$signals)) {
+        foreach my $signal (keys(%{$signals->{$symbol}})) {
+            my $data = $signals->{$symbol}->{$signal};
+            push @next_signals, $data->[0]->[0] if ($data->[0] && $data->[0]->[0] gt $date);
+            push @next_signals, $data->[1]->[0] if ($data->[1] && $data->[1]->[0] gt $date);
+        }
+    }
+    @next_signals = sort (@next_signals);
+
+    return $next_signals[0];
 }
 
 sub getServerEpoch {
@@ -411,6 +508,89 @@ sub getServerDateTime {
 
     return $self->{_now};
 }
+
+
+=item C<delta_add($date, $delta)>
+Add $delta seconds to $date and returns the new date
+=cut
+sub delta_add {
+    my ($date, $delta) = @_;
+
+    return sprintf( '%d-%02d-%02d %02d:%02d:%02d',
+                            Add_Delta_DHMS( substr($date,0,4),
+                                            substr($date,5,2),
+                                            substr($date,8,2),
+                                            substr($date,11,2),
+                                            substr($date,14,2),
+                                            substr($date,17,2),
+                                            0,0,0,$delta
+                                           )
+                          );
+    
+}
+
+=item C<delta_dates($date1,$date2)>
+    Returns the number of seconds between $date1 and $date2
+=cut
+sub delta_dates {
+my $date1 = shift;
+my $date2 = shift;
+my @d1 = (
+                substr($date1,0,4),
+                substr($date1,5,2),
+                substr($date1,8,2),
+                substr($date1,11,2),
+                substr($date1,14,2),
+                substr($date1,17,2)
+	);
+
+my @d2 = (  substr($date2,0,4),
+                substr($date2,5,2),
+                substr($date2,8,2),
+                substr($date2,11,2),
+                substr($date2,14,2),
+                substr($date2,17,2)
+	);
+
+
+my @r = Delta_DHMS(@d2,@d1);
+
+my $v = ($r[0]*86400 + $r[1]*3600 + $r[2]*60 + $r[3]);
+return $v;
+}
+
+=item C<epoch_to_date()>
+=cut
+sub epoch_to_date {
+    my $epoch = shift;
+
+    my ($sec, $min, $hr, $day, $month, $year, $weekday) = gmtime($epoch);    
+    return sprintf( '%04d-%02d-%02d %02d:%02d:%02d',
+                            $year+1900,
+                            $month+1,
+                            $day,
+                            $hr,
+                            $min,
+                            $sec
+                  );
+}
+
+=item C<date_to_epoch()>
+=cut
+sub date_to_epoch {
+    my $date = shift;
+
+    my $r = Date_to_Time(
+                    substr($date,0,4),
+                    substr($date,5,2),
+                    substr($date,8,2),
+                    substr($date,11,2),
+                    substr($date,14,2),
+                    substr($date,17,2)
+                  );
+}
+
+
 
 1;
 
