@@ -66,7 +66,17 @@ sub symbolsLastUpdated {
 sub getSymbolsNextUpdate {
     my $self = shift;
     
-    return $self->{_symbolsLastUpdated} + $self->symbolUpdateInterval();
+    my $nextUpdate = $self->{_symbolsLastUpdated} + $self->symbolUpdateInterval;
+
+    #TODO what i mean here is, if the market is open, use $self->symbolUpdateInterval
+    #if the market is not open, wait until it's open.
+    my ($sec, $min, $hr, $day, $month, $year, $weekday) = gmtime($nextUpdate);
+    if  ($weekday != 0 && $weekday != 6 ) {
+        return $nextUpdate;
+    } else {
+        return $self->{_symbolsLastUpdated} + 10800;
+    }
+    
 }
 
 =head2 Methods
