@@ -80,7 +80,7 @@ sub getSymbolsSignalFilter {
 
     my $rv = { long => [], short => [] };
 
-    my $filter=$filters->{signals}->[0];
+    my $filter=$filters->{signals}->[0];#TODO should loop through every filter signal available ?
 
     foreach my $symbol (@$long_symbols) {
         if ($account->checkSignal(
@@ -120,7 +120,7 @@ sub getExitValue {
 sub _getSignalValue {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
-    my $signal = $self->system->{signals}->{$action};
+    my $signal = $self->system->{signals}->{$action};#TODO what if there are multiple signals ?
 
     return $self->account->getIndicatorValue(
                 $symbol, 
@@ -144,7 +144,7 @@ sub checkExitSignal {
 sub _checkSignalWithAction {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
-    my $signal_definition = $self->system->{signals}->{$action}->{$tradeDirection};
+    my $signal_definition = $self->system->{signals}->{$action}->{$tradeDirection};#TODO what if there are multiple signals ?
     my $signal_args = $self->system->{signals}->{$action}->{args};
 
     return $self->account->checkSignal(
