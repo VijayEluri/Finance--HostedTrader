@@ -2,9 +2,11 @@
 
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 13;
 use Test::Exception;
 use Data::Dumper;
+
+use Finance::HostedTrader::System;
 
 BEGIN {
 use_ok ('Finance::HostedTrader::Factory::Account');
@@ -18,8 +20,18 @@ throws_ok {
     	)->create_instance();
 } qr/Don't know about Account class: invalidone/, 'Factory can\'t instantiate unknown account classes';
 
+
+throws_ok {
+    $acc = Finance::HostedTrader::Factory::Account->new(
+            SUBCLASS => 'UnitTest',
+    	)->create_instance();
+} qr/Attribute \(system\) is required/, 'UnitTest dies without system argument';
+
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
+
 $acc = Finance::HostedTrader::Factory::Account->new(
         SUBCLASS    => 'UnitTest',
+        system      => $trendfollow,
         startDate   => '2020-06-24 06:00:00',
         endDate     => '2030-06-24 06:00:00',
 	)->create_instance();
