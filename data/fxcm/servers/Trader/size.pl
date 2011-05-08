@@ -24,8 +24,8 @@ GetOptions(
     "port=i"    => \$port,
 );
 
-my $trendfollow = Finance::HostedTrader::SystemTrader->new( name => 'trendfollow' );
-my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port)->create_instance();
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
+my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port )->create_instance();
 
 my $system = Finance::HostedTrader::SystemTrader->new( system => $trendfollow, account => $account );
 my $accountSize = $account->getNav();
