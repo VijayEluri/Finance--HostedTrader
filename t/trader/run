@@ -1,11 +1,24 @@
 #!/bin/sh
 
+set -e
+
+while getopts ":p" opt; do
+    case $opt in
+      c)
+         USE_PROFILER=1
+         ;;
+    esac
+done
+
 HOMEDIR=~/Finance--HostedTrader
 
-START_DATE="2010-07-18 06:00:00"
-END_DATE="2011-04-29 20:00:00"
+START_DATE="2010-08-18 06:00:00"
+END_DATE="2011-01-29 20:00:00"
 
 TZ=GMT
-nice -n 19 perl $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
-#nice -n 19 perl -MDevel::Cover $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
-#nice -n 19 perl -d:NYTProf $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
+if [ $USE_PROFILER ]; then
+    ARGS="-d:NYTProf"
+#    ARGS="-MDevel::Cover"
+fi
+
+nice -n 19 perl $ARGS $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
