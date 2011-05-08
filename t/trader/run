@@ -3,8 +3,9 @@
 HOMEDIR=~/Finance--HostedTrader
 
 START_DATE="2010-07-18 06:00:00"
-END_DATE="2010-07-23 20:00:00"
+END_DATE="2011-04-29 20:00:00"
 
+TZ=GMT
 nice -n 19 perl $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
 #nice -n 19 perl -MDevel::Cover $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
 #nice -n 19 perl -d:NYTProf $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
