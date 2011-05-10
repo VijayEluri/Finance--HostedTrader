@@ -193,7 +193,7 @@ sub positionRisk {
         $pl /= $account->getAsk("GBP$base");
     }
 
-    return $pl;
+    return $pl; #TODO this is not working for net short positions
 }
 
 sub getTradeSize {
