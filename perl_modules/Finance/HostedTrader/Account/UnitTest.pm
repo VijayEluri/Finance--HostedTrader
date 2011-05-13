@@ -285,7 +285,7 @@ Adds a new trade to the position in $symbol.
 sub openMarket {
     my ($self, $symbol, $direction, $amount) = @_;
 
-    my $id = $$ . Time::HiRes::time();
+    my $id = $symbol.'|'.$direction.'|'.$amount.'|'.$self->{_now};
     my $rate = ($direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
 
     my $trade = Finance::HostedTrader::Trade->new(
