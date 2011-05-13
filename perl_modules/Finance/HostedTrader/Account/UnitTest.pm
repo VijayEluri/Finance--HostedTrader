@@ -57,6 +57,26 @@ has system => (
     required=>1,
 ); 
 
+=item C<skipSignalDates>
+
+If set to true, system testing calculations only happen for periods
+during which there are open/close signals.
+
+This is the default option, as it makes calculations faster.
+
+If set to false, all dates are checked, which is slower but better
+mimics what would happen in reality.
+
+This option mainly exists to test accuracy of the date skipping code.
+
+=cut
+has skipSignalDates => (
+    is     => 'ro',
+    isa    => 'Bool',
+    required=>1,
+    default=>1,
+);
+
 =back
 
 =head2 Constructor
@@ -461,6 +481,12 @@ sub waitForNextTrade {
     my ($sec, $min, $hr, $day, $month, $year, $weekday) = gmtime($self->getServerEpoch());
     my $interval = $self->interval;
     my $date = $self->{_now};
+    
+    if (!$self->skipSignalDates) {
+        $self->{_now} = sprintf('%d-%02d-%02d %02d:%02d:%02d', Add_Delta_DHMS(substr($date,0,4),substr($date,5,2),substr($date,8,2),substr($date,11,2),substr($date,14,2),substr($date,17,2),0,0,0,$interval));
+        $self->{_now_epoch} += $interval;
+        return;
+    }
     my $nextSignalDate = $self->_getNextSignalDate();
 
 #Adjust next signal date to take into account the signal check interval
