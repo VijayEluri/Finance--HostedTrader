@@ -11,7 +11,7 @@ use Finance::HostedTrader::SystemTrader;
 use Finance::HostedTrader::System;
 
 my $positions = [
-    {   symbol => 'AUDUSD', direction => 'long' },
+    {   symbol => 'USDJPY', direction => 'short' },
     {   symbol => 'XAGUSD', direction => 'long' },
 ];
 
@@ -31,7 +31,7 @@ my $system = Finance::HostedTrader::SystemTrader->new( system => $trendfollow, a
 my $accountSize = $account->getNav();
 
 
-print "Account Size: $accountSize\n";
+print "Account Nav: $accountSize\n";
 
 foreach my $position (@$positions) {
 
