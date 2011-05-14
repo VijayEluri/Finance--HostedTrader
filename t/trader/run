@@ -2,23 +2,30 @@
 
 set -e
 
-while getopts ":p" opt; do
+while getopts "pc" opt; do
     case $opt in
-      c)
+      p)
          USE_PROFILER=1
+         USE_COVER=
+         ;;
+      c)
+         USE_PROFILER=
+         USE_COVER=1
          ;;
     esac
 done
+shift $(($OPTIND - 1))
 
 HOMEDIR=~/Finance--HostedTrader
 
-START_DATE="2010-08-18 06:00:00"
-END_DATE="2011-10-26 04:00:00"
+START_DATE=${1:-"2010-08-18 06:00:00"}
+END_DATE=${2:-"2010-10-18 04:00:00"}
 
 TZ=GMT
 if [ $USE_PROFILER ]; then
     ARGS="-d:NYTProf"
-#    ARGS="-MDevel::Cover"
+elif [ $USE_COVER ]; then
+    ARGS="-MDevel::Cover"
 fi
 
-nice -n 19 perl $ARGS $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --verbose --startDate="$START_DATE" --endDate="$END_DATE"
+nice -n 19 perl $ARGS $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --startDate="$START_DATE" --endDate="$END_DATE"
