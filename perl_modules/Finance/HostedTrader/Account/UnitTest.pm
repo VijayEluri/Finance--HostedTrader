@@ -383,10 +383,10 @@ sub checkSignal {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
     my $cache = $self->{_signal_cache};
 
-#Get all signals for this symbol/signal_definition in the relevant time period and cache them
+    #Get all signals for this symbol/signal_definition in the relevant time period and cache them
     if (!$cache->{$symbol} || !$cache->{$symbol}->{$signal_definition}) {
 
-#calculating max_loaded_periods adds a lot of code  but is important for performance
+        #calculating max_loaded_periods adds a lot of code  but is important for performance
         my $startDate = UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S');
         my $date = $self->endDate;
         my @d1 = (  substr($date,0,4),
