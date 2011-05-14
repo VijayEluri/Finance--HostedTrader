@@ -108,15 +108,15 @@ sub systemEntryExit {
         foreach my $symbol (@{$systemTrader->system->symbols($direction)}) {
             my $currentExit = $systemTrader->getExitValue($symbol, $direction);
             my $currentEntry = $systemTrader->getEntryValue($symbol, $direction);
-            my $positionRisk = -1*$systemTrader->positionRisk($account->getPosition($symbol));
+            my $amountAtRisk = -1*$systemTrader->amountAtRisk($account->getPosition($symbol));
 
             $t->addRow( $symbol, 
                         ($direction eq 'long' ? $account->getAsk($symbol) : $account->getBid($symbol)),
                         $currentEntry,
                         $currentExit,
                         $direction,
-                        sprintf('%.2f',$positionRisk),
-                        sprintf('%.2f',100 * $positionRisk / $account->getNav)
+                        sprintf('%.2f',$amountAtRisk),
+                        sprintf('%.2f',100 * $amountAtRisk / $account->getNav)
             );
         }
     }

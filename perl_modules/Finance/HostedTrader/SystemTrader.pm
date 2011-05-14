@@ -161,15 +161,7 @@ sub _checkSignalWithAction {
 }
 
 
-sub maxNumberTrades {
-my ($self) = @_;
-
-my $exposurePerPosition = $self->system->{maxExposure};
-die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
-return scalar(@{$exposurePerPosition});
-}
-
-=item C<positionRisk($position)
+=item C<amountAtRisk($position)
 
 How much capital will be lost/gained if $ position closes at the stop loss
 level defined by this system.
@@ -177,7 +169,7 @@ level defined by this system.
 This returned value is relative to the opening price and does not take into
 account current profit/loss.
 =cut
-sub positionRisk {
+sub amountAtRisk {
     my $self = shift;
     my $position = shift;
     my $account = $self->account;
@@ -214,31 +206,30 @@ my $trades = $position->getTradeList;
 my $numTrades = scalar(@$trades);
 my $account = $self->account;
 my $action = ( $numTrades == 0 ? 'enter' : 'add');
-my $exposure = $self->system->{signals}->{$action}->{$direction}->{exposure};
+my $allowedExposure = $self->system->{signals}->{$action}->{$direction}->{exposure};
 
     if ($action eq 'add') {
-        if ($numTrades > scalar(@$exposure)) {
+        if ($numTrades > scalar(@$allowedExposure)) {
             return (0,undef,undef);
         }
-        $exposure = $exposure->[$numTrades-1];
+        $allowedExposure = $allowedExposure->[$numTrades-1];
     }
-    $exposure = $exposure / 100;
+    $allowedExposure = $allowedExposure / 100;
 
     my $balance = $account->balance();
     die("balance is negative") if ($balance < 0);
-    my $positionRisk = $self->positionRisk($position);
-    my $currentRisk = $positionRisk / $balance;
+    my $amountAtRisk = $self->amountAtRisk($position);
+    my $existingExposure = $amountAtRisk / $balance;
 
-    my $maxExposure = $exposure - $currentRisk;
+    my $maxExposure = $allowedExposure - $existingExposure;
     return (0,undef,undef) if ($maxExposure <= 0);
 
-    my $maxLoss   = $balance * $maxExposure;
+    my $maxLossAmount   = $balance * $maxExposure;
     my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
     my $base = $account->getSymbolBase($symbol);
-    print "SIZE: $maxExposure\t$maxLoss\t$balance\t".$account->{_now}."\n";
 
     if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
-        $maxLoss *= $account->getAsk("GBP$base");
+        $maxLossAmount *= $account->getAsk("GBP$base");
     }
 
     my $value;
@@ -253,9 +244,9 @@ my $exposure = $self->system->{signals}->{$action}->{$direction}->{exposure};
     if ( $maxLossPts <= 0 ) {
         die("Tried to set stop to " . $stopLoss . " but current price is " . $value);
     }
-    my $amount = $account->convertBaseUnit($symbol, $maxLoss / $maxLossPts);
-    $amount -= $position->size;
-    $amount = 0 if ($amount < 0);
+    my $amount = $account->convertBaseUnit($symbol, $maxLossAmount / $maxLossPts);
+    #print "SIZE: $amount\t$existingExposure\t$amountAtRisk\t$maxExposure\t$maxLossAmount\t".$account->{_now}."\n";
+    die('Tried to open trade with negative amount. This shouldn not happen unless there is a bug') if ($amount < 0);
     return ($amount, $value, $stopLoss);
 }
 
