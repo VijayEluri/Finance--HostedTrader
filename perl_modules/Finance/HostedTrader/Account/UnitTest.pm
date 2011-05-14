@@ -110,8 +110,9 @@ This method calculates profit/loss of existing trades to keep data consistent
 =cut
 sub refreshPositions {
     my $self = shift;
-# positions are kept in memory
-# Calculate current p/l for each open trade
+    # positions are kept in memory
+    
+    # Calculate current p/l for each open trade
     my $positions = $self->{_positions};
     foreach my $key (keys(%{$positions})) {
         foreach my $trade (@{ $positions->{$key}->getTradeList }) {
@@ -120,7 +121,6 @@ sub refreshPositions {
             $trade->pl($pl);
         }
     }
-
 }
 
 sub _calculatePL {
@@ -128,8 +128,7 @@ sub _calculatePL {
     my $trade = shift;
     my $size = shift;
     
-    $size *= -1 if ($trade->direction eq 'short');
-    die("size parameter cannot be larger than trade->size") if ($size > $trade->size);
+    die("size parameter cannot be larger than trade->size") if (abs($size) > abs($trade->size));
     my $symbol = $trade->symbol;
     my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
     my $base = $self->getSymbolBase($symbol);
@@ -295,7 +294,7 @@ sub openMarket {
             direction   => $direction,
             openDate    => $self->{_now},
             openPrice   => $rate,
-            size        => $amount,
+            size        => ($direction eq 'long' ? $amount : $amount*(-1)),
     );
 
     my $position = $self->getPosition($symbol);
@@ -310,6 +309,8 @@ sub openMarket {
 =cut
 sub closeMarket {
     my ($self, $tradeID, $amount) = @_;
+    
+    die('$amount must be positive value') if ($amount <= 0);
 
     my $positions = $self->getPositions();
     foreach my $key (keys %{$positions}) {

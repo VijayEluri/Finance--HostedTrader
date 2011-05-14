@@ -171,6 +171,11 @@ sub refreshPositions {
     my $trades = YAML::Syck::Load( $yml ) || die("Invalid yaml: $!");
 
     foreach my $trade_data (@$trades) {
+        if ($trade_data->{direction} eq 'short') {
+            #FXCM returns short positions as positive numbers,
+            #convert to negative
+            $trade_data->{size} *= -1;
+        }
         my $trade = Finance::HostedTrader::Trade->new(
             $trade_data
         );

@@ -126,11 +126,7 @@ sub size {
     my $size = 0;
 
     foreach my $trade (@{ $self->getTradeList }) {
-        if ($trade->direction eq 'long') {
-            $size += $trade->size();
-        } else {
-            $size -= $trade->size();
-        }
+        $size += $trade->size();
     }
 
     return $size;
@@ -144,16 +140,12 @@ sub averagePrice {
     
     my $size = 0;
     my $price = 0;
-    
+
     foreach my $trade(@{ $self->getTradeList }) {
-        if ($trade->direction eq 'long') {
-            $size += $trade->size();
-            $price += $trade->size() * $trade->openPrice();
-        } else {
-            $size -= $trade->size();
-            $price -= $trade->size() * $trade->openPrice();
-        }
+        $size += $trade->size();
+        $price += $trade->size() * $trade->openPrice();
     }
+
     return undef if ($size == 0);
     return $price / $size;
 }

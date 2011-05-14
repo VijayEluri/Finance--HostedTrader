@@ -29,11 +29,6 @@ subtype 'positiveNum'
     => where { $_ > 0 }
     => message { "The number provided ($_) must be positive" };
 
-subtype 'positiveInt'
-    => as 'Int'
-    => where { $_ > 0 }
-    => message { "The number provided ($_) must be a positive integer" };
-
 
 =item C<id>
 
@@ -95,8 +90,8 @@ has openPrice => (
 
 =cut
 has size => (
-    is     => 'rw',#TODO once initialized, trade size can only decrease. enforce this in the Trade object
-    isa    => 'positiveInt',
+    is     => 'rw',#TODO once initialized, trade size can only decrease for longs and increase for shorts. enforce this in the Trade object
+    isa    => 'Int',
     required=>1,
 );
 
@@ -133,9 +128,22 @@ has pl => (
 
 =back
 
+=cut
+
+sub BUILD {
+    my $self = shift;
+
+    if ($self->direction eq 'short') {
+        die('Shorts need to be negative numbers') if ($self->size >= 0);
+    } else {
+        die('Longs need to be positive numbers') if ($self->size <= 0);
+    }
+} 
+
 =head2 Methods
 
 =over 12
+
 
 =item C<profit>
 

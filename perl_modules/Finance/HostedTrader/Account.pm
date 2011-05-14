@@ -333,7 +333,7 @@ sub closeTrades {
     my $position = $self->getPosition($symbol);
     foreach my $trade (@{ $position->getTradeList }) {
         next if ($trade->direction ne $direction);
-        $self->closeMarket($trade->id, $trade->size);
+        $self->closeMarket($trade->id, abs($trade->size));
     }
 }
 
