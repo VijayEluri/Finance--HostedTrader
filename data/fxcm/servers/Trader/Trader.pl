@@ -10,7 +10,7 @@ use Pod::Usage;
 
 
 use Finance::HostedTrader::Factory::Account;
-use Finance::HostedTrader::SystemTrader;
+use Finance::HostedTrader::Trader;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
@@ -40,7 +40,7 @@ my $account = Finance::HostedTrader::Factory::Account->new(
             )->create_instance();
 
 my @systems =   (   
-                    Finance::HostedTrader::SystemTrader->new( system => $trendfollow, account => $account ),
+                    Finance::HostedTrader::Trader->new( system => $trendfollow, account => $account ),
                 );
 
 logger("STARTUP");

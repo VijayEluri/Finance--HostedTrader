@@ -44,7 +44,7 @@ has account => (
 =cut
 has systemTrader => (
     is      => 'ro',
-    isa     => 'Finance::HostedTrader::SystemTrader',
+    isa     => 'Finance::HostedTrader::Trader',
     required=> 1,
 );
 
