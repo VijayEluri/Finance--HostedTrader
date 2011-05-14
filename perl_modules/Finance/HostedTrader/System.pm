@@ -57,12 +57,6 @@ sub BUILD {
     $self->{_symbolsLastUpdated} = 0;
 }
 
-sub symbolsLastUpdated {
-    my $self = shift;
-
-    return $self->{_symbolsLastUpdated};
-}
-
 sub getSymbolsNextUpdate {
     my $self = shift;
     
