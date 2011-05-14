@@ -84,15 +84,6 @@ sub getTrade {
     return $self->trades->{$id};
 }
 
-=item C<numOpenTrades()>
-    Returns the number of open trades in this position
-=cut
-sub numOpenTrades {
-    my $self = shift;
-    
-    return scalar(keys(%{$self->trades}));    
-}
-
 =item C<getTradeList()>
     Returns a reference to a list of trades in this position.
     There is no particular order in the returned data.
