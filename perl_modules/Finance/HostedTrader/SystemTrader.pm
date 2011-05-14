@@ -175,22 +175,21 @@ sub amountAtRisk {
     my $account = $self->account;
     my $symbol = $position->symbol;
 
-    my $trades = $position->getTradeList;
-    my $pl = 0; #ProfitLoss in symbols base currency 
+    my $size = $position->size();
+    my $direction = ($size > 0 ? 'long' : 'short');
+    my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
+    die("Could not get stop loss for $symbol $direction") if (!defined($stopLoss));
+    my $openPrice = $position->averagePrice();
+    return 0 if (!$openPrice);
 
-    foreach my $trade (@$trades) {
-        my $stopLoss = $self->_getSignalValue('exit', $symbol, $trade->direction);
-        die("Could not get stop loss for $symbol " . $trade->direction) if (!defined($stopLoss));
-        my $plPts = $stopLoss - $trade->openPrice;
-        $pl -= $plPts * $trade->size;
-    }
+    my $pl = ( $openPrice - $stopLoss ) * $size;
 
     my $base = uc(substr($symbol, -3));
 
     if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
         $pl /= $account->getAsk("GBP$base");
     }
-
+    
     return $pl; #TODO this is not working for net short positions
 }
 

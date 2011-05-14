@@ -133,7 +133,29 @@ sub size {
         }
     }
 
-    return abs($size);
+    return $size;
+}
+
+=item C<averagePrice>
+
+=cut
+sub averagePrice {
+    my ($self) = @_;
+    
+    my $size = 0;
+    my $price = 0;
+    
+    foreach my $trade(@{ $self->getTradeList }) {
+        if ($trade->direction eq 'long') {
+            $size += $trade->size();
+            $price += $trade->size() * $trade->openPrice();
+        } else {
+            $size -= $trade->size();
+            $price -= $trade->size() * $trade->openPrice();
+        }
+    }
+    return undef if ($size == 0);
+    return $price / $size;
 }
 
 =item C<pl>

@@ -128,6 +128,7 @@ sub _calculatePL {
     my $trade = shift;
     my $size = shift;
     
+    $size *= -1 if ($trade->direction eq 'short');
     die("size parameter cannot be larger than trade->size") if ($size > $trade->size);
     my $symbol = $trade->symbol;
     my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
