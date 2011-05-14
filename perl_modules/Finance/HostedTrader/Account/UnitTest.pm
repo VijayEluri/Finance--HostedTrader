@@ -315,8 +315,8 @@ sub closeMarket {
     foreach my $key (keys %{$positions}) {
         my $position = $positions->{$key};
         my $trade = $position->getTrade($tradeID);
-        die("Tried to close $amount which is more than trade size " . $trade->size) if ($amount > $trade->size);
-
+        next if (!defined($trade));
+        die("Tried to close $amount which is more than trade size " . abs($trade->size)) if ($amount > abs($trade->size));
         my $pl = $self->_calculatePL($trade, $amount);
         $self->{_account_data}->{balance} += $pl;
 
@@ -325,12 +325,13 @@ sub closeMarket {
         } else {
             $trade->size($trade->size-$amount);
         }
+        return;
     }
 }
 
 =item C<getBaseUnit($symbol)>
 
-TODO. Always returns base unit as 50.
+TODO. Set base unit for other symbols.
 =cut
 sub getBaseUnit {
     my ($self, $symbol) = @_;
