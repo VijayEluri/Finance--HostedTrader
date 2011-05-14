@@ -169,27 +169,6 @@ sub status {
     return 'closed';
 }
 
-=item C<close>
-
-
-=cut
-sub close {
-    my ($self, $closeDate, $closePrice) = @_;
-
-    die('trade already closed') if ($self->status eq 'closed');
-    $self->{closeDate} = $closeDate;
-    $self->{closePrice} = $closePrice;
-}
-
-=item C<exitValue>
-
-=cut
-sub exitValue {
-    my ($self, $system);
-
-    return $system->getExitValue($self->symbol, $self->direction);
-}
-
 __PACKAGE__->meta->make_immutable;
 1;
 
