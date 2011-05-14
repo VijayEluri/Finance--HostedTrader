@@ -13,7 +13,7 @@ done
 HOMEDIR=~/Finance--HostedTrader
 
 START_DATE="2010-08-18 06:00:00"
-END_DATE="2011-01-29 20:00:00"
+END_DATE="2011-10-26 04:00:00"
 
 TZ=GMT
 if [ $USE_PROFILER ]; then

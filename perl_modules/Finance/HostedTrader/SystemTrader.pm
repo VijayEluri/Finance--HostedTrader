@@ -135,6 +135,12 @@ sub checkEntrySignal {
     return $self->_checkSignalWithAction('enter', @_);
 }
 
+sub checkAddUpSignal {
+    my $self = shift;
+
+    return $self->_checkSignalWithAction('add', @_);
+}
+
 sub checkExitSignal {
     my $self = shift;
 
@@ -205,24 +211,31 @@ my $position = shift || Finance::HostedTrader::Position->new(symbol => $symbol);
 my $maxLossPts;
 my $system = $self->system;
 my $trades = $position->getTradeList;
+my $numTrades = scalar(@$trades);
 my $account = $self->account;
+my $action = ( $numTrades == 0 ? 'enter' : 'add');
+my $exposure = $self->system->{signals}->{$action}->{$direction}->{exposure};
 
+    if ($action eq 'add') {
+        if ($numTrades > scalar(@$exposure)) {
+            return (0,undef,undef);
+        }
+        $exposure = $exposure->[$numTrades-1];
+    }
+    $exposure = $exposure / 100;
 
     my $balance = $account->balance();
     die("balance is negative") if ($balance < 0);
     my $positionRisk = $self->positionRisk($position);
     my $currentRisk = $positionRisk / $balance;
 
-    my $exposurePerPosition = $system->{maxExposure};
-    die("no exposure coefficients in system definition") if (!$exposurePerPosition || !scalar(@{$exposurePerPosition}));
-    return (0,undef,undef) if (scalar(@$trades) >= scalar(@{$exposurePerPosition}));
-
-    my $maxExposure = $exposurePerPosition->[scalar(@{$trades})] - $currentRisk;
+    my $maxExposure = $exposure - $currentRisk;
     return (0,undef,undef) if ($maxExposure <= 0);
 
-    my $maxLoss   = $balance * $maxExposure / 100;
+    my $maxLoss   = $balance * $maxExposure;
     my $stopLoss = $self->_getSignalValue('exit', $symbol, $direction);
     my $base = $account->getSymbolBase($symbol);
+    print "SIZE: $maxExposure\t$maxLoss\t$balance\t".$account->{_now}."\n";
 
     if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
         $maxLoss *= $account->getAsk("GBP$base");

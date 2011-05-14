@@ -134,42 +134,46 @@ sub checkSystem {
     foreach my $symbol ( @$symbols ) {
         my $position = $account->getPosition($symbol);
         my $posSize = $position->size;
-        my $numOpenTrades = $position->numOpenTrades();
 
-        if ($numOpenTrades < $systemTrader->maxNumberTrades) {
+        my $result;
+        if ($posSize == 0) {
             logger("Checking ".$systemTrader->system->name." $symbol $direction") if ($verbose > 1);
-            my $result = $systemTrader->checkEntrySignal($symbol, $direction);
-            if ($result) {
-                my ($amount, $value, $stopLoss) = $systemTrader->getTradeSize($symbol, $direction, $position);
-                if ($verbose > 1 && $result) {
-                    logger("$symbol $direction at " . $result->[0] . " Amount=" . $amount . " value=" . $value . " stopLoss=" . $stopLoss);
-                }
-                next if ($amount <= 0);
-                my $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader );
-                logger("Positions before open trade\n" . $report->openPositions);
-                logger("\n".$report->systemEntryExit);
-                logger("Adding position for $symbol $direction ($amount)");
+            $result = $systemTrader->checkEntrySignal($symbol, $direction);
+        } else {
+            logger("Checking ".$systemTrader->system->name." $symbol $direction") if ($verbose > 1);
+            $result = $systemTrader->checkAddUpSignal($symbol, $direction);
+        }
+        
+        if ($result) {
+            my ($amount, $value, $stopLoss) = $systemTrader->getTradeSize($symbol, $direction, $position);
+            if ($verbose > 1 && $result) {
+                logger("$symbol $direction at " . $result->[0] . " Amount=" . $amount . " value=" . $value . " stopLoss=" . $stopLoss);
+            }
+            next if ($amount <= 0);
+            my $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader );
+            logger("Positions before open trade\n" . $report->openPositions);
+            logger("\n".$report->systemEntryExit);
+            logger("Adding position for $symbol $direction ($amount)");
 
-                TRY_OPENTRADE: foreach my $try (1..3) {
-                    eval {
-                        my ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
-                        logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate");
-                        1;
-                    } or do {
-                        logger($@);
-                        next;
-                    };
-                    sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
+            TRY_OPENTRADE: foreach my $try (1..3) {
+                eval {
+                    my ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
+                    logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate");
+                    1;
+                } or do {
+                    logger($@);
+                    next;
+                };
+                sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
 Instrument: $symbol
 Direction: $direction
 Amount: $amount
 Current Value: $value
 Stop Loss: $stopLoss
-                });
-                    logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
-                    logger("\n".$report->systemEntryExit);
-                    last TRY_OPENTRADE;
-                }
+            });
+                logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
+                logger("\n".$report->systemEntryExit);
+                last TRY_OPENTRADE;
             }
         }
 
