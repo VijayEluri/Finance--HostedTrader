@@ -316,15 +316,11 @@ sub closeMarket {
         my $position = $positions->{$key};
         my $trade = $position->getTrade($tradeID);
         next if (!defined($trade));
-        die("Tried to close $amount which is more than trade size " . abs($trade->size)) if ($amount > abs($trade->size));
+        die("Current implementation of closeMarket can only close full positions") if (abs($amount) != abs($trade->size));
+
         my $pl = $self->_calculatePL($trade, $amount);
         $self->{_account_data}->{balance} += $pl;
-
-        if ($trade->size == $amount) {
-            $position->deleteTrade($trade->id);
-        } else {
-            $trade->size($trade->size-$amount);
-        }
+        $position->deleteTrade($trade->id);
         return;
     }
 }
