@@ -260,27 +260,27 @@ sub waitForNextTrade {
     sleep(20);
 }
 
-=item C<convertToBaseCurrency($amount, $currentCurrency, $bidask>
-
-Converts $amount from $currentCurrency to the account's base currency, using either 'bid' or 'ask' price.
-
-=cut
-sub convertToBaseCurrency {
-    my ($self, $amount, $currentCurrency, $bidask) = @_;
-    $bidask = 'ask' if (!$bidask);
-
-    my $baseCurrency = $self->getBaseCurrency();
-
-    return $amount if ($baseCurrency eq $currentCurrency);
-    my $pair = $baseCurrency . $currentCurrency;
-    if ($bidask eq 'ask') {
-        return $amount / $self->getAsk($pair);
-    } elsif ($bidask eq 'bid') {
-        return $amount / $self->getBid($pair);
-    } else {
-        die("Invalid value in bidask argument: '$bidask'");
-    }
-}
+#=item C<convertToBaseCurrency($amount, $currentCurrency, $bidask>
+#
+#Converts $amount from $currentCurrency to the account's base currency, using either 'bid' or 'ask' price.
+#
+#=cut
+#sub convertToBaseCurrency {
+#    my ($self, $amount, $currentCurrency, $bidask) = @_;
+#    $bidask = 'ask' if (!$bidask);
+#
+#    my $baseCurrency = $self->getBaseCurrency();
+#
+#    return $amount if ($baseCurrency eq $currentCurrency);
+#    my $pair = $baseCurrency . $currentCurrency;
+#    if ($bidask eq 'ask') {
+#        return $amount / $self->getAsk($pair);
+#    } elsif ($bidask eq 'bid') {
+#        return $amount / $self->getBid($pair);
+#    } else {
+#        die("Invalid value in bidask argument: '$bidask'");
+#    }
+#}
 
 =item C<convertBaseUnit($symbol, $amount)>
 
