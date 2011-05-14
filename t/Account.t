@@ -41,7 +41,7 @@ isa_ok($acc,'Finance::HostedTrader::Account');
 is($acc->startDate, '1001-01-01 00:00:00', 'start date defined');
 is($acc->endDate, '3001-01-01 00:00:00', 'end date defined');
 
-can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertToBaseCurrency convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
+can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
 
 foreach my $method (qw/refreshPositions getBid getAsk openMarket closeMarket getBaseUnit getNav getBaseCurrency getServerEpoch/) {
 throws_ok { $acc->$method } qr/overrideme/, "$method must be implemented by child class";
