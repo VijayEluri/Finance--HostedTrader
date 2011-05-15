@@ -49,7 +49,7 @@ sub run {
 
     $yml->write("systems/$systemName.tradeable.yml") || die($!);
     if (-e "systems/$systemName.symbols.yml" ) { unlink("systems/$systemName.symbols.yml") || die($!); }
-    system('perl '.$ENV.' ../data/fxcm/servers/Trader/Trader.pl '.$args.' --class=UnitTest --notifier=UnitTest --startDate="'.$self->startDate.'" --endDate="'.$self->endDate.'" --expectedTradesFile=' . $self->resultsFile);
+    system('perl '.$ENV.' ../data/fxcm/servers/Trader/Trader.pl '.$args.' --class=UnitTest --startDate="'.$self->startDate.'" --endDate="'.$self->endDate.'" --expectedTradesFile=' . $self->resultsFile);
 }
 
 1;

@@ -33,7 +33,7 @@ use Data::Dumper;
 
 has 'expectedTradesFile' => (
     is     => 'ro',
-    isa    => 'Str',
+    isa    => 'Maybe[Str]',
     required=>1,
 );
 
@@ -64,7 +64,7 @@ Constructor.
 sub BUILD {
 sub _load {
     my $file = shift;
-
+    
     my $yaml = YAML::Tiny->new;
     if (-e $file) {
         $yaml = YAML::Tiny->read( $file ) || die("Cannot read symbols from $file. $!");
@@ -76,9 +76,15 @@ sub _load {
 }
     my $self = shift;
 
-    $self->{_expectedTrades} = _load($self->expectedTradesFile);
     $self->{_tradeCount} = 0;
-    plan tests => scalar(@{$self->{_expectedTrades}}) unless ($self->skipTests);
+    
+    if (defined($self->expectedTradesFile)) {
+        $self->{_skipTests} = 0;
+        $self->{_expectedTrades} = _load($self->expectedTradesFile);
+        plan tests => scalar(@{$self->{_expectedTrades}});
+    } else {
+        $self->{_skipTests} = 1;
+    }
 }
 
 =back
@@ -115,7 +121,7 @@ sub open {
     
     warn("Was not expecting any more trades !") && exit if (!defined($expected_trade));
  
-    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->skipTests);
+    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
 }
 
 =item C<close()>
@@ -141,7 +147,7 @@ sub close {
     
     warn("Was not expecting any more trades !") && exit if (!defined($expected_trade));
  
-    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->skipTests);
+    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
 }
 
 

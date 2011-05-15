@@ -77,6 +77,23 @@ has skipToDatesWithSignal => (
     default=>1,
 );
 
+has expectedTradesFile => (
+    is     => 'ro',
+    isa    => 'Str',
+    required=>0,
+);
+
+has notifier => (
+    is     => 'ro',
+    isa    => 'Finance::HostedTrader::Trader::Notifier',
+    required=>1,
+    default=> sub {
+                    my $self = shift;
+                    require Finance::HostedTrader::Trader::Notifier::UnitTest;
+                    return Finance::HostedTrader::Trader::Notifier::UnitTest->new( expectedTradesFile => $self->expectedTradesFile );
+                  },
+);
+
 =back
 
 =head2 Constructor

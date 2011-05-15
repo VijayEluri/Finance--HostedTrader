@@ -11,15 +11,13 @@ use Pod::Usage;
 
 use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::Trader;
-use Finance::HostedTrader::Factory::Notifier;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $address, $port, $accountClass, $notifierClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'Production', undef, 'now', '10 years', 0);
+my ($verbose, $help, $address, $port, $accountClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates) = (0, 0, '127.0.0.1', 1500, 'FXCM', undef, 'now', '10 years', 0);
 
 my $result = GetOptions(
     "class=s",  \$accountClass,
-    "notifier=s",\$notifierClass,
     "expectedTradesFile=s", \$expectedTradesFile,
     "dontSkipDates",  \$dontSkipDates,
     "address=s",\$address,
@@ -42,10 +40,7 @@ my $account = Finance::HostedTrader::Factory::Account->new(
                 endDate => $endDate,
                 system => $trendfollow,
                 skipToDatesWithSignal => !$dontSkipDates,
-                notifier => Finance::HostedTrader::Factory::Notifier->new(
-                                SUBCLASS => $notifierClass,
-                                expectedTradesFile => $expectedTradesFile,
-                            )->create_instance(),
+                expectedTradesFile => $expectedTradesFile,
             )->create_instance();
 
 my @systems =   (   

@@ -22,14 +22,12 @@ throws_ok {
 throws_ok {
     $acc = Finance::HostedTrader::Factory::Notifier->new(
             SUBCLASS => 'UnitTest',
-            skipTests => 1,
     	)->create_instance();
 } qr/Attribute \(expectedTradesFile\) is required/, 'UnitTest dies without expectedTradesFile argument';
 
 $acc = Finance::HostedTrader::Factory::Notifier->new(
         SUBCLASS    => 'UnitTest',
-        expectedTradesFile => 'somebadfile',
-        skipTests => 1,
+        expectedTradesFile => undef,
 	)->create_instance();
 isa_ok($acc,'Finance::HostedTrader::Trader::Notifier::UnitTest');
 can_ok($acc, qw/open close/);

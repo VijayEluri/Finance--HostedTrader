@@ -88,6 +88,20 @@ has port => (
 #    required=>1,
 #);
 
+=item <notifier>
+=cut
+has notifier => (
+    is     => 'ro',
+    isa    => 'Finance::HostedTrader::Trader::Notifier',
+    required=>1,
+    default=> sub {
+                    my $self = shift;
+                    require Finance::HostedTrader::Trader::Notifier::Production;
+                    return Finance::HostedTrader::Trader::Notifier::Production->new();
+                  },
+);
+
+
 my %symbolMap = (
     AUDCAD => 'AUD/CAD',
     AUDCHF => 'AUD/CHF',
