@@ -24,11 +24,6 @@ use Finance::HostedTrader::Position;
 use Date::Manip;
 
 
-use YAML::Syck;
-
-YAML::Syck->VERSION( '0.70' );
-
-
 ##These should exist everywhere, regardless of broker
 
 =head2 Properties
