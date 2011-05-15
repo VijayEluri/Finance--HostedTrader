@@ -172,10 +172,10 @@ sub checkSystem {
             }
 
             TRY_OPENTRADE: foreach my $try (1..3) {
-                my ($orderID, $rate);
+                my $trade;
                 eval {
-                    ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
-                    logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate") if ($verbose);
+                    $trade = $account->openMarket($symbol, $direction, $amount);
+                    logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=".$trade->id.",rate=".$trade->openPrice) if ($verbose);
                     1;
                 } or do {
                     logger($@);
@@ -186,8 +186,8 @@ sub checkSystem {
                     direction   => $direction,
                     amount      => $amount, 
                     stopLoss    => $stopLoss,
-                    orderID     => $orderID,
-                    rate        => $rate,
+                    orderID     => $trade->id,
+                    rate        => $trade->openPrice,
                     currentValue=> $value,
                     now         => $account->getServerDateTime(),
                     nav         => $account->getNav(),

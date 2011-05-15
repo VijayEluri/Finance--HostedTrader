@@ -186,7 +186,7 @@ sub openMarket {
     $position->addTrade($trade);
     $self->{_positions}->{$symbol} = $position;
 
-    return ($id, $rate);
+    return $trade;
 }
 
 =item C<closeMarket($tradeID, $amount)>

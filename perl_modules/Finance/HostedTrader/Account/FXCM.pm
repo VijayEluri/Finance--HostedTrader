@@ -233,7 +233,9 @@ sub openMarket {
 
     $symbol = $self->_convertSymbolToFXCM($symbol);
     my $data = $self->_sendCmd("openmarket $symbol $direction $amount");
-    return split(/ /, $data);
+    my ($orderID, $rate) = split(/ /, $data); #TODO don't need to return rate here
+    
+    return $self->getPosition($symbol)->getTrade($orderID);
 }
 
 =item C<closeMarket($tradeID, $amount)>
