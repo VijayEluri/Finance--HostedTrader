@@ -1,7 +1,7 @@
 package Finance::HostedTrader::Account;
 =head1 NAME
 
-    Finance::HostedTrader::Account - Trade object
+    Finance::HostedTrader::Account - Account object
 
 =head1 SYNOPSIS
 

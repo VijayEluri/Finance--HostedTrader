@@ -11,13 +11,16 @@ use Pod::Usage;
 
 use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::Trader;
+use Finance::HostedTrader::Factory::Notifier;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $address, $port, $class, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'now', '10 years');
+my ($verbose, $help, $address, $port, $accountClass, $notifierClass, $expectedTradesFile, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'Production', undef, 'now', '10 years');
 
 my $result = GetOptions(
-    "class=s",  \$class,
+    "class=s",  \$accountClass,
+    "notifier=s",\$notifierClass,
+    "expectedTradesFile=s", \$expectedTradesFile,
     "address=s",\$address,
     "port=i",   \$port,
     "verbose",  \$verbose,
@@ -31,7 +34,7 @@ pod2usage(1) if ($help);
 my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
 
 my $account = Finance::HostedTrader::Factory::Account->new(
-                SUBCLASS => $class,
+                SUBCLASS => $accountClass,
                 address => $address,
                 port => $port,
                 startDate => $startDate,
@@ -40,7 +43,14 @@ my $account = Finance::HostedTrader::Factory::Account->new(
             )->create_instance();
 
 my @systems =   (   
-                    Finance::HostedTrader::Trader->new( system => $trendfollow, account => $account ),
+                    Finance::HostedTrader::Trader->new(
+                        system => $trendfollow,
+                        account => $account,
+                        notifier => Finance::HostedTrader::Factory::Notifier->new(
+                                        SUBCLASS => $notifierClass,
+                                        expectedTradesFile => $expectedTradesFile,
+                                    )->create_instance(),
+                    ),
                 );
 
 logger("STARTUP");
@@ -156,21 +166,27 @@ sub checkSystem {
             logger("Adding position for $symbol $direction ($amount)");
 
             TRY_OPENTRADE: foreach my $try (1..3) {
+                my ($orderID, $rate);
                 eval {
-                    my ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
+                    ($orderID, $rate) = $account->openMarket($symbol, $direction, $amount);
                     logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=$orderID,rate=$rate");
                     1;
                 } or do {
                     logger($@);
                     next;
                 };
-                sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
-Instrument: $symbol
-Direction: $direction
-Amount: $amount
-Current Value: $value
-Stop Loss: $stopLoss
-            });
+                $systemTrader->notifier->open(
+                    symbol      => $symbol,
+                    direction   => $direction,
+                    amount      => $amount, 
+                    stopLoss    => $stopLoss,
+                    orderID     => $orderID,
+                    rate        => $rate,
+                    currentValue=> $value,
+                    now         => $account->getServerDateTime(),
+                    nav         => $account->getNav(),
+                    balance     => $account->balance(),
+                );
                 logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
                 logger("\n".$report->systemEntryExit);
                 last TRY_OPENTRADE;
@@ -188,12 +204,15 @@ Stop Loss: $stopLoss
                 } else {
                     $value = $account->getBid($symbol);
                 }
-                sendMail('Trading Robot - Close Trade ' . $symbol, qq {Close Trade:
-Instrument: $symbol
-Direction: $direction
-Position Size: $posSize
-Current Value: $value
-                });
+                $systemTrader->notifier->close(
+                    symbol      => $symbol,
+                    direction   => $direction,
+                    amount      => $posSize, 
+                    currentValue=> $value,
+                    now         => $account->getServerDateTime(),
+                    nav         => $account->getNav(),
+                    balance     => $account->balance(),
+                );
                 my $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader );
                 logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
                 logger("\n".$report->systemEntryExit);
@@ -207,21 +226,4 @@ sub logger {
 
     my $datetimeNow = $account->getServerDateTime;
     print "[$datetimeNow] $msg\n";
-}
-
-
-sub sendMail {
-my ($subject, $content) = @_;
-use MIME::Lite;
-
-    logger($content);
-    return if ($class eq 'UnitTest');
-    ### Create a new single-part message, to send a GIF file:
-    my $msg = MIME::Lite->new(
-        From     => 'fxhistor@fxhistoricaldata.com',
-        To       => 'joaocosta@zonalivre.org',
-        Subject  => $subject,
-        Data     => $content
-    );
-    $msg->send; # send via default
 }
