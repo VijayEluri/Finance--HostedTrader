@@ -28,4 +28,4 @@ elif [ $USE_COVER ]; then
     ARGS="-MDevel::Cover"
 fi
 
-nice -n 19 perl $ARGS $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --notifier=UnitTest --startDate="$START_DATE" --endDate="$END_DATE" --expectedTradesFile=trades.jpy
+nice -n 19 perl $ARGS $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --notifier=UnitTest --startDate="$START_DATE" --endDate="$END_DATE" --expectedTradesFile=trades.jpy --verbose
