@@ -57,7 +57,7 @@ has system => (
     required=>1,
 ); 
 
-=item C<skipSignalDates>
+=item C<skipToDatesWithSignal>
 
 If set to true, system testing calculations only happen for periods
 during which there are open/close signals.
@@ -70,7 +70,7 @@ mimics what would happen in reality.
 This option mainly exists to test accuracy of the date skipping code.
 
 =cut
-has skipSignalDates => (
+has skipToDatesWithSignal => (
     is     => 'ro',
     isa    => 'Bool',
     required=>1,
@@ -366,7 +366,7 @@ sub waitForNextTrade {
     my $interval = $self->interval;
     my $date = $self->{_now};
     
-    if (!$self->skipSignalDates) {
+    if (!$self->skipToDatesWithSignal) {
         $self->{_now} = sprintf('%d-%02d-%02d %02d:%02d:%02d', Add_Delta_DHMS(substr($date,0,4),substr($date,5,2),substr($date,8,2),substr($date,11,2),substr($date,14,2),substr($date,17,2),0,0,0,$interval));
         $self->{_now_epoch} += $interval;
         return;
