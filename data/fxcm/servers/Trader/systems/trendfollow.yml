@@ -7,19 +7,34 @@ filters:
       args:
         period: 16hours
         timeframe: 2hour
-        maxLoadedItems: 150
+        maxLoadedItems: 1500
 signals:
   enter:
-    long: 
+    long:
       signal: crossoverup(close, min(ema(close,200)+6*atr(14), 50))
       currentPoint: min(ema(close,200)+6*atr(14), 50)
+      exposure: 3
     short:
       signal: crossoverdown(close, max(ema(close,200)-6*atr(14), 50))
       currentPoint: max(ema(close,200)-6*atr(14), 50)
+      exposure: 3
     args:
       timeframe: 5min
       maxLoadedItems: 2000
       period: 1hour
+  add:
+    long: 
+      signal: crossoverdown(macdsig(close,12,26,9), macd(close,12,26,9))
+      exposure:
+        - 1
+    short:
+      signal: crossoverup(macdsig(close,12,26,9), macd(close,12,26,9))
+      exposure:
+        - 1
+    args:
+      timeframe: 4hour
+      maxLoadedItems: 1000
+      period: 12hour
   exit:
     long:
       signal: low < previous(min(low,1584),1)
@@ -31,6 +46,3 @@ signals:
       timeframe: 15min
       maxLoadedItems: 2000
       period: 1hour
-maxExposure:
-    - 3
-    - 1
