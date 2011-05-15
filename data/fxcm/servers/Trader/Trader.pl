@@ -15,15 +15,16 @@ use Finance::HostedTrader::Factory::Notifier;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $address, $port, $accountClass, $notifierClass, $expectedTradesFile, $startDate, $endDate) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'Production', undef, 'now', '10 years');
+my ($verbose, $help, $address, $port, $accountClass, $notifierClass, $expectedTradesFile, $startDate, $endDate, $skipToDatesWithSignal) = (0, 0, '127.0.0.1', 1500, 'FXCM', 'Production', undef, 'now', '10 years', 0);
 
 my $result = GetOptions(
     "class=s",  \$accountClass,
     "notifier=s",\$notifierClass,
     "expectedTradesFile=s", \$expectedTradesFile,
+    "skipToDatesWithSignal",  \$skipToDatesWithSignal,
     "address=s",\$address,
     "port=i",   \$port,
-    "verbose",  \$verbose,
+    "verbose",  \$verbose,p
     "help",     \$help,
     "startDate=s",\$startDate,
     "endDate=s",  \$endDate,
@@ -40,6 +41,7 @@ my $account = Finance::HostedTrader::Factory::Account->new(
                 startDate => $startDate,
                 endDate => $endDate,
                 system => $trendfollow,
+    		skipToDatesWithSignal => $skipToDatesWithSignal,
             )->create_instance();
 
 my @systems =   (   
