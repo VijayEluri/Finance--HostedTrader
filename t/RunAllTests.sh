@@ -14,7 +14,7 @@ if [ $USE_COVER ]; then
     export HARNESS_PERL_SWITCHES="-MDevel::Cover=+ignore,.t$"
     cover -delete
 fi
-prove -r --timer .
+nice -n 19 prove -r --timer .
 if [ $USE_COVER ]; then
     cover
     chmod 775 cover_db
