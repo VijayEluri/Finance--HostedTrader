@@ -150,8 +150,10 @@ sub checkExitSignal {
 sub _checkSignalWithAction {
     my ($self, $action, $symbol, $tradeDirection) = @_;
 
-    my $signal_definition = $self->system->{signals}->{$action}->{$tradeDirection};#TODO what if there are multiple signals ?
-    my $signal_args = $self->system->{signals}->{$action}->{args};
+    my $signal = $self->system->{signals}->{$action};
+    die("System definition file is missing entry signals->$action ") if (!defined($signal));
+    my $signal_definition = $signal->{$tradeDirection};#TODO what if there are multiple signals ?
+    my $signal_args = $signal->{args};
 
     return $self->account->checkSignal(
                     $symbol,
