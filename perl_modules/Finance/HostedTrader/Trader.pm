@@ -26,7 +26,7 @@ has 'account' => (
 has 'notifier' => (
     is     => 'ro',
     isa    => 'Finance::HostedTrader::Trader::Notifier',
-    required=>1,
+    required=>0,
 );
 
 sub updateSymbols {
