@@ -28,7 +28,7 @@ use Data::Dumper;
 
 =over 12
 
-=item C<expectedTrades>
+=item C<expectedTradesFile>
 =cut
 
 has 'expectedTradesFile' => (
@@ -36,6 +36,18 @@ has 'expectedTradesFile' => (
     isa    => 'Str',
     required=>1,
 );
+
+=item C<skipTests>
+
+=cut
+
+has 'skipTests' => (
+    is     => 'ro',
+    isa    => 'Bool',
+    required=>1,
+    default => 0,
+);
+
 
 =back
 
@@ -66,7 +78,7 @@ sub _load {
 
     $self->{_expectedTrades} = _load($self->expectedTradesFile);
     $self->{_tradeCount} = 0;
-    plan tests => scalar(@{$self->{_expectedTrades}});
+    plan tests => scalar(@{$self->{_expectedTrades}}) unless ($self->skipTests);
 }
 
 =back
@@ -104,7 +116,7 @@ sub open {
     
     warn("Was not expecting any more trades !") && exit if (!defined($expected_trade));
  
-    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount});
+    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->skipTests);
 }
 
 =item C<close()>
@@ -130,7 +142,7 @@ sub close {
     
     warn("Was not expecting any more trades !") && exit if (!defined($expected_trade));
  
-    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount});    
+    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->skipTests);
 }
 
 
