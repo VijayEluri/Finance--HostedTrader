@@ -1,4 +1,4 @@
-package Finance::HostedTrader::Notifier;
+package Finance::HostedTrader::Trader::Notifier;
 =head1 NAME
 
     Finance::HostedTrader::Notifier - Notifier object
@@ -79,7 +79,7 @@ around 'open' => sub {
                 balance     =>  { type => SCALAR, callbacks => { v => \&_isPositiveNum } },
               }
             );
-    $self->orig(@_);
+    $self->$orig(@_);
 };
 
 sub open {
@@ -105,19 +105,13 @@ around 'close' => sub {
                 balance     =>  { type => SCALAR, callbacks => { v => \&_isPositiveNum } },
               }
             );
-    $self->orig(@_);
+    $self->$orig(@_);
 };
 
 sub close {
     die("overrideme");
 }
 
-=item C<add()>
-
-=cut
-sub add {
-    die("overrideme");
-}
 
 __PACKAGE__->meta->make_immutable;
 1;
