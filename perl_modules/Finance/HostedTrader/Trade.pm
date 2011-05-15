@@ -149,7 +149,7 @@ sub BUILD {
 
 
 =cut
-# these methods are not really used, so commenting out for now
+# this method is not really used, so commenting out for now
 #sub profit {
 #    my ($self) = @_;
 #
@@ -163,12 +163,12 @@ sub BUILD {
 
 
 =cut
-#sub status {
-#    my ($self) = @_;
-#
-#    return 'open' if (!defined($self->closePrice));
-#    return 'closed';
-#}
+sub status {
+    my ($self) = @_;
+
+    return 'open' if (!defined($self->closePrice));
+    return 'closed';
+}
 
 __PACKAGE__->meta->make_immutable;
 1;
