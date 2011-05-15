@@ -233,7 +233,7 @@ sub getBaseUnit {
 sub getNav {
     my $self = shift;
 
-    return $self->balance() + $self->pl();
+    return sprintf("%.4f", $self->balance() + $self->pl());
 }
 
 =item C<balance>
@@ -241,7 +241,7 @@ sub getNav {
 =cut
 sub balance {
     my ($self) = @_;
-    return $self->{_account_data}->{balance};
+    return sprintf("%.4f", $self->{_account_data}->{balance});
 }
 
 #sub checkSignal_slow {
