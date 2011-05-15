@@ -53,5 +53,5 @@ is($acc->getSymbolBase('GBPCHF'), 'CHF', 'base for GBPCHF is CHF');
 
 my $res = $acc->checkSignal('EURUSD', 'high >= low', { timeframe => 'hour', period => '10 years', maxLoadedItems => 10, debug => 0 });
 is(defined($res->[0]), 1, 'Can check signals with account object');
-my $res = $acc->getIndicatorValue('EURUSD', 'close', { timeframe => 'hour', maxLoadedItems => 10, debug => 0 });
+$res = $acc->getIndicatorValue('EURUSD', 'close', { timeframe => 'hour', maxLoadedItems => 10, debug => 0 });
 is(defined($res), 1, 'Can get indicator values with account object');
