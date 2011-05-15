@@ -42,16 +42,16 @@ my $account = Finance::HostedTrader::Factory::Account->new(
                 endDate => $endDate,
                 system => $trendfollow,
                 skipToDatesWithSignal => !$dontSkipDates,
+                notifier => Finance::HostedTrader::Factory::Notifier->new(
+                                SUBCLASS => $notifierClass,
+                                expectedTradesFile => $expectedTradesFile,
+                            )->create_instance(),
             )->create_instance();
 
 my @systems =   (   
                     Finance::HostedTrader::Trader->new(
                         system => $trendfollow,
                         account => $account,
-                        notifier => Finance::HostedTrader::Factory::Notifier->new(
-                                        SUBCLASS => $notifierClass,
-                                        expectedTradesFile => $expectedTradesFile,
-                                    )->create_instance(),
                     ),
                 );
 
@@ -174,24 +174,13 @@ sub checkSystem {
             TRY_OPENTRADE: foreach my $try (1..3) {
                 my $trade;
                 eval {
-                    $trade = $account->openMarket($symbol, $direction, $amount);
+                    $trade = $account->openMarket($symbol, $direction, $amount, $stopLoss);
                     logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=".$trade->id.",rate=".$trade->openPrice) if ($verbose);
                     1;
                 } or do {
                     logger($@);
                     next;
                 };
-                $systemTrader->notifier->open(
-                    symbol      => $symbol,
-                    direction   => $direction,
-                    amount      => $amount, 
-                    stopLoss    => $stopLoss,
-                    orderID     => $trade->id,
-                    rate        => $trade->openPrice,
-                    now         => $account->getServerDateTime(),
-                    nav         => $account->getNav(),
-                    balance     => $account->balance(),
-                );
                 if ($verbose) {
                     logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
                     logger("\n".$report->systemEntryExit);
@@ -205,21 +194,6 @@ sub checkSystem {
             if ($result) {
                 logger("Closing position for $symbol $direction ( $posSize )") if ($verbose);
                 $account->closeTrades($symbol, $direction);
-                my $value;
-                if ($direction eq "long") {
-                    $value = $account->getAsk($symbol);
-                } else {
-                    $value = $account->getBid($symbol);
-                }
-                $systemTrader->notifier->close(
-                    symbol      => $symbol,
-                    direction   => $direction,
-                    amount      => $posSize, 
-                    currentValue=> $value,
-                    now         => $account->getServerDateTime(),
-                    nav         => $account->getNav(),
-                    balance     => $account->balance(),
-                );
                 if ($verbose) {
                     my $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader );
                     logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);

@@ -167,8 +167,8 @@ sub getBid {
 Creates a new position in $symbol if one does not exist yet.
 Adds a new trade to the position in $symbol.
 =cut
-sub openMarket {
-    my ($self, $symbol, $direction, $amount) = @_;
+augment 'openMarket' => sub {
+    my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
 
     my $id = $symbol.'|'.$direction.'|'.$amount.'|'.$self->{_now};
     my $rate = ($direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
@@ -187,7 +187,7 @@ sub openMarket {
     $self->{_positions}->{$symbol} = $position;
 
     return $trade;
-}
+};
 
 =item C<closeMarket($tradeID, $amount)>
 

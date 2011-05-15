@@ -23,12 +23,6 @@ has 'account' => (
     required=>1,
 );
 
-has 'notifier' => (
-    is     => 'ro',
-    isa    => 'Finance::HostedTrader::Trader::Notifier',
-    required=>0,
-);
-
 sub updateSymbols {
     my $self = shift;
     my $account = $self->account;

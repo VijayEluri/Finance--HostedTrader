@@ -228,15 +228,15 @@ $price   - The price at which the trade was executed.
 
 =cut
 
-sub openMarket {
-    my ($self, $symbol, $direction, $amount) = @_;
+augment 'openMarket' => sub {
+    my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
 
     $symbol = $self->_convertSymbolToFXCM($symbol);
     my $data = $self->_sendCmd("openmarket $symbol $direction $amount");
     my ($orderID, $rate) = split(/ /, $data); #TODO don't need to return rate here
-    
+
     return $self->getPosition($symbol)->getTrade($orderID);
-}
+};
 
 =item C<closeMarket($tradeID, $amount)>
 

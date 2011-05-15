@@ -54,6 +54,14 @@ has endDate => (
     default => '-10 years ago',
 );
 
+=item C<notifier>
+=cut
+has 'notifier' => (
+    is     => 'ro',
+    isa    => 'Finance::HostedTrader::Trader::Notifier',
+    required=>0,
+);
+
 =back
 
 =head2 Constructor
@@ -137,7 +145,25 @@ $price   - The price at which the trade was executed.
 
 =cut
 sub openMarket {
-    die("overrideme");
+    my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
+    my $notifier = $self->notifier();
+    my $trade = inner();
+    
+    if ($notifier) {
+        $notifier->open(
+            symbol      => $symbol,
+            direction   => $direction,
+            amount      => $amount, 
+            stopLoss    => $stopLoss,
+            orderID     => $trade->id,
+            rate        => $trade->openPrice,
+            now         => $self->getServerDateTime(),
+            nav         => $self->getNav(),
+            balance     => $self->balance(),
+        );
+    }
+    
+    return $trade;
 }
 
 =item C<closeMarket($tradeID, $amount)>
@@ -325,10 +351,26 @@ Closes all trades in the given $symbol/$direction at market values.
 sub closeTrades {
     my ($self, $symbol, $direction) = @_;
 
+    my $posSize = 0;
     my $position = $self->getPosition($symbol);
     foreach my $trade (@{ $position->getTradeList }) {
         next if ($trade->direction ne $direction);
         $self->closeMarket($trade->id, abs($trade->size));
+        $posSize += $trade->size;
+    }
+    
+    my $notifier = $self->notifier;
+    if ($notifier) {
+        my $value = ($direction eq 'long' ? $self->getAsk($symbol) : $self->getBid($symbol) );
+        $notifier->close(
+            symbol      => $symbol,
+            direction   => $direction,
+            amount      => $posSize, 
+            currentValue=> $value,
+            now         => $self->getServerDateTime(),
+            nav         => $self->getNav(),
+            balance     => $self->balance(),
+        );
     }
 }
 
