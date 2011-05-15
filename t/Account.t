@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 20;
+use Test::More tests => 23;
 use Test::Exception;
 use Data::Dumper;
 
@@ -41,12 +41,17 @@ isa_ok($acc,'Finance::HostedTrader::Account');
 is($acc->startDate, '1001-01-01 00:00:00', 'start date defined');
 is($acc->endDate, '3001-01-01 00:00:00', 'end date defined');
 
-can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
+can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getServerDateTime getSymbolBase/);
 
-foreach my $method (qw/refreshPositions getBid getAsk openMarket closeMarket getBaseUnit getNav getBaseCurrency getServerEpoch/) {
+foreach my $method (qw/refreshPositions getBid getAsk openMarket closeMarket getBaseUnit getNav getBaseCurrency getServerEpoch getServerDateTime/) {
 throws_ok { $acc->$method } qr/overrideme/, "$method must be implemented by child class";
 }
 
 throws_ok { $acc->getSymbolBase('invalid') } qr/Unsupported symbol 'invalid'/, 'Unsupported symbol';
 is($acc->getSymbolBase('EURUSD'), 'USD', 'base for EURUSD is USD');
 is($acc->getSymbolBase('GBPCHF'), 'CHF', 'base for GBPCHF is CHF');
+
+my $res = $acc->checkSignal('EURUSD', 'high >= low', { timeframe => 'hour', period => '10 years', maxLoadedItems => 10, debug => 0 });
+is(defined($res->[0]), 1, 'Can check signals with account object');
+my $res = $acc->getIndicatorValue('EURUSD', 'close', { timeframe => 'hour', maxLoadedItems => 10, debug => 0 });
+is(defined($res), 1, 'Can get indicator values with account object');
