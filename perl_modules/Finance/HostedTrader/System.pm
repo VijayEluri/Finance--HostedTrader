@@ -127,6 +127,7 @@ sub _loadSymbols {
     } else {
         return { long => [], short => []};
     }
+    return { long => [], short => []} if (!defined($yaml->[0]));
 
     die("invalid name in symbol file $file") if ($self->name ne $yaml->[0]->{name});
 
