@@ -6,6 +6,9 @@ use YAML::Tiny;
 
 use TestSystem;
 
+my $args;
+$args = '--dontSkipDates' if ($0 =~ /noskip/);
+
 my $test = TestSystem->new(
                 systemName	=> 'trendfollow',
                 symbols     =>  {
@@ -17,4 +20,4 @@ my $test = TestSystem->new(
                 endDate     => '2010-09-17 00:00:00',
 );
 
-$test->run();
+$test->run($args);
