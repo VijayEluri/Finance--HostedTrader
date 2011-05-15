@@ -66,6 +66,7 @@ sub _load {
 
     $self->{_expectedTrades} = _load($self->expectedTradesFile);
     $self->{_tradeCount} = 0;
+    plan tests => scalar(@{$self->{_expectedTrades}});
 }
 
 =back
