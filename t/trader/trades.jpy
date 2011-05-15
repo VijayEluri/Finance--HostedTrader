@@ -6,8 +6,8 @@
   rate: 85.2100
   value: 85.2100
   now: 2010-08-18 11:08:00
-  nav: 50000
-  balance: 50000
+  nav: 50000.0000
+  balance: 50000.0000
 - symbol: USDJPY
   direction: short
   amount: 10000
@@ -16,12 +16,12 @@
   rate: 83.6400
   value: 83.6400
   now: 2010-09-09 08:00:00
-  nav: 50728.8201160542
-  balance: 50000
+  nav: 50728.8201
+  balance: 50000.0000
 - symbol: USDJPY
   direction: short
   amount: -70000
   value: 85.8200
   now: 2010-09-16 22:00:00
-  nav: 50435.4958985831
-  balance: 50435.4958985831
+  nav: 49564.5041
+  balance: 49564.5041
