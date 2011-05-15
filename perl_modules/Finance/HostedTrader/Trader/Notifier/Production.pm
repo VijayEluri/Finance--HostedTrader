@@ -64,13 +64,12 @@ sub open {
     my $stopLoss    = $args{stopLoss};
     my $orderID     = $args{orderID};
     my $rate        = $args{rate};
-    my $value       = $args{currentValue};
     
 
     $self->_sendMail('Trading Robot - Open Trade ' . $symbol, qq {Open Trade:
 Instrument: $symbol
 Amount: $amount
-Current Value: $value
+Open Price: $rate
 Stop Loss: $stopLoss
             });
 }

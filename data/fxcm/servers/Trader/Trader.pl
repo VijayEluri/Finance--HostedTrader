@@ -188,7 +188,6 @@ sub checkSystem {
                     stopLoss    => $stopLoss,
                     orderID     => $trade->id,
                     rate        => $trade->openPrice,
-                    currentValue=> $value,
                     now         => $account->getServerDateTime(),
                     nav         => $account->getNav(),
                     balance     => $account->balance(),
