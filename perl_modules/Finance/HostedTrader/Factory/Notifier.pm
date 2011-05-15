@@ -77,7 +77,7 @@ my $self = shift;
 
     my $sc = $self->SUBCLASS();
 
-    if ($sc eq 'FXCM') {
+    if ($sc eq 'Production') {
         require Finance::HostedTrader::Trader::Notifier::Production;
         return Finance::HostedTrader::Trader::Notifier::Production->new( $self->{_args} );
     } elsif ($sc eq 'UnitTest') {
