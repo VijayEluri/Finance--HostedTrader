@@ -149,25 +149,26 @@ sub BUILD {
 
 
 =cut
-sub profit {
-    my ($self) = @_;
-
-    return undef if (!defined($self->closePrice));
-    return sprintf("%.4f", $self->closePrice - $self->openPrice) if ($self->direction eq 'long');
-    return sprintf("%.4f", $self->openPrice - $self->closePrice) if ($self->direction eq 'short');
-    die('WTF');
-}
+# these methods are not really used, so commenting out for now
+#sub profit {
+#    my ($self) = @_;
+#
+#    return undef if (!defined($self->closePrice));
+#    return sprintf("%.4f", $self->closePrice - $self->openPrice) if ($self->direction eq 'long');
+#    return sprintf("%.4f", $self->openPrice - $self->closePrice) if ($self->direction eq 'short');
+#    die('WTF');
+#}
 
 =item C<status>
 
 
 =cut
-sub status {
-    my ($self) = @_;
-
-    return 'open' if (!defined($self->closePrice));
-    return 'closed';
-}
+#sub status {
+#    my ($self) = @_;
+#
+#    return 'open' if (!defined($self->closePrice));
+#    return 'closed';
+#}
 
 __PACKAGE__->meta->make_immutable;
 1;
