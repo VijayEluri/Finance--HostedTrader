@@ -6,4 +6,4 @@ CONFIG_FILE=$1
 . $CONFIG_FILE
 
 cd $RUNDIR
-./Trader.pl --address=$SERVER_ADDRESS --port=$SERVER_PORT  >> trader_$FXCM_TYPE.log 2>&1 < /dev/null &
+./Trader.pl --verbose --address=$SERVER_ADDRESS --port=$SERVER_PORT  >> trader_$FXCM_TYPE.log 2>&1 < /dev/null &
