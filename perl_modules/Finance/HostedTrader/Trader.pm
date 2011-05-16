@@ -38,9 +38,10 @@ sub updateSymbols {
     foreach my $symbol (keys %{$positions}) {
         my $position = $positions->{$symbol};
         foreach my $trade (@{$position->getOpenTradeList}) {
-            if ($trade->direction eq 'long') {
+            my $direction = $trade->direction;
+            if ($direction eq 'long') {
                 $symbols{long}->{$symbol} = 1;
-            } elsif ($trade->direction eq 'short') {
+            } elsif ($direction eq 'short') {
                 $symbols{short}->{$symbol} = 1;
             } else {
                 die('Invalid trade direction: ' . $trade->direction);
