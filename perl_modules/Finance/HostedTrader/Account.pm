@@ -269,16 +269,11 @@ sub getIndicatorValue {
 
 =item C<waitForNextTrade($system)>
 
-Sleeps for 20 seconds. $system is ignored.
-
-This method is called by Trader.pl and is overriden by C<Finance::HostedTrader::Account::UnitTest>.
-It probably doesn't belong in the Account object.
-
 =cut
 sub waitForNextTrade {
     my ($self, $system) = @_;
 
-    sleep(20);
+    die('overrideme');
 }
 
 #=item C<convertToBaseCurrency($amount, $currentCurrency, $bidask>
@@ -329,7 +324,8 @@ sub getPosition {
 
     $self->refreshPositions();
     my $positions = $self->{_positions};
-    return $positions->{$symbol} || Finance::HostedTrader::Position->new(symbol=>$symbol);
+    return Finance::HostedTrader::Position->new(symbol=>$symbol) if (!defined($positions->{$symbol}));
+    return $positions->{$symbol};
 }
 
 =item C<getPositions()>
@@ -353,7 +349,7 @@ sub closeTrades {
 
     my $posSize = 0;
     my $position = $self->getPosition($symbol);
-    foreach my $trade (@{ $position->getTradeList }) {
+    foreach my $trade (@{ $position->getOpenTradeList }) {
         next if ($trade->direction ne $direction);
         $self->closeMarket($trade->id, abs($trade->size));
         $posSize += $trade->size;

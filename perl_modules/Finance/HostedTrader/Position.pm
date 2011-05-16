@@ -84,11 +84,11 @@ sub getTrade {
     return $self->trades->{$id};
 }
 
-=item C<getTradeList()>
+=item C<getOpenTradeList()>
     Returns a reference to a list of trades in this position.
     There is no particular order in the returned data.
 =cut
-sub getTradeList {
+sub getOpenTradeList {
     my $self = shift;
     
     my @trades = values(%{$self->trades});
@@ -116,7 +116,7 @@ sub size {
 
     my $size = 0;
 
-    foreach my $trade (@{ $self->getTradeList }) {
+    foreach my $trade (@{ $self->getOpenTradeList }) {
         $size += $trade->size();
     }
 
@@ -132,7 +132,7 @@ sub averagePrice {
     my $size = 0;
     my $price = 0;
 
-    foreach my $trade(@{ $self->getTradeList }) {
+    foreach my $trade(@{ $self->getOpenTradeList }) {
         $size += $trade->size();
         $price += $trade->size() * $trade->openPrice();
     }
@@ -149,7 +149,7 @@ Calculate total profit/loss of a given position
 sub pl {
     my ($self, $system) = @_;
     my $pl=0;
-    foreach my $trade (@{$self->getTradeList}) {
+    foreach my $trade (@{$self->getOpenTradeList}) {
         $pl += $trade->pl;
     }
     return $pl

@@ -11,7 +11,7 @@ while getopts ":c" opt; do
 done
 
 if [ $USE_COVER ]; then
-    export HARNESS_PERL_SWITCHES="-MDevel::Cover=+ignore,.t$,+ignore,TestSystem.pm$,+ignore,Trader.pl$"
+    export HARNESS_PERL_SWITCHES="-MDevel::Cover=+ignore,.t$,+ignore,TestSystem.pm$,+ignore,Trader.pl$,+ignore,Report.pm$"
     cover -delete
 fi
 nice -n 19 prove -r --timer .

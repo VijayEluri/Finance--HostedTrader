@@ -128,11 +128,11 @@ This method calculates profit/loss of existing trades to keep data consistent
 sub refreshPositions {
     my $self = shift;
     # positions are kept in memory
-    
+
     # Calculate current p/l for each open trade
     my $positions = $self->{_positions};
     foreach my $key (keys(%{$positions})) {
-        foreach my $trade (@{ $positions->{$key}->getTradeList }) {
+        foreach my $trade (@{ $positions->{$key}->getOpenTradeList }) {
             my $pl = $self->_calculatePL($trade, $trade->size);
 
             $trade->pl($pl);

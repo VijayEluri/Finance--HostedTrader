@@ -37,8 +37,7 @@ sub updateSymbols {
     my $positions = $account->getPositions();
     foreach my $symbol (keys %{$positions}) {
         my $position = $positions->{$symbol};
-        foreach my $trade (@{$position->getTradeList}) {
-            next if ($trade->status ne 'open');
+        foreach my $trade (@{$position->getOpenTradeList}) {
             if ($trade->direction eq 'long') {
                 $symbols{long}->{$symbol} = 1;
             } elsif ($trade->direction eq 'short') {
@@ -203,7 +202,7 @@ my $position = shift || Finance::HostedTrader::Position->new(symbol => $symbol);
 
 my $maxLossPts;
 my $system = $self->system;
-my $trades = $position->getTradeList;
+my $trades = $position->getOpenTradeList;
 my $numTrades = scalar(@$trades);
 my $account = $self->account;
 my $action = ( $numTrades == 0 ? 'enter' : 'add');
