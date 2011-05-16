@@ -60,10 +60,14 @@ Dies if the symbol of $trade is different than the symbol of this position objec
 =cut
 sub addTrade {
     my ($self, $trade) = @_;
+    my $self_symbol = $self->symbol;
+    my $self_trades = $self->trades;
+    my $trade_symbol = $trade->symbol;
+    my $trade_id = $trade->id;
 
-    die("Trade has symbol " . $trade->symbol . " but position has symbol " . $self->symbol ) if ($self->symbol ne $trade->symbol);
-    die("Trade already exists in position") if (exists($self->trades->{$trade->id}));
-    $self->trades->{$trade->id} = $trade;
+    die("Trade has symbol " . $trade->symbol . " but position has symbol " . $self_symbol ) if ($self_symbol ne $trade_symbol);
+    die("Trade already exists in position") if (exists($self_trades->{$trade_id}));
+    $self_trades->{$trade_id} = $trade;
 }
 
 =item C<deleteTrade($id)>

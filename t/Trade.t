@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 14;
 use Test::Exception;
 use Data::Dumper;
 
@@ -78,6 +78,17 @@ throws_ok {
 lives_ok {
     $trade = Finance::HostedTrader::Trade->new( size => 1000,
                                                 direction => 'long',
+                                                openPrice => 1.1,
+                                                id => 1.1,
+                                                symbol => 'EURUSD',
+                                                openDate => '2010-01-01 00:00:00',
+                                              )
+} 'Create trade object';
+isa_ok($trade, 'Finance::HostedTrader::Trade');
+
+lives_ok {
+    $trade = Finance::HostedTrader::Trade->new( size => -1000,
+                                                direction => 'short',
                                                 openPrice => 1.1,
                                                 id => 1.1,
                                                 symbol => 'EURUSD',

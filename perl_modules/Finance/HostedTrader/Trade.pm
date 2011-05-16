@@ -131,11 +131,13 @@ has pl => (
 
 sub BUILD {
     my $self = shift;
+    my $self_direction = $self->direction;
+    my $self_size = $self->size;
 
-    if ($self->direction eq 'short') {
-        die('Shorts need to be negative numbers') if ($self->size >= 0);
+    if ($self_direction eq 'short') {
+        die('Shorts need to be negative numbers') if ($self_size >= 0);
     } else {
-        die('Longs need to be positive numbers') if ($self->size <= 0);
+        die('Longs need to be positive numbers') if ($self_size <= 0);
     }
 } 
 
