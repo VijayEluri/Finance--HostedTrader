@@ -15,6 +15,7 @@ Perl modules
 	Date::Manip
 	Date::Calc
 	Devel::NYTProf
+        Pod::Coverage
 HostedTrader
 	Need a config file, eg: ~/.fx.yml
 MySQL
