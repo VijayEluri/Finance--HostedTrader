@@ -345,22 +345,23 @@ Closes all trades in the given $symbol/$direction at market values.
 
 =cut
 sub closeTrades {
-    my ($self, $symbol, $direction) = @_;
+    my ($self, $symbol, $directionToClose) = @_;
 
     my $posSize = 0;
     my $position = $self->getPosition($symbol);
     foreach my $trade (@{ $position->getOpenTradeList }) {
-        next if ($trade->direction ne $direction);
+        my $trade_direction = $trade->direction;
+        next if ($trade_direction ne $directionToClose);
         $self->closeMarket($trade->id, abs($trade->size));
         $posSize += $trade->size;
     }
     
     my $notifier = $self->notifier;
     if ($notifier) {
-        my $value = ($direction eq 'long' ? $self->getAsk($symbol) : $self->getBid($symbol) );
+        my $value = ($directionToClose eq 'long' ? $self->getAsk($symbol) : $self->getBid($symbol) );
         $notifier->close(
             symbol      => $symbol,
-            direction   => $direction,
+            direction   => $directionToClose,
             amount      => $posSize, 
             currentValue=> $value,
             now         => $self->getServerDateTime(),

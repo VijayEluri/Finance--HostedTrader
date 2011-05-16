@@ -143,15 +143,17 @@ sub refreshPositions {
 sub _calculatePL {
     my $self = shift;
     my $trade = shift;
-    my $size = shift;
+    my $sizeToClose = shift;
     
-    die("size parameter cannot be larger than trade->size") if (abs($size) > abs($trade->size));
+    my $trade_size = $trade->size;
+    die("sizeToClose parameter cannot be larger than trade->size") if (abs($sizeToClose) > abs($trade_size));
     my $symbol = $trade->symbol;
-    my $rate = ($trade->direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
+    my $trade_direction = $trade->direction;
+    my $rate = ($trade_direction eq "long" ? $self->getAsk($symbol) : $self->getBid($symbol));
     my $base = $self->getSymbolBase($symbol);
     my $openPrice = $trade->openPrice;
     
-    my $pl = ($rate - $openPrice) * $size;
+    my $pl = ($rate - $openPrice) * $sizeToClose;
     if ($base ne "GBP") { # TODO: should not be hardcoded that account is based on GBP
         $pl /= $self->getAsk("GBP$base"); # TODO: this won't work for all cases( eg, if base is EUR)
     }
@@ -210,18 +212,19 @@ augment 'openMarket' => sub {
 
 =cut
 sub closeMarket {
-    my ($self, $tradeID, $amount) = @_;
+    my ($self, $tradeID, $amountToClose) = @_;
     
-    die('$amount must be positive value') if ($amount <= 0);
+    die('$amountToClose must be positive value') if ($amountToClose <= 0);
 
     my $positions = $self->getPositions();
     foreach my $key (keys %{$positions}) {
         my $position = $positions->{$key};
         my $trade = $position->getTrade($tradeID);
         next if (!defined($trade));
-        die("Current implementation of closeMarket can only close full positions") if (abs($amount) != abs($trade->size));
+        my $trade_size = $trade->size;
+        die("Current implementation of closeMarket can only close full positions") if (abs($amountToClose) != abs($trade_size));
 
-        my $pl = $self->_calculatePL($trade, ($trade->direction() eq 'long' ?  $amount : -1*$amount));
+        my $pl = $self->_calculatePL($trade, ($trade->direction() eq 'long' ?  $amountToClose : -1*$amountToClose));
         $self->{_account_data}->{balance} += $pl;
         $position->deleteTrade($trade->id);
         return;
