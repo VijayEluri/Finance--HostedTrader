@@ -199,7 +199,9 @@ sub getTradeSize {
 my $self = shift;
 my $symbol = shift;
 my $direction = shift;
-my $position = shift || Finance::HostedTrader::Position->new(symbol => $symbol);
+my $position = shift;
+
+$position = Finance::HostedTrader::Position->new(symbol => $symbol) if (!defined($position));
 
 my $maxLossPts;
 my $system = $self->system;

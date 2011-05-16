@@ -78,7 +78,8 @@ sub _load {
 
     $self->{_tradeCount} = 0;
     
-    if (defined($self->expectedTradesFile)) {
+    my $expectedTradesFile = $self->expectedTradesFile;
+    if (defined($expectedTradesFile)) {
         $self->{_skipTests} = 0;
         $self->{_expectedTrades} = _load($self->expectedTradesFile);
         plan tests => scalar(@{$self->{_expectedTrades}});
