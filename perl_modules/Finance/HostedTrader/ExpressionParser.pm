@@ -166,8 +166,7 @@ sub getIndicatorData {
       || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
     my $maxLoadedItems = $args->{maxLoadedItems};
     $maxLoadedItems = 10_000_000_000
-      if ( !defined( $args->{maxLoadedItems} )
-        || $args->{maxLoadedItems} == -1 );
+      if ( !defined( $args->{maxLoadedItems} ) );
     my $displayEndDate   = $args->{endPeriod} || '9999-12-31';
     my $displayStartDate = $args->{startPeriod} || '0001-01-31';
     my $order_ext = 'ASC';
@@ -259,18 +258,20 @@ sub getSignalData {
 }
 
 sub getSystemData {
-    my ( $self, $args ) = @_;
+    my ( $self, $a ) = @_;
 
-    $args->{expr} = $args->{enter};
-    $args->{fields} = "'ENTRY' AS Action, datetime, close";
-    my $sql_entry = $self->_getSignalSql($args);
-    $args->{expr} = $args->{exit};
-    $args->{fields} = "'EXIT' AS Action, datetime, close";
-    my $sql_exit  = $self->_getSignalSql($args);
+    my %args = %{ $a };
+
+    $args{expr} = delete $args{enter};
+    $args{fields} = "'ENTRY' AS Action, datetime, close";
+    my $sql_entry = $self->_getSignalSql(\%args);
+    $args{expr} = delete $args{exit};
+    $args{fields} = "'EXIT' AS Action, datetime, close";
+    my $sql_exit  = $self->_getSignalSql(\%args);
 
 
     my $sql = $sql_entry . ' UNION ALL ' . $sql_exit . ' ORDER BY datetime';
-    print $sql if ($args->{debug});
+    print $sql if ($args{debug});
 
     my $dbh = $self->{_ds}->dbh;
     my $data = $dbh->selectall_arrayref($sql) or die( $DBI::errstr . $sql );
