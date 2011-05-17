@@ -224,7 +224,8 @@ sub closeMarket {
         my $trade_size = $trade->size;
         die("Current implementation of closeMarket can only close full positions") if (abs($amountToClose) != abs($trade_size));
 
-        my $pl = $self->_calculatePL($trade, ($trade->direction() eq 'long' ?  $amountToClose : -1*$amountToClose));
+        my $trade_direction = $trade->direction;
+        my $pl = $self->_calculatePL($trade, ($trade_direction eq 'long' ?  $amountToClose : -1*$amountToClose));
         $self->{_account_data}->{balance} += $pl;
         $position->deleteTrade($trade->id);
         return;

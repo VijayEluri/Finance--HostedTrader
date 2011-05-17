@@ -88,10 +88,11 @@ sub symbols {
 
 sub _loadSystem {
     my $self = shift;
+    my $self_name = $self->name;
 
-    my $file = "systems/".$self->name.".yml";
+    my $file = "systems/".$self_name.".yml";
     die("Cannot read system file from '$file'") if ( ! -r $file);
-    my $tradeable_filter = "systems/".$self->name.".tradeable.yml";
+    my $tradeable_filter = "systems/".$self_name.".tradeable.yml";
     my @files = ($file, $tradeable_filter);
     my $system_all = Config::Any->load_files(
         {
@@ -110,7 +111,7 @@ sub _loadSystem {
     }
 
     die("failed to load system from $file. $!") unless defined($system_all);
-    die("invalid name in symbol file $tradeable_filter") if ($self->name ne $system->{name});
+    die("invalid name in symbol file $tradeable_filter") if ($self_name ne $system->{name});
 
     foreach my $key (keys(%$system)) {
         $self->{$key} = $system->{$key};
@@ -128,8 +129,8 @@ sub _loadSymbols {
         return { long => [], short => []};
     }
     return { long => [], short => []} if (!defined($yaml->[0]));
-
-    die("invalid name in symbol file $file") if ($self->name ne $yaml->[0]->{name});
+    my $self_name = $self->name;
+    die("invalid name in symbol file $file") if ($self_name ne $yaml->[0]->{name});
 
     return $yaml->[0]->{symbols};
 }
