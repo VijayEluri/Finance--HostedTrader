@@ -154,7 +154,7 @@ function:
 sub getIndicatorData {
     my ( $self, $args ) = @_;
 
-    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug reverse);
+    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug);
 
     foreach my $key (keys %$args) {
         die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
@@ -170,14 +170,13 @@ sub getIndicatorData {
         || $args->{maxLoadedItems} == -1 );
     my $displayEndDate   = $args->{endPeriod} || '9999-12-31';
     my $displayStartDate = $args->{startPeriod} || '0001-01-31';
-    my $reverse = $args->{reverse} || 0;
-    my $order_ext = $reverse ? 'DESC' : 'ASC';
-    my $order_int = $reverse ? 'ASC' : 'DESC';
+    my $order_ext = 'ASC';
+    my $order_int = 'DESC';
     my $itemCount = $args->{numItems} || $maxLoadedItems;
     my $expr      = $args->{fields}          || die("No fields set for indicator");
     my $symbol    = $args->{symbol}          || die("No symbol set for indicator");
 
-    my $cache_key = "$symbol-$tf-$expr-$maxLoadedItems-$itemCount-$reverse";
+    my $cache_key = "$symbol-$tf-$expr-$maxLoadedItems-$itemCount";
     my $cached_result = $self->{_result_cache}->{$cache_key};
     if ($cached_result && $cached_result->[0] eq "$displayStartDate/$displayEndDate") {
         return $cached_result->[1];
@@ -208,11 +207,10 @@ sub getIndicatorData {
 
     $select_fields = ',' . $select_fields if ($select_fields);
 
-    my $WHERE_FILTER = "WHERE ";
-    $WHERE_FILTER .= ($reverse ? "datetime >= '$displayStartDate'" : "datetime <= '$displayEndDate'");
+    my $WHERE_FILTER = "WHERE datetime <= '$displayEndDate'";
     $WHERE_FILTER .= ' AND dayofweek(datetime) <> 1' if ( $tf != 604800 );
 
-    my $EXT_WHERE = ($reverse ? "datetime <= '$displayEndDate'" : "datetime >= '$displayStartDate'");
+    my $EXT_WHERE = "datetime >= '$displayStartDate'";
 
     my $sql = qq(
 SELECT * FROM (
