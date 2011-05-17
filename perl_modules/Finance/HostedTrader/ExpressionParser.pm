@@ -162,8 +162,8 @@ sub getIndicatorData {
 
     #Handle arguments
     my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
-      || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
+    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf);
+    die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) ) if (!$tf);
     my $maxLoadedItems = $args->{maxLoadedItems};
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} ) );
@@ -263,9 +263,10 @@ sub getSystemData {
     my %args = %{ $a };
 
     $args{expr} = delete $args{enter};
+    my $exitSignal = delete $args{exit};
     $args{fields} = "'ENTRY' AS Action, datetime, close";
     my $sql_entry = $self->_getSignalSql(\%args);
-    $args{expr} = delete $args{exit};
+    $args{expr} = $exitSignal;
     $args{fields} = "'EXIT' AS Action, datetime, close";
     my $sql_exit  = $self->_getSignalSql(\%args);
 
@@ -281,15 +282,15 @@ sub getSystemData {
 sub _getSignalSql {
 my ($self, $args) = @_;
 
-    my @good_args = qw(tf expr symbol maxLoadedItems startPeriod endPeriod numItems fields debug);
+    my @good_args = qw(tf expr symbol maxLoadedItems startPeriod endPeriod numItems fields debug noOrderBy);
 
     foreach my $key (keys %$args) {
         die("invalid arg in _getSignalSql: $key") unless grep { /$key/ } @good_args;
     }
 
     my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf)
-      || die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) );
+    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf);
+    die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) ) if (!$tf);
     my $expr   = $args->{expr}   || die("No expression set for signal");
     my $symbol = $args->{symbol} || die("No symbol set");
     my $maxLoadedItems = $args->{maxLoadedItems};
@@ -299,8 +300,7 @@ my ($self, $args) = @_;
     my $nbItems = $args->{numItems} || 10_000_000_000;
 
     $maxLoadedItems = 10_000_000_000
-      if ( !defined( $args->{maxLoadedItems} )
-        || $args->{maxLoadedItems} == -1 );
+      if ( !defined( $args->{maxLoadedItems} ));
 
     %INDICATORS = ();
     my $result = $self->{_parser_s}->start( $args->{expr} );
@@ -312,6 +312,8 @@ my ($self, $args) = @_;
 
     my $WHERE_FILTER = " WHERE datetime <= '$endPeriod'";
     $WHERE_FILTER .= ' AND dayofweek(datetime) <> 1' if ( $tf != 604800 );
+    my $ORDERBY_CLAUSE='';
+       $ORDERBY_CLAUSE='ORDER BY datetime' if (!$args->{noOrderBy});
 
     my $sql = qq(
 SELECT $fields FROM (
@@ -331,7 +333,7 @@ WHERE ( $result ) AND datetime >= '$startPeriod' AND datetime <='$endPeriod'
 ORDER BY datetime DESC
 LIMIT $nbItems
 ) AS DT
-ORDER BY datetime
+$ORDERBY_CLAUSE
 );
 
 return $sql;
@@ -354,7 +356,7 @@ sub checkSignal {
     my $timeframe = $args->{tf} || die("timeframe argument missing in checkSignal");
     my $maxLoadedItems = $args->{maxLoadedItems} || -1;
     my $debug = $args->{debug} || 0;
-    my $period = $args->{period} || '1hour';
+    my $period = $args->{period} || 3600;
     my $nowValue = $args->{simulatedNowValue} || 'now';
 
     my $startPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
@@ -373,6 +375,5 @@ sub checkSignal {
     );
 
     return $data->[0] if defined($data);
-    return undef;
 }
 1;
