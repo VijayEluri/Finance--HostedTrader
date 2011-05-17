@@ -359,7 +359,7 @@ sub checkSignal {
     my $period = $args->{period} || 3600;
     my $nowValue = $args->{simulatedNowValue} || 'now';
 
-    my $startPeriod = UnixDate(DateCalc($nowValue, '- '.$period), '%Y-%m-%d %H:%M:%S');
+    my $startPeriod = UnixDate(DateCalc($nowValue, '- '.$period."seconds"), '%Y-%m-%d %H:%M:%S');
     my $endPeriod = UnixDate($nowValue, '%Y-%m-%d %H:%M:%S');
     my $data = $self->getSignalData(
         {

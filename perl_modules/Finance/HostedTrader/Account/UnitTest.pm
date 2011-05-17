@@ -301,7 +301,7 @@ sub checkSignal {
     if (!$cache->{$symbol} || !$cache->{$symbol}->{$signal_definition}) {
 
         #calculating max_loaded_periods adds a lot of code  but is important for performance
-        my $startDate = UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}), '%Y-%m-%d %H:%M:%S');
+        my $startDate = UnixDate(DateCalc($self->{_now}, '- '.$signal_args->{period}."seconds"), '%Y-%m-%d %H:%M:%S');
         my $date = $self->endDate;
         my @d1 = (  substr($date,0,4),
                     substr($date,5,2),

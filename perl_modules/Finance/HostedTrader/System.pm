@@ -119,10 +119,10 @@ sub _loadSystem {
     }
     my $filters_signals = $self->{filters}->{signals};
     foreach my $filter_signal (@$filters_signals) {
-        $filter_signal->{args}->{period} = Delta_Format(ParseDateDelta($filter_signal->{args}->{period}), 0, "%st");
+        $filter_signal->{args}->{period} = int(Delta_Format(ParseDateDelta($filter_signal->{args}->{period}), 0, "%st"));
     }
     foreach my $signal (qw/enter exit add/) {
-        $self->{signals}->{$signal}->{args}->{period} = Delta_Format(ParseDateDelta($self->{signals}->{$signal}->{args}->{period}), 0, "%st");
+        $self->{signals}->{$signal}->{args}->{period} = int(Delta_Format(ParseDateDelta($self->{signals}->{$signal}->{args}->{period}), 0, "%st"));
     }
 }
 
