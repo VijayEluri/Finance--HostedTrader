@@ -341,8 +341,7 @@ sub checkSignal {
 
     my $signal;
     my $signal_date = 0;
-    my $period = $signal_args->{period} || '1hour';
-    my $secs_in_period =  Delta_Format(ParseDateDelta($period), 0, "%st");
+    my $secs_in_period = $signal_args->{period} || 3600;
     my $date=$self->{_now};
     my $signal_valid_from = sprintf('%d-%02d-%02d %02d:%02d:%02d', Add_Delta_DHMS(substr($date,0,4),substr($date,5,2),substr($date,8,2),substr($date,11,2),substr($date,14,2),substr($date,17,2),0,0,0,$secs_in_period*(-1)));
 
