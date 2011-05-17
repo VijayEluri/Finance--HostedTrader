@@ -78,7 +78,7 @@ sub _build_dbh {
         $cfg->db->dbuser,
         $cfg->db->dbpasswd,
         { RaiseError => 1}
-    ) || die($DBI::errstr);
+    );
 
     return $dbh;
 }
