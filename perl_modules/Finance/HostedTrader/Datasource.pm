@@ -226,11 +226,6 @@ sub createSynthetic {
     $self->dbh->do($sql);
 }
 
-sub DESTROY {
-#    my ($self) = @_;
-#    $self->dbh->disconnect;
-}
-
 1;
 
 =back
