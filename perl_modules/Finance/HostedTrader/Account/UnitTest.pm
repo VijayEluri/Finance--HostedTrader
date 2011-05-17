@@ -126,8 +126,16 @@ Positions are kept in memory.
 This method calculates profit/loss of existing trades to keep data consistent
 =cut
 sub refreshPositions {
-    my $self = shift;
     # positions are kept in memory
+}
+
+# Profit/loss on trades needs to be updated somehow
+# To be 100% correct, this needs to be called in "sub refreshPositions"
+# however that slows down things considerably
+# Alternatively, it can be called only in "sub getNav", which gets called much less often than refreshPositions and is enough to make the unit tests pass
+# but means the UnitTest module will only have updated PL when getNav is called.  This will break anything that calls Finance::HostedTrader::Trade::pl, like Report.pm 
+sub _updatePL {
+    my $self = shift;
 
     # Calculate current p/l for each open trade
     my $positions = $self->{_positions};
@@ -254,6 +262,7 @@ sub getBaseUnit {
 sub getNav {
     my $self = shift;
 
+    $self->_updatePL;
     return sprintf("%.4f", $self->balance() + $self->pl());
 }
 
