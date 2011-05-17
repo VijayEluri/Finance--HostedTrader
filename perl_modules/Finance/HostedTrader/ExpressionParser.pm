@@ -238,10 +238,7 @@ ORDER BY datetime $order_ext
     print $sql if ($args->{debug});
 
     my $dbh = $self->{_ds}->dbh;
-    my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
-    $sth->execute() or die( $DBI::errstr . $sql );
-    my $data = $sth->fetchall_arrayref;
-    $sth->finish() or die($DBI::errstr);
+    my $data = $dbh->selectall_arrayref($sql) or die($DBI::errstr);
     my $lastItemIndex = scalar(@$data) - 1;
     if ( 0 && defined($itemCount) && ( $lastItemIndex > $itemCount ) ) {
         my @slice =
@@ -259,10 +256,7 @@ sub getSignalData {
     print $sql if ($args->{debug});
 
     my $dbh = $self->{_ds}->dbh;
-    my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
-    $sth->execute() or die( $DBI::errstr . $sql );
-    my $data = $sth->fetchall_arrayref;
-    $sth->finish() or die($DBI::errstr);
+    my $data = $dbh->selectall_arrayref($sql) or die( $DBI::errstr . $sql );
     return $data;
 }
 
@@ -281,10 +275,7 @@ sub getSystemData {
     print $sql if ($args->{debug});
 
     my $dbh = $self->{_ds}->dbh;
-    my $sth = $dbh->prepare($sql) or die( $DBI::errstr . $sql );
-    $sth->execute() or die( $DBI::errstr . $sql );
-    my $data = $sth->fetchall_arrayref;
-    $sth->finish() or die($DBI::errstr);
+    my $data = $dbh->selectall_arrayref($sql) or die( $DBI::errstr . $sql );
     return $data;
 }
 
