@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Test::Exception;
 use Data::Dumper;
 
@@ -24,6 +24,13 @@ throws_ok {
             SUBCLASS => 'UnitTest',
     	)->create_instance();
 } qr/Attribute \(expectedTradesFile\) is required/, 'UnitTest dies without expectedTradesFile argument';
+
+throws_ok {
+    $acc = Finance::HostedTrader::Factory::Notifier->new(
+            SUBCLASS => 'UnitTest',
+            expectedTradesFile => 'non existant file',
+    	)->create_instance();
+} qr/file "non existant file" does not exist/, 'UnitTest dies with bad expectedTradesFile argument';
 
 $acc = Finance::HostedTrader::Factory::Notifier->new(
         SUBCLASS    => 'UnitTest',
