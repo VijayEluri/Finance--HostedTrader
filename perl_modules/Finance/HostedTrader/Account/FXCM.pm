@@ -247,8 +247,8 @@ $price   - The price at which the trade was executed.
 augment 'openMarket' => sub {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
 
-    $symbol = $self->_convertSymbolToFXCM($symbol);
-    my $data = $self->_sendCmd("openmarket $symbol $direction $amount");
+    my $fxcm_symbol = $self->_convertSymbolToFXCM($symbol);
+    my $data = $self->_sendCmd("openmarket $fxcm_symbol $direction $amount");
     my ($orderID, $rate) = split(/ /, $data); #TODO don't need to return rate here
 
     return $self->getPosition($symbol)->getTrade($orderID);
