@@ -69,7 +69,7 @@ sub _load {
     if (-e $file) {
         $yaml = YAML::Tiny->read( $file ) || die("Cannot read symbols from $file. $!");
     } else {
-        return [];
+        die("file \"$file\" does not exist");
     }
 
     return $yaml->[0];
