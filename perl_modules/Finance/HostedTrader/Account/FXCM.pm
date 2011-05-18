@@ -92,7 +92,7 @@ has port => (
 =cut
 has notifier => (
     is     => 'ro',
-    isa    => 'Finance::HostedTrader::Trader::Notifier',
+    isa    => 'Maybe[Finance::HostedTrader::Trader::Notifier]',
     required=>1,
     default=> sub {
                     my $self = shift;
@@ -182,7 +182,8 @@ sub refreshPositions {
     my $yml = $self->_sendCmd('trades');
 
     return if (!$yml);
-    my $trades = YAML::Syck::Load( $yml ) || die("Invalid yaml: $!");
+    my $trades = YAML::Syck::Load( $yml );
+    die("Invalid yaml: $!") if (!$trades);
 
     foreach my $trade_data (@$trades) {
         if ($trade_data->{direction} eq 'short') {
@@ -193,9 +194,10 @@ sub refreshPositions {
         my $trade = Finance::HostedTrader::Trade->new(
             $trade_data
         );
+        my $trade_symbol = $trade->symbol;
 
-        if (!exists($self->{_positions}->{$trade->symbol})) {
-            $self->{_positions}->{$trade->symbol} = Finance::HostedTrader::Position->new(symbol => $trade->symbol);
+        if (!exists($self->{_positions}->{$trade_symbol})) {
+            $self->{_positions}->{$trade->symbol} = Finance::HostedTrader::Position->new(symbol => $trade_symbol);
         }
         $self->{_positions}->{$trade->symbol}->addTrade($trade);
     }
