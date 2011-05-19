@@ -10,6 +10,6 @@ my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
 my $expr = join( ' ', @ARGV );
 my $data = $signal_processor->getIndicatorData(
-    { symbol => 'EURUSD', tf => 'day', expr => $expr } );
+    { symbol => 'EURUSD', tf => 'day', fields => $expr } );
 
 print Dumper ( \$data );
