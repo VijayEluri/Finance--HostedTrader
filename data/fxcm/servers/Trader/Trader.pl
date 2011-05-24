@@ -169,6 +169,11 @@ sub checkSystem {
             TRY_OPENTRADE: foreach my $try (1..3) {
                 my $trade;
                 eval {
+                    #TODO: The call to openMarket can fail after the trade has already
+                    #been opened (eg, notifier fail).
+                    #Either:
+                    #1 - check for different exceptions types and don't try to open again unless it's an open trade exception
+                    #2 - Make the notifier call here after the TRY_OPENTRADE loop  
                     $trade = $account->openMarket($symbol, $direction, $amount, $stopLoss);
                     logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=".$trade->id.",rate=".$trade->openPrice) if ($verbose);
                     1;

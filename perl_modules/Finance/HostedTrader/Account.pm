@@ -146,9 +146,13 @@ $price   - The price at which the trade was executed.
 =cut
 sub openMarket {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
-    my $notifier = $self->notifier();
     my $trade = inner();
     
+    if (!$trade) {
+        die("openMarket did not return a trade object\nParameters were: $symbol $direction $amount $stopLoss");
+    }
+    
+    my $notifier = $self->notifier();
     if ($notifier) {
         $notifier->open(
             symbol      => $symbol,
