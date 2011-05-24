@@ -251,7 +251,16 @@ augment 'openMarket' => sub {
     my $data = $self->_sendCmd("openmarket $fxcm_symbol $direction $amount");
     my ($orderID, $rate) = split(/ /, $data); #TODO don't need to return rate here
 
-    return $self->getPosition($symbol)->getTrade($orderID);
+    #Try to fetch the trade object for the trade just opened
+    #Try up to 5 times because getPosition implicitly sends a call to the FXCM API to retrieve existing
+    #trades which usually doesn't imediatelly return the open trade 
+    my $tries = 5;
+    while ($tries--) {
+        sleep(1); #Sleep a bit because FXCM server won't imediatelly return the trade just opened
+        my $trade = $self->getPosition($symbol)->getTrade($orderID);
+        return $trade if (defined($trade));
+    }
+    die("Could not find trade just opened. Return from _sendCmd was: '$data'");
 };
 
 =item C<closeMarket($tradeID, $amount)>
