@@ -87,8 +87,7 @@ function:
     my $grammar_signals = q {
 start:          statement /\Z/               {$item[1]}
 
-statement:		<leftop: signal boolop signal > {join(' ', @{$item[1]})} |
-				signal
+statement:		<leftop: signal boolop signal > {join(' ', @{$item[1]})}
 
 boolop:	'AND' | 'OR'
 
