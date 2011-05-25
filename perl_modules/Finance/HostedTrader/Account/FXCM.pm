@@ -248,7 +248,20 @@ augment 'openMarket' => sub {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
 
     my $fxcm_symbol = $self->_convertSymbolToFXCM($symbol);
-    my $data = $self->_sendCmd("openmarket $fxcm_symbol $direction $amount");
+    my $data;
+
+    #the openmarket call can fail if price moves
+    #to quickly, so try it 3 times until it succeeds
+    TRY_OPENTRADE: foreach my $try (1..3) {
+        eval {
+            $data = $self->_sendCmd("openmarket $fxcm_symbol $direction $amount");
+            1;
+        } or do {
+            #TODO would be preferable to log something here
+            next;
+        };
+        last TRY_OPENTRADE;
+    }
     my ($orderID, $rate) = split(/ /, $data); #TODO don't need to return rate here
 
     #Try to fetch the trade object for the trade just opened
@@ -256,9 +269,9 @@ augment 'openMarket' => sub {
     #trades which usually doesn't imediatelly return the open trade 
     my $tries = 5;
     while ($tries--) {
-        sleep(1); #Sleep a bit because FXCM server won't imediatelly return the trade just opened
         my $trade = $self->getPosition($symbol)->getTrade($orderID);
         return $trade if (defined($trade));
+        sleep(1); #Sleep a bit because FXCM server may not imediatelly return the trade just opened
     }
     die("Could not find trade just opened. Return from _sendCmd was: '$data'");
 };

@@ -159,33 +159,20 @@ sub checkSystem {
                 logger("$symbol $direction at " . $result->[0] . " Amount=" . $amount . " value=" . $value . " stopLoss=" . $stopLoss);
             }
             next if ($amount <= 0);
-            my $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader );
+            my $report;
             if ($verbose) {
+                $report = Finance::HostedTrader::Report->new( account => $account, systemTrader => $systemTrader );
                 logger("Positions before open trade\n" . $report->openPositions);
                 logger("\n".$report->systemEntryExit);
                 logger("Adding position for $symbol $direction ($amount)");
             }
 
-            TRY_OPENTRADE: foreach my $try (1..3) {
-                my $trade;
-                eval {
-                    #TODO: The call to openMarket can fail after the trade has already
-                    #been opened (eg, notifier fail).
-                    #Either:
-                    #1 - check for different exceptions types and don't try to open again unless it's an open trade exception
-                    #2 - Make the notifier call here after the TRY_OPENTRADE loop  
-                    $trade = $account->openMarket($symbol, $direction, $amount, $stopLoss);
-                    logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=".$trade->id.",rate=".$trade->openPrice) if ($verbose);
-                    1;
-                } or do {
-                    logger($@);
-                    next;
-                };
-                if ($verbose) {
-                    logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
-                    logger("\n".$report->systemEntryExit);
-                }
-                last TRY_OPENTRADE;
+            my $trade = $account->openMarket($symbol, $direction, $amount, $stopLoss);
+
+            if ($verbose) {
+                logger("symbol=$symbol,direction=$direction,amount=$amount,orderID=".$trade->id.",rate=".$trade->openPrice);
+                logger("NAV=" . $account->getNav() . "\n" . $report->openPositions);
+                logger("\n".$report->systemEntryExit);
             }
         }
 
