@@ -24,7 +24,7 @@ http://tangentsoft.net/wskfaq/examples/basics/threaded-server.html
 
 using namespace std;
 
-#import "c:\\Program Files (x86)\\Candleworks\\FXOrder2Go\\fxcore.dll" 
+#import "c:\\Programas\\Candleworks\\FXOrder2Go\\fxcore.dll" 
 
 #include <iostream>
 #include <sstream>
@@ -484,8 +484,8 @@ string CmdOpenMarketOrder(string symbol, string direction, int iAmount) {
 				iAmount, "", 0, &vOrderID, &vDealerInt);
 
 	rv = "200 ";// + vOrderID.bstrVal;// + " " + dRate;
-	_bstr_t _vOrderID = vOrderID.bstrVal;
-	rv.append((const char *) _vOrderID );
+	_bstr_t _vTradeID = g_pTradeDesk->GetTradeByOrder(vOrderID.bstrVal);
+	rv.append((const char *) _vTradeID );
 	rv+=" ";
 
 	os << dRate;
