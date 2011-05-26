@@ -24,25 +24,6 @@ use Finance::HostedTrader::Config;
 use Data::Dumper;
 use Moose;
 
-my %timeframes = (
-    'tick'  => 0,
-    'sec'   => 1,
-    '5sec'  => 5,
-    '15sec' => 15,
-    '30sec' => 30,
-    'min'   => 60,
-    '5min'  => 300,
-    '15min' => 900,
-    '30min' => 1800,
-    'hour'  => 3600,
-    '2hour' => 7200,
-    '3hour' => 10800,
-    '4hour' => 14400,
-    'day'   => 86400,
-    '2day'  => 172800,
-    'week'  => 604800
-);
-
 =item C<debug>
 
 Optional If set to a true value, prints SQL queries to stdout.
