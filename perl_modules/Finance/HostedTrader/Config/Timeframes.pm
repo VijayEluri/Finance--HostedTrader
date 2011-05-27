@@ -25,24 +25,25 @@ use Moose;
 use Moose::Util::TypeConstraints;
 
 #List of available timeframes this module understands
+#TODO finish missing date/time formats
 my %timeframes = (
-    'tick'  => 0,
-    'sec'   => 1,
-    '5sec'  => 5,
-    '15sec' => 15,
-    '30sec' => 30,
-    'min'   => 60,
-    '2min'  => 120,
-    '5min'  => 300,
-    '15min' => 900,
-    '30min' => 1800,
-    'hour'  => 3600,
-    '2hour' => 7200,
-    '3hour' => 10800,
-    '4hour' => 14400,
-    'day'   => 86400,
-    '2day'  => 172800,
-    'week'  => 604800
+    'tick'  => [0, undef],
+    'sec'   => [1, undef],
+    '5sec'  => [5, undef],
+    '15sec' => [15, undef],
+    '30sec' => [30, undef],
+    'min'   => [60, undef],
+    '2min'  => [120, undef],
+    '5min'  => [300, "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 5) * 5, ':00') AS DATETIME)"],
+    '15min' => [900, "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 15) * 15, ':00') AS DATETIME)"],
+    '30min' => [1800, "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 30) * 30, ':00') AS DATETIME)"],
+    'hour'  => [3600, "date_format(datetime, '%Y-%m-%d %H:00:00')"],
+    '2hour' => [7200, "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 2) * 2, ':00:00') AS DATETIME)"],
+    '3hour' => [10800, "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 3) * 3, ':00:00') AS DATETIME)"],
+    '4hour' => [14400, "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  floor(hour(datetime) / 4) * 4, ':00:00') AS DATETIME)"],
+    'day'   => [86400, "date_format(datetime, '%Y-%m-%d 00:00:00')"],
+    '2day'  => [172800, undef],
+    'week'  => [604800, "date_format(date_sub(datetime, interval weekday(datetime)+1 DAY), '%Y-%m-%d 00:00:00')"],
 );
 
 enum 'TimeframeIDs' => qw(0 1 5 15 30 60 120 300 900 1800 3600 7200 10800 14400 86400 172800 604800);
@@ -134,7 +135,7 @@ my $tf = $self->getTimeframeID('day');
 =cut
 sub getTimeframeID {
     my ( $self, $name ) = @_;
-    return $timeframes{$name};
+    return $timeframes{$name}->[0];
 }
 
 =item C<getTimeframeName>
@@ -147,7 +148,15 @@ my $tf = $self->getTimeframeName(60);
 =cut
 sub getTimeframeName {
     my ( $self, $id ) = @_;
-    grep { return $_ if $timeframes{$_} == $id } keys(%timeframes);
+    grep { return $_ if $timeframes{$_}->[0] == $id } keys(%timeframes);
+}
+
+=item C<getTimeframeFormat>
+=cut
+sub getTimeframeFormat {
+    my ($self, $name) = @_;
+    
+    return $timeframes{$name}->[1];
 }
 
 __PACKAGE__->meta->make_immutable;

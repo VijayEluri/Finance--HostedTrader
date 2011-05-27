@@ -98,6 +98,7 @@ sub convertOHLCTimeSeries {
 
     my ( $date_select, $date_group );
 
+#TODO - date_select is duplicated with Timeframes.pm
     if ( $tf_dst == 300 ) {
         $date_select =
 "CAST(CONCAT(year(datetime), '-', month(datetime), '-', day(datetime), ' ',  hour(datetime), ':', floor(minute(datetime) / 5) * 5, ':00') AS DATETIME)";
