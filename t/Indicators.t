@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 56;
+use Test::More tests => 58;
 use Test::Exception;
 use Data::Dumper;
 
@@ -31,15 +31,24 @@ testIndicator('macd', 'close,12,26,9', '0.0172', 'close', 'close,12,26,9,1', 'ba
 testIndicator('macdsig', 'close,12,26,9', '0.0145', 'close', 'close,12,26,9,1', 'bad,12,26,9');
 testIndicator('abs', '10-20', '10', '', 'close,12', 'bad');
 
+adhoc_test('datetime,rsi(close,21) + ema(close,21)', '72.2587', 'expr + expr');
+adhoc_test('datetime,rsi(close,21) / ema(close,21)', '48.87830469', 'expr / expr');
+
 sub testIndicator {
-    my ($name, $valid_args, $expected_valuereturned, $toofew_args, $toomany_args, $bad_expression) = @_;
+    my ($name, $valid_args, $expected, $toofew_args, $toomany_args, $bad_expression) = @_;
     my ($got, $expect);
 
     my $expr = "datetime, $name($valid_args)";
-    $got = $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => $expr });
-    $expect = ['2011-04-29 00:00:00', $expected_valuereturned];
-    is_deeply($got->[0], $expect, "$name value");
+    adhoc_test($expr, $expected, "$name value");
     throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($toofew_args)" }) } qr/Syntax error in indicator/, "$name too few arguments" if (defined($toofew_args));
     throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($toomany_args)" }) } qr/Syntax error in indicator/, "$name too many arguments" if (defined($toomany_args));
     throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($bad_expression)" }) } qr/Syntax error in indicator/, "$name bad arguments expression" if (defined($bad_expression));
+}
+
+sub adhoc_test {
+    my ($expr, $expected, $desc) = @_;
+    
+    my $got = $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => $expr });
+    my $expect = ['2011-04-29 00:00:00', $expected];
+    is_deeply($got->[0], $expect, $desc);
 }
