@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 58;
+use Test::More tests => 61;
 use Test::Exception;
 use Data::Dumper;
 
@@ -31,8 +31,12 @@ testIndicator('macd', 'close,12,26,9', '0.0172', 'close', 'close,12,26,9,1', 'ba
 testIndicator('macdsig', 'close,12,26,9', '0.0145', 'close', 'close,12,26,9,1', 'bad,12,26,9');
 testIndicator('abs', '10-20', '10', '', 'close,12', 'bad');
 
+adhoc_test('datetime,ema(rsi(close,21),21)', '65.3717', 'recursive');
+
 adhoc_test('datetime,rsi(close,21) + ema(close,21)', '72.2587', 'expr + expr');
 adhoc_test('datetime,rsi(close,21) / ema(close,21)', '48.87830469', 'expr / expr');
+adhoc_test('datetime,(2+3)*4', '20', 'operator precedence simple');
+adhoc_test('datetime,(2+ema(close,21))*atr(21)', '0.0421', 'operator precedence expr');
 
 sub testIndicator {
     my ($name, $valid_args, $expected, $toofew_args, $toomany_args, $bad_expression) = @_;
