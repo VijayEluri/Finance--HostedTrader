@@ -91,17 +91,13 @@ statement:		<leftop: signal boolop signal > {join(' ', @{$item[1]})}
 boolop:	'AND' | 'OR'
 
 
-signal:         'crossoverup' '(' expression ',' number ')' {my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[3]);my $t1 = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)");"($item[3] > $item[5] AND T$t1 <= $item[5])"}
-			  | 'crossoverup' '(' number ',' expression ')' {my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[5]);my $t1 = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)");"($item[3] > $item[5] AND $item[3] <= T$t1)"}
-			  | 'crossoverup' '(' expression ',' expression ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[3],$item[5]);my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)","ta_previous($vals[1],1)");"($item[3] > $item[5] AND T$t1 <= T$t2)"}
-              | 'crossoverdown' '(' expression ',' number ')' {my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[3]);my $t1 = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)");"($item[3] < $item[5] AND T$t1 >= $item[5])"}
-			  | 'crossoverdown' '(' number ',' expression ')' {my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[5]);my $t1 = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)");"($item[3] < $item[5] AND $item[3] >= T$t1)"}
+signal:         
+			    'crossoverup' '(' expression ',' expression ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[3],$item[5]);my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)","ta_previous($vals[1],1)");"($item[3] > $item[5] AND T$t1 <= T$t2)"}
 			  | 'crossoverdown' '(' expression ',' expression ')' { my @vals = Finance::HostedTrader::ExpressionParser::checkArgs($item[3],$item[5]);my ($t1,$t2) = Finance::HostedTrader::ExpressionParser::getID("ta_previous($vals[0],1)","ta_previous($vals[1],1)");"($item[3] < $item[5] AND T$t1 >= T$t2)"}
-              | expression '>' expression      {"$item[1] > $item[3]"}
-              | expression '<' expression      {"$item[1] < $item[3]"}
-              | expression '>=' expression     {"$item[1] >= $item[3]"}
-              | expression '<=' expression     {"$item[1] <= $item[3]"}
+              | expression cmp_op expression      {"$item[1] $item[2] $item[3]"}
               | expression
+
+cmp_op:         '>=' | '>' | '<=' | '<'
 
 expression:     term math_op expression      {"$item[1] $item[2] $item[3]"}
               | term
