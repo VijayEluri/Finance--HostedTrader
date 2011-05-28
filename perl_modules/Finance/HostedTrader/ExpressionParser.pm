@@ -103,11 +103,10 @@ signal:         'crossoverup' '(' expression ',' number ')' {my @vals = Finance:
               | expression '<=' expression     {"$item[1] <= $item[3]"}
               | expression
 
-expression:     term '+' expression      {"$item[1] + $item[3]"}
-              | term '-' expression      {"$item[1] - $item[3]"}
-              | term '*' expression      {"$item[1] * $item[3]"}
-              | term '/' expression      {"$item[1] / $item[3]"}
+expression:     term math_op expression      {"$item[1] $item[2] $item[3]"}
               | term
+
+math_op:        '+' | '-' | '*' | '/'
 
 term:           number
               | field
