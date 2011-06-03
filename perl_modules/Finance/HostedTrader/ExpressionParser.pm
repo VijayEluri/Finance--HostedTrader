@@ -154,9 +154,9 @@ sub getIndicatorData {
     }
 
     #Handle arguments
-    my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf);
-    die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) ) if (!$tf);
+    my $tf_name = $args->{tf} || 'day';
+    my $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf_name);
+    die( "Could not understand timeframe " . ( $tf_name ) ) if (!$tf);
     my $maxLoadedItems = $args->{maxLoadedItems};
     $maxLoadedItems = 10_000_000_000
       if ( !defined( $args->{maxLoadedItems} ) );
@@ -281,9 +281,9 @@ my ($self, $args) = @_;
         die("invalid arg in _getSignalSql: $key") unless grep { /$key/ } @good_args;
     }
 
-    my $tf = $args->{tf} || 'day';
-    $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf);
-    die( "Could not understand timeframe " . ( $args->{tf} || 'day' ) ) if (!$tf);
+    my $tf_name = $args->{tf} || 'day';
+    my $tf = $self->{_ds}->cfg->timeframes->getTimeframeID($tf_name);
+    die( "Could not understand timeframe " . ( $tf_name ) ) if (!$tf);
     my $expr   = $args->{expr}   || die("No expression set for signal");
     my $symbol = $args->{symbol} || die("No symbol set");
     my $maxLoadedItems = $args->{maxLoadedItems};
