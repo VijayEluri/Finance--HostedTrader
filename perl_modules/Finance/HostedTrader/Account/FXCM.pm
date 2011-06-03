@@ -367,12 +367,11 @@ sub _sendCmd {
         } else {
             die("Unknown return code: $code, msg=$msg");
         }
-        return $msg;
     } else {
         die("Timeout reading from server (cmd=$cmd)");
     }
 
-    close($sock);
+    #$sock is implicitly closed when this sub goes out of scope
 }
 
 sub getServerEpoch {
