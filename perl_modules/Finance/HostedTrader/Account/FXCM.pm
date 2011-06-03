@@ -342,7 +342,8 @@ sub _sendCmd {
                     PeerPort => $self->{port},
                     Proto    => 'tcp',
                     Timeout  => CONNECT_TIMEOUT,
-                    ) or die($!);
+                    );
+   die($!) if (!$sock);
    $sock->autoflush(1);
 
 
