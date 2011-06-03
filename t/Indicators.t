@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 61;
+use Test::More tests => 62;
 use Test::Exception;
 use Data::Dumper;
 
@@ -15,6 +15,7 @@ my $expect;
 
 my $e = Finance::HostedTrader::ExpressionParser->new();
 throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, fields => 'rsi(close,21)' }) } qr/Unknown column 'datetime' in 'order clause'/, "No datetime in expression";
+throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => 'badtf', numItems => 1, fields => 'rsi(close,21)' }) } qr/Could not understand timeframe badtf/, "Invalid timeframe";
 
 testIndicator('ema', 'close,21', '1.4487', 'close', 'close,21,22', 'bad,21');
 testIndicator('sma', 'close,21', '1.4466', 'close', 'close,21,22', 'bad,21');

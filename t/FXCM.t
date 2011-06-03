@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 29;
 use Test::Exception;
 use Data::Dumper;
 
@@ -24,6 +24,131 @@ my $position;
     )->create_instance();
 
     isa_ok($acc,'Finance::HostedTrader::Account::FXCM');
+
+    throws_ok { $acc->getAsk('EURUSD') } qr/Connection refused/, "Exception connecting to FXCM server";
+    
+    my $pid = fork();
+    die("could not fork: $!") if (!defined($pid));
+    if ($pid) {
+        sleep(2); # Sleep to make sure server process sets itself up
+        throws_ok { $acc->getAsk('EURUSD') } qr/Server returned no response/, "Exception when server does not respond to command";
+    } else {
+        my $sock = IO::Socket::INET->new(
+                    Listen    => 1,
+                    LocalAddr => 'localhost',
+                    LocalPort => 1501,
+                    Proto     => 'tcp'
+        ) or die($!);
+        $sock->accept();
+        exit;
+    }
+    waitpid($pid,0);
+    
+    $pid = fork();
+    die("could not fork: $!") if (!defined($pid));
+    if ($pid) {
+        sleep(2); # Sleep to make sure server process sets itself up
+        throws_ok { $acc->getAsk('EURUSD') } qr/Internal Error: Random error/, "FXCM server throws exception";
+    } else {
+        my $sock = IO::Socket::INET->new(
+                    Listen    => 1,
+                    LocalAddr => 'localhost',
+                    LocalPort => 1501,
+                    Proto     => 'tcp'
+        ) or die($!);
+        use IO::Select;
+        my $paddr = $sock->accept();
+        my $select = IO::Select->new($paddr);
+        if ( $select->can_read(4) ) {
+            print $paddr "500 Random error||THE_END||";
+        } else {
+            die($!);
+        }
+        exit;
+    }
+    waitpid($pid,0);
+    
+    $pid = fork();
+    die("could not fork: $!") if (!defined($pid));
+    if ($pid) {
+        sleep(2); # Sleep to make sure server process sets itself up
+        throws_ok { $acc->getAsk('EURUSD') } qr/Command not found/, "FXCM server returns unrecognized command";
+    } else {
+        my $sock = IO::Socket::INET->new(
+                    Listen    => 1,
+                    LocalAddr => 'localhost',
+                    LocalPort => 1501,
+                    Proto     => 'tcp'
+        ) or die($!);
+        use IO::Select;
+        my $paddr = $sock->accept();
+        my $select = IO::Select->new($paddr);
+        if ( $select->can_read(4) ) {
+            print $paddr "404 gibberish||THE_END||";
+        } else {
+            die($!);
+        }
+        exit;
+    }
+    waitpid($pid,0);
+    
+    $pid = fork();
+    die("could not fork: $!") if (!defined($pid));
+    if ($pid) {
+        sleep(2); # Sleep to make sure server process sets itself up
+        throws_ok { $acc->getAsk('EURUSD') } qr/Unknown return code:/, "FXCM server returns crap";
+    } else {
+        my $sock = IO::Socket::INET->new(
+                    Listen    => 1,
+                    LocalAddr => 'localhost',
+                    LocalPort => 1501,
+                    Proto     => 'tcp'
+        ) or die($!);
+        use IO::Select;
+        my $paddr = $sock->accept();
+        my $select = IO::Select->new($paddr);
+        if ( $select->can_read(4) ) {
+            print $paddr "gibberish";
+        } else {
+            die($!);
+        }
+        exit;
+    }
+    waitpid($pid,0);
+    
+    $pid = fork();
+    die("could not fork: $!") if (!defined($pid));
+    if ($pid) {
+        sleep(2); # Sleep to make sure server process sets itself up
+        is( $acc->getAsk('EURUSD'), "123", "200 code" );
+    } else {
+        my $sock = IO::Socket::INET->new(
+                    Listen    => 1,
+                    LocalAddr => 'localhost',
+                    LocalPort => 1501,
+                    Proto     => 'tcp'
+        ) or die($!);
+        use IO::Select;
+        my $paddr = $sock->accept();
+        my $select = IO::Select->new($paddr);
+        if ( $select->can_read(4) ) {
+            print $paddr "200 123||THE_END||";
+        } else {
+            die($!);
+        }
+        exit;
+    }
+    waitpid($pid,0);
+    
+    my $sock = IO::Socket::INET->new(
+                Listen    => 1,
+                LocalAddr => 'localhost',
+                LocalPort => 1501,
+                Proto     => 'tcp'
+    );
+    
+    diag("Simulating read timeout, will take a bit");
+    throws_ok { $acc->getAsk('EURUSD') } qr/Timeout reading from server \(cmd=ask EUR\/USD\)/, "Exception reading from FXCM server";
 
     $mockFXCM->mock('_sendCmd', sub {
         my ($self, $cmd) = @_;
