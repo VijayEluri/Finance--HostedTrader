@@ -66,9 +66,8 @@ sub _around_timeframes {
 sub _sort_timeframes {
 my $self = shift;
 my $values =shift;
-use Data::Dumper;
 
-return [] if (!defined($values));
+    return [] if (!defined($values));
     my @sorted =
       sort { int($a) <=> int($b) }
       ( @{ $values } );
