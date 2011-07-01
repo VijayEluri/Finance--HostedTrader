@@ -49,10 +49,7 @@ start_indicator:          statement_indicator /\Z/               {$item[1]}
 
 start_signal:          statement_signal /\Z/               {$item[1]}
 
-statement_indicator:		<leftop: expression exp_sep expression > {join(' ', @{$item[1]})} |
-				expression
-
-exp_sep:	','
+statement_indicator:		expression(s /,/) {join(',', @{$item[1]})}
 
 statement_signal:		<leftop: signal boolop signal > {join(' ', @{$item[1]})}
 
