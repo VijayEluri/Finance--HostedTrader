@@ -114,7 +114,7 @@ function:
 sub getIndicatorData {
     my ( $self, $args ) = @_;
 
-    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug);
+    my @good_args = qw(tf fields symbol maxLoadedItems startPeriod endPeriod numItems debug cacheResults);
 
     foreach my $key (keys %$args) {
         die("invalid arg in getIndicatorData: $key") unless grep { /$key/ } @good_args;
@@ -134,6 +134,8 @@ sub getIndicatorData {
     my $itemCount = $args->{numItems} || $maxLoadedItems;
     my $expr      = $args->{fields}          || die("No fields set for indicator");
     my $symbol    = $args->{symbol}          || die("No symbol set for indicator");
+    my $cacheResults = $args->{cacheResults};
+    $cacheResults = 1 if (!defined($cacheResults));
 
     my $cache_key = "$symbol-$tf-$expr-$maxLoadedItems-$itemCount";
     my $cached_result = $self->{_result_cache}->{$cache_key};
@@ -203,7 +205,7 @@ ORDER BY datetime $order_ext
         return \@slice;
     }
     
-    $self->{_result_cache}->{$cache_key} = [ "$displayStartDate/$displayEndDate", $data ];
+    $self->{_result_cache}->{$cache_key} = [ "$displayStartDate/$displayEndDate", $data ] if ($cacheResults);
     return $data;
 }
 
