@@ -84,6 +84,7 @@ foreach my $tf ( @{$tfs} ) {
                 'fields' => 'datetime,open,low,high,close',
                 'symbol' => $symbol,
                 'tf'     => $tf,
+                'cacheResults' => 0,
             }
         );
 
