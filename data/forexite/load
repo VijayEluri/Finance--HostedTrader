@@ -3,7 +3,7 @@ set -e
 
 TF=$1
 # Load natural timeframes
-mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\r\n' -s -uroot fx *_$TF
+mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\r\n' -s -ufx fx *_$TF
 rm -Rf *_$TF
 
 # Create synthetic pairs
@@ -11,7 +11,7 @@ rm -Rf *_$TF
 
 # Create synthetic timeframes
 ~/fx/updateTf.pl --start="4 days ago at midnight" --available-timeframe=min
-./TruncateWeekly.pl | mysql -u root fx
+./TruncateWeekly.pl | mysql -ufx fx
 ~/fx/updateTf.pl --timeframes=604800 --available-timeframe=day
 
 # Dump downloadable rates
