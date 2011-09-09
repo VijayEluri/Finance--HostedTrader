@@ -74,11 +74,11 @@ DROP TABLE IF EXISTS `$symbol\_$tf`;
 CREATE TABLE IF NOT EXISTS `$symbol\_$tf` (
 `datetime` DATETIME NOT NULL ,
 `open` DECIMAL(9,4) NOT NULL ,
-`low` DECIMAL(9,4) NOT NULL ,
 `high` DECIMAL(9,4) NOT NULL ,
+`low` DECIMAL(9,4) NOT NULL ,
 `close` DECIMAL(9,4) NOT NULL ,
 PRIMARY KEY ( `datetime` )
-) TYPE = $table_type ;
+) ENGINE = $table_type ;
 /;
 
     }
