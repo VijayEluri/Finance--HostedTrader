@@ -24,11 +24,11 @@ signals:
       period: 1hour
   add:
     long: 
-      signal: crossoverdown(macdsig(close,12,26,9), macd(close,12,26,9))
+      signal: crossoverdown(macd(close,12,26,9), macdsig(close,12,26,9))
       exposure:
         - 1
     short:
-      signal: crossoverup(macdsig(close,12,26,9), macd(close,12,26,9))
+      signal: crossoverup(macd(close,12,26,9), macdsig(close,12,26,9))
       exposure:
         - 1
     args:
