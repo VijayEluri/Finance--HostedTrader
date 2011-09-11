@@ -11,7 +11,6 @@ import com.fxcore2.O2GAccountsTableResponseReader;
 import com.fxcore2.O2GOfferRow;
 import com.fxcore2.O2GOffersTableResponseReader;
 import com.fxcore2.O2GOrderResponseReader;
-import com.fxcore2.O2GPriceUpdateMode;
 import com.fxcore2.O2GRequest;
 import com.fxcore2.O2GRequestFactory;
 import com.fxcore2.O2GRequestParamsEnum;
@@ -42,7 +41,6 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 	
 	public ForexConnect(String username, String password, String AccountType) throws TimeoutException {
 		session = O2GTransport.createSession();
-		session.setPriceUpdateMode(O2GPriceUpdateMode.NO_PRICE);
 		session.subscribeSessionStatus(this);
 		session.subscribeResponse(this);
 
@@ -368,10 +366,12 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		String username = args[0];
 		String password = args[1];
 		String type = args[2];
+		
 		ForexConnect tradeStation = new ForexConnect(username, password, type);
 		//String id = tradeStation.openMarket("EUR/USD", Constants.Buy, 10000);
 		//String rv = tradeStation.closeMarket("10145053", 10000);
-		System.out.println(tradeStation.getTrades());
+		//System.out.println(tradeStation.getTrades());
+		System.out.println(tradeStation.getNav());
 		/*Log.log("" + tradeStation.getNav());
 		Log.log("" + tradeStation.getBalance());
 		Log.log(
