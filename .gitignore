@@ -16,3 +16,4 @@ config_real.sh
 .project
 .settings
 _Inline
+*.class
