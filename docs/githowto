@@ -19,7 +19,10 @@ git pull origin master
 To ignore files, create a .gitignore file in the relevant directory
 
 #retrieve file
-git checkout file
+git checkout $file
 
 # Revert to previous version of a file:
-git checkout HEAD^ Trader.pl
+git checkout HEAD^ $file
+
+# Recover a deleted file
+git checkout $(git rev-list -n 1 HEAD -- "$file")^ -- "$file"
