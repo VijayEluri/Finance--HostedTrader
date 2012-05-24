@@ -1,0 +1,5 @@
+#!/bin/sh
+
+
+#--dontSkipDates
+perl -d:NYTProf ../data/fxcm/servers/Trader/Trader.pl --class=UnitTest --startDate="2010-08-18 06:00:00" --endDate="2010-10-17 00:00:00" --expectedTradesFile=trades.xag
