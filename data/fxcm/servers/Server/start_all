@@ -1,7 +1,0 @@
-#!/bin/sh
-
-BASEDIR=~/fx/data/fxcm/servers
-RUNDIR=$BASEDIR/Server
-
-$RUNDIR/start $BASEDIR/config_demo.sh
-$RUNDIR/start $BASEDIR/config_real.sh

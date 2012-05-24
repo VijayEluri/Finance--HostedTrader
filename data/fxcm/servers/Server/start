@@ -1,8 +1,0 @@
-#!/bin/sh
-
-RUNDIR=~/fx/data/fxcm/servers/Server
-CONFIG_FILE=$1
-
-. $CONFIG_FILE
-
-wine $RUNDIR/Server.exe 127.0.0.1 $SERVER_PORT $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE >> $RUNDIR/server_$FXCM_TYPE.log 2>&1 < /dev/null &
