@@ -366,15 +366,21 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		String username = args[0];
 		String password = args[1];
 		String type = args[2];
-		
+
+/*
+        username    = "7510107448";
+        password    = "4^Real";
+        type        = "Real";
+*/
+
 		ForexConnect tradeStation = new ForexConnect(username, password, type);
-		//String id = tradeStation.openMarket("EUR/USD", Constants.Buy, 10000);
-		//String rv = tradeStation.closeMarket("10145053", 10000);
-		//System.out.println(tradeStation.getTrades());
-		System.out.println(tradeStation.getNav());
-		/*Log.log("" + tradeStation.getNav());
+		String id = tradeStation.openMarket("XAG/USD", Constants.Sell, 50);
+//		String rv = tradeStation.closeMarket("8134655", 50);
+		System.out.println(tradeStation.getTrades());
+//		System.out.println(tradeStation.getNav() + " " + tradeStation.getBid("EUR/USD") + " " + tradeStation.getBid("EUR/JPY"));
+		Log.log("" + tradeStation.getNav());
 		Log.log("" + tradeStation.getBalance());
-		Log.log(
+		/*Log.log(
 				tradeStation.getAsk("XAU/USD") + "\n" +
 				tradeStation.getBid("USD/JPY") + "\n" + 
 				"");*/
