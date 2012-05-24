@@ -2,7 +2,7 @@ Eclipse plugins
 	http://download.eclipse.org/egit/updates
 	http://e-p-i-c.sf.net/updates/testing
 Perl modules
-	Rec::ParseDescent
+	Parse::RecDescent
 	Config::Any
 	Hash::Merge
 	Test::Exception
@@ -18,6 +18,7 @@ Perl modules
         Pod::Coverage
     Test::MockModule
 HostedTrader
+    Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Hosted--Trader
 	Need a config file, eg: ~/.fx.yml
 MySQL
 	If using partitioned tables (eg, minutes timeframe tables can be very large and it makes sense to partition them)
