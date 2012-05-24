@@ -23,3 +23,7 @@ git checkout file
 
 # Revert to previous version of a file:
 git checkout HEAD^ Trader.pl
+
+# Tag
+git tag -a 'TAGNAME' -m 'comment'
+git push --tags
