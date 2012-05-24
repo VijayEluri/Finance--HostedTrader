@@ -270,7 +270,7 @@ augment 'openMarket' => sub {
     while ($tries--) {
         my $trade = $self->getPosition($symbol)->getTrade($orderID);
         return $trade if (defined($trade));
-        sleep(1); #Sleep a bit because FXCM server may not imediatelly return the trade just opened
+        sleep(1); #Sleep a bit because FXCM server may not imediatelly return the trade just opened #TODO use Zefram's module and sleep less time
     }
     die("Could not find trade just opened. Return from _sendCmd was: '$data'");
 };

@@ -84,6 +84,9 @@ my $self = shift;
     if ($sc eq 'FXCM') {
         require Finance::HostedTrader::Account::FXCM;
         return Finance::HostedTrader::Account::FXCM->new( $self->{_args} );
+    } elsif ($sc eq 'ForexConnect') {
+        require Finance::HostedTrader::Account::FXCM::ForexConnect;
+        return Finance::HostedTrader::Account::FXCM::ForexConnect->new( $self->{_args} );
     } elsif ($sc eq 'UnitTest') {
         require Finance::HostedTrader::Account::UnitTest;
         return Finance::HostedTrader::Account::UnitTest->new( $self->{_args} );
