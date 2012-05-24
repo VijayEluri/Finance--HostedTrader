@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+
+TF=$1
+# Load natural timeframes
+DATADIR=${2:-/dev/shm}
+STARTDATE=${3:-0001-01-01}
+mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\n' -s -ufxcm fxcm $DATADIR/*_$TF
+rm -Rf $DATADIR/*_$TF
+
+# Create synthetic pairs
+~/fx/synthetics.pl --timeframe=$TF
+
+# Create synthetic timeframes
+if [[ "$TF" == "300" ]]; then
+~/fx/updateTf.pl --start="$STARTDATE" --timeframes=900 --available-timeframe=5min --symbols=all
+~/fx/updateTf.pl --start="$STARTDATE" --timeframes=1800 --available-timeframe=15min --symbols=all
+fi
+
+if [[ "$TF" == "3600" ]]; then
+~/fx/updateTf.pl --start="$STARTDATE" --timeframes=7200 --available-timeframe=hour --symbols=all
+~/fx/updateTf.pl --start="$STARTDATE" --timeframes=10800 --available-timeframe=hour --symbols=all
+~/fx/updateTf.pl --start="$STARTDATE" --timeframes=14400 --available-timeframe=2hour --symbols=all
+fi
