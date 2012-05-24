@@ -5,27 +5,20 @@ set -e
 while getopts "pc" opt; do
     case $opt in
       p)
-         USE_PROFILER=1
-         USE_COVER=
+         ARGS="-d:NYTProf"
          ;;
       c)
-         USE_PROFILER=
-         USE_COVER=1
+         ARGS="-MDevel::Cover"
          ;;
     esac
 done
 shift $(($OPTIND - 1))
 
 HOMEDIR=~/fx
+TZ=GMT
 
 START_DATE=${1:-"2010-08-18 06:00:00"}
 END_DATE=${2:-"2010-09-17 00:00:00"}
 
-TZ=GMT
-if [ $USE_PROFILER ]; then
-    ARGS="-d:NYTProf"
-elif [ $USE_COVER ]; then
-    ARGS="-MDevel::Cover"
-fi
 
 nice -n 19 perl $ARGS $HOMEDIR/data/fxcm/servers/Trader/Trader.pl --class=UnitTest --notifier=UnitTest --startDate="$START_DATE" --endDate="$END_DATE" --expectedTradesFile=trades.xag --verbose
