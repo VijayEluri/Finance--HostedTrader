@@ -81,10 +81,7 @@ my $self = shift;
 
     my $sc = $self->SUBCLASS();
 
-    if ($sc eq 'FXCM') {
-        require Finance::HostedTrader::Account::FXCM;
-        return Finance::HostedTrader::Account::FXCM->new( $self->{_args} );
-    } elsif ($sc eq 'ForexConnect') {
+    if ($sc eq 'ForexConnect') {
         require Finance::HostedTrader::Account::FXCM::ForexConnect;
         return Finance::HostedTrader::Account::FXCM::ForexConnect->new( $self->{_args} );
     } elsif ($sc eq 'UnitTest') {
