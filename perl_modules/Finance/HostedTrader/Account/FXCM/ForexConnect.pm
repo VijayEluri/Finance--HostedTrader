@@ -167,10 +167,16 @@ my %symbolMap = (
     USOil  => 'USOil',
 );
 
-sub BUILD {
-    my $self = shift;
+has '_fx' => (
+    is      => 'ro',
+    isa     => 'Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect',
+    lazy    => 1,
+    builder => '_build_fx',
+);
 
-    $self->{_fx} = Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect->new($self->username, $self->password, $self->accountType);
+sub build_fx {
+    my $self = shift;
+    return Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect->new($self->username, $self->password, $self->accountType);
 }
 
 =item C<refreshPositions()>

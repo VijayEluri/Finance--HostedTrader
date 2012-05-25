@@ -62,6 +62,16 @@ has 'notifier' => (
     required=>0,
 );
 
+has '_signal_processor' => (
+    is      => 'ro',
+    isa     => 'Finance::HostedTrader::ExpressionParser',
+    lazy    => 1,
+    builder => '_build_signal_processor',
+);
+
+sub _build_signal_processor {
+    return Finance::HostedTrader::ExpressionParser->new();
+}
 =back
 
 =head2 Constructor
@@ -85,7 +95,6 @@ sub BUILD {
     die("End date cannot be earlier than start date") if ( $endDate lt $startDate);
     $self->startDate($startDate);
     $self->endDate($endDate);
-    $self->{_signal_processor} = Finance::HostedTrader::ExpressionParser->new();
     $self->{_positions} = {};
 }
 
@@ -239,7 +248,7 @@ Returns true if the given $signal/$args occurs in $symbol
 sub checkSignal {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
 
-    return $self->{_signal_processor}->checkSignal(
+    return $self->_signal_processor->checkSignal(
         {
             'expr' => $signal_definition, 
             'symbol' => $symbol,
@@ -259,7 +268,7 @@ Returns the indicator value of $indicator/$args on $symbol.
 sub getIndicatorValue {
     my ($self, $symbol, $indicator, $args) = @_;
 
-    my $value = $self->{_signal_processor}->getIndicatorData( {
+    my $value = $self->_signal_processor->getIndicatorData( {
                 symbol  => $symbol,
                 tf      => $args->{timeframe},
                 fields  => 'datetime, ' . $indicator,
