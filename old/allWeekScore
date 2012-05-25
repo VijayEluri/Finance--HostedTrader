@@ -1,1 +1,0 @@
-./eval.pl --timeframe=week "abs(ta_ema(trend(close,21), 13)), IF(ta_ema(trend(close,21),13) > 0, 1, -1)" | cut -f 1,3
