@@ -14,14 +14,12 @@ use Finance::HostedTrader::Trader;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $address, $port, $accountClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates) = (0, 0, '127.0.0.1', 1500, 'FXCM', undef, 'now', '10 years', 0);
+my ($verbose, $help, $accountClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates) = (0, 0, 'FXConnect', undef, 'now', '10 years', 0);
 
 my $result = GetOptions(
     "class=s",  \$accountClass,
     "expectedTradesFile=s", \$expectedTradesFile,
     "dontSkipDates",  \$dontSkipDates,
-    "address=s",\$address,
-    "port=i",   \$port,
     "verbose",  \$verbose,
     "help",     \$help,
     "startDate=s",\$startDate,
@@ -34,8 +32,6 @@ my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
 
 my $account = Finance::HostedTrader::Factory::Account->new(
                 SUBCLASS => $accountClass,
-                address => $address,
-                port => $port,
                 startDate => $startDate,
                 endDate => $endDate,
                 system => $trendfollow,
