@@ -277,7 +277,7 @@ sub balance {
 #sub checkSignal_slow {
 #    my ($self, $symbol, $signal_definition, $signal_args) = @_;
 #
-#    return $self->{_signal_processor}->checkSignal(
+#    return $self->_signal_processor->checkSignal(
 #        {
 #            'expr' => $signal_definition, 
 #            'symbol' => $symbol,
@@ -325,7 +325,7 @@ sub checkSignal {
         my $max_loaded_periods = int(($seconds_between_dates / $seconds_in_tf) + 0.5) + $signal_args->{maxLoadedItems};
 
 
-        $cache->{$symbol}->{$signal_definition} = $self->{_signal_processor}->getSignalData( {
+        $cache->{$symbol}->{$signal_definition} = $self->_signal_processor->getSignalData( {
             'expr' => $signal_definition, 
             'symbol' => $symbol,
             'tf' => $signal_args->{timeframe},
@@ -375,7 +375,7 @@ sub checkSignal {
 sub getIndicatorValue {
     my ($self, $symbol, $indicator, $args) = @_;
 
-    my $value = $self->{_signal_processor}->getIndicatorData( {
+    my $value = $self->_signal_processor->getIndicatorData( {
                 symbol  => $symbol,
                 tf      => $args->{timeframe},
                 fields  => 'datetime, ' . $indicator,
