@@ -47,7 +47,7 @@ if [ $VERBOSE ]; then
     echo FXCM_TF=$FXCM_TIMEFRAME TF=$TIMEFRAME NUM_ITEMS=$NUM_ITEMS DATE_TO_CALC_SYNTHETICS=$CALC_SYNTHETICS_FROM_DATE
 fi
 
-. ../config_real.sh
+. $TRADER_HOME/data/fxcm/servers/config_real.sh
 cd $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData
 SYMBOLS=`perl -MFinance::HostedTrader::Config -e 'print join(" ", map {substr($_,0,3)."/".substr($_,3)} @{Finance::HostedTrader::Config->new()->symbols->all})'`
 sleep $(expr $RANDOM % 5 + 5)
