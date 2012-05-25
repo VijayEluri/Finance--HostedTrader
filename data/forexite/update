@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+cd $TRADER_HOME/data/forexite
+
 if [ ! -f LAST_DOWNLOADED ]; then
 echo "Don't know what to download"
 exit 1
