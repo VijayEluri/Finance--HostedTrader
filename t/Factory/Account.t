@@ -42,24 +42,26 @@ is($acc->endDate, '2030-06-24 06:00:00', 'Factory set endDate argument appropria
 
 throws_ok {
     $acc = Finance::HostedTrader::Factory::Account->new(
-            SUBCLASS => 'FXCM',
+            SUBCLASS    => 'ForexConnect',
+            password    => 'password',
     	)->create_instance();
-} qr/Attribute \(address\) is required/, 'FXCM dies without address argument';
+} qr/Attribute \(username\) is required/, 'ForexConnect dies without username argument';
 
 throws_ok {
     $acc = Finance::HostedTrader::Factory::Account->new(
-            SUBCLASS    => 'FXCM',
-            address     => '127.0.0.1',
+            SUBCLASS    => 'ForexConnect',
+            username    => 'username',
     	)->create_instance();
-} qr/Attribute \(port\) is required/, 'FXCM dies without port argument';
+} qr/Attribute \(password\) is required/, 'ForexConnect dies without password argument';
 
     $acc = Finance::HostedTrader::Factory::Account->new(
-            SUBCLASS    => 'FXCM',
-            address     => '127.0.0.1',
-            port        => '1500',
+            SUBCLASS    => 'ForexConnect',
+            username    => 'username',
+            password    => 'password',
+            accountType => 'Demo',
     	)->create_instance();
-isa_ok($acc,'Finance::HostedTrader::Account::FXCM');
+isa_ok($acc,'Finance::HostedTrader::Account::FXCM::ForexConnect');
 can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getSymbolBase/);
-is($acc->address, '127.0.0.1', 'Factory set address argument appropriately');
-is($acc->port, '1500', 'Factory set port argument appropriately');
+is($acc->username, 'username', 'Factory set username argument appropriately');
+is($acc->password, 'password', 'Factory set password argument appropriately');
 
