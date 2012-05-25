@@ -1,34 +1,41 @@
 MAILTO=joaocosta@zonalivre.org
+TRADER_HOME=/home/fxhistor/fx
 # Minute   Hour   Day of Month       Month          Day of Week        Command
 # (0-59)  (0-23)     (1-31)    (1-12 or Jan-Dec)  (0-6 or Sun-Sat)
 
+
+*/5 21-23 * * 0 $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData/loaddata.sh -t m5 -n 10 2>&1 | egrep -v "Picked up JAVA_TOOL_OPTIONS|pure virtual method called|terminate called without an active exception|line 55:"
+*/5 * * * 1-4 $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData/loaddata.sh -t m5 -n 10 2>&1 | egrep -v "Picked up JAVA_TOOL_OPTIONS|pure virtual method called|terminate called without an active exception|line 55:"
+*/5 0-20 * * 5 $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData/loaddata.sh -t m5 -n 10 2>&1 | egrep -v "Picked up JAVA_TOOL_OPTIONS|pure virtual method called|terminate called without an active exception|line 55:"
+3,18,38 * * * 0-5 $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData/loaddata.sh -t H1 -n 10 2>&1 | egrep -v "Picked up JAVA_TOOL_OPTIONS|pure virtual method called|terminate called without an active exception|line 55:"
+6 */3 * * 0-5 $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData/loaddata.sh -t D1 -n 10 2>&1 | egrep -v "Picked up JAVA_TOOL_OPTIONS|pure virtual method called|terminate called without an active exception|line 55:"
+31 6 * * 1 $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData/loaddata.sh -t W1 -n 320 -d "0001-01-01" 2>&1 | egrep -v "Picked up JAVA_TOOL_OPTIONS|pure virtual method called|terminate called without an active exception|line 55:"
+
 #Update from forexite once a day
-2 7 * * * source ~/.bash_profile;cd ~/fx/data/forexite;./update 60
+8 7 * * * $TRADER_HOME/data/forexite/update 60
+
+8 7 * * * cd $TRADER_HOME/data/fxcm;../../eval.pl --timeframe=week "datetime,abs(trend(close,21)),trend(close,21)" | sort -g -k 4 -r
 
 #Check errors in fxcm data import once a day
 2 7 * * * cat /tmp/mysqlimport.errors 2> /dev/null
 
 #Produce currency score report on Saturdays
-13 8 * * 6 source ~/.bash_profile;~/fx/score.single.pl --timeframe=week | sort -g -k 2
+13 8 * * 6 $TRADER_HOME/score.single.pl --timeframe=week | sort -g -k 2
 
 #Run unit tests on Saturdays
-52 10 * * 6 source ~/.bash_profile;cd ~/fx/t/;~/fx/t/RunAllTests.sh -c
+52 10 * * 6 cd $TRADER_HOME/t/;~/fx/t/RunAllTests.sh -c
 
 #Check relevant FXCM API processes are running during market hours
-7,27,47 21-23 * * 0 ~/fx/data/fxcm/servers/checkProcesses.sh
-7,27,47 * * * 1-4 ~/fx/data/fxcm/servers/checkProcesses.sh
-7,37 0-19 * * 5 ~/fx/data/fxcm/servers/checkProcesses.sh
-
-#Start processes on sunday (doesn't work because it windows windowing)
-#3 21 * * 0 ~/fx/data/fxcm/servers/Datafeed/RatePrinter start
-#4 21 * * 0 ~/fx/data/fxcm/servers/Server/start
+7,27,47 21-23 * * 0 $TRADER_HOME/data/fxcm/servers/checkProcesses.sh
+7,27,47 * * * 1-4 $TRADER_HOME/data/fxcm/servers/checkProcesses.sh
+7,37 0-19 * * 5 $TRADER_HOME/data/fxcm/servers/checkProcesses.sh
 
 # Produce report once a day during weekdays
-43 20 * * 1-5 source ~/.bash_profile;cd ~/fx/data/fxcm/servers/Trader;~/fx/data/fxcm/servers/Trader/report.pl
+#43 20 * * 1-5 source ~/.bash_profile;cd $TRADER_HOME/data/fxcm/servers/Trader;$TRADER_HOME/data/fxcm/servers/Trader/report.pl
 
 #Report on existing trades/opportunities
-#36 */6 * * 1-4 source ~/.bash_profile;cd ~/fx/data/fxcm/servers/Trader;./report.pl
+#36 */6 * * 1-4 source ~/.bash_profile;cd $TRADER_HOME/data/fxcm/servers/Trader;./report.pl
 
-37 */3 * * 1-4 source ~/.bash_profile;cd ~/fx/data/fxcm/servers/Trader;~/fx/t/dataUp2Date.pl
+37 */3 * * 1-4 source ~/.bash_profile;cd $TRADER_HOME/data/fxcm/servers/Trader;$TRADER_HOME/t/dataUp2Date.pl
 
-45 22 * * 1-5 source ~/.bash_profile;cd ~/fx/data/fxcm/;testSignal.pl --start="3 days ago" "crossoverdown(low,previous(min(low,60),1)) AND min(previous(low,1),20) > previous(min(low,60),1)";testSignal.pl --start="3 days ago" "crossoverup(high,previous(max(high,60),1)) AND max(previous(high,1),20) < previous(max(high,60),1)"
+#45 22 * * 1-5 source ~/.bash_profile;cd ~/fx/data/fxcm/;testSignal.pl --start="3 days ago" "crossoverdown(low,previous(min(low,60),1)) AND min(previous(low,1),20) > previous(min(low,60),1)";testSignal.pl --start="3 days ago" "crossoverup(high,previous(max(high,60),1)) AND max(previous(high,1),20) < previous(max(high,60),1)"
