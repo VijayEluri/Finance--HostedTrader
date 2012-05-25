@@ -5,16 +5,21 @@ package Finance::HostedTrader::Account::FXCM::ForexConnect;
 
 =head1 SYNOPSIS
 
-    use FXCM;
-    my $s = Finance::HostedTrader::Account::FXCM::ForexConnect->new( username => '', password => '', accountType => 'Real' );
-    print $s->getAsk('EURUSD');
-    print $s->getBid('EURUSD');
+    my $account = Finance::HostedTrader::Factory::Account->new(
+                SUBCLASS => 'ForexConnect',
+                username => '',
+                password => '',
+                accountType => 'demo', #real
+            )->create_instance();
 
-    my ($openOrderID, $price) = $s->openMarket('EURUSD', 'long', 100000);
-    my $trades = $s->getTrades();
+    print $account->getAsk('EURUSD');
+    print $account->getBid('EURUSD');
+
+    my ($openOrderID, $price) = $account->openMarket('EURUSD', 'long', 100000);
+    my $trades = $account->getTrades();
 
     my $tradeID = $trades->[0]->{ID};
-    my $closeOrderID = $s->closeMarket($tradeID, 100000);
+    my $closeOrderID = $account->closeMarket($tradeID, 100000);
 
 =head1 DESCRIPTION
 
