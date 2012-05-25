@@ -1,9 +1,9 @@
 Store trades locally
 Use non-fx instruments:
 Some files make assumptions in this regard:
-    ~/fx/data/fxcm/servers/Trader/report.pl (base currency)
-    ~/fx/data/fxcm/src/cpp/Server/Server/basic-server.cpp ( convertSymbolToFXCM )
-    ~/fx/perl_modules/Finance/HostedTrader/Datasource.pm (createSynthetic)
+    $TRADER_HOME/data/fxcm/servers/Trader/report.pl (base currency)
+    $TRADER_HOME/data/fxcm/src/cpp/Server/Server/basic-server.cpp ( convertSymbolToFXCM )
+    $TRADER_HOME/perl_modules/Finance/HostedTrader/Datasource.pm (createSynthetic)
 
 
 .tidyrc

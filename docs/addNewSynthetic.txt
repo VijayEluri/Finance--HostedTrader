@@ -4,7 +4,7 @@ createTables.pl --tableType=MEMORY --symbols=CHFJPY | mysql -ufxcm fxcm
 #Edit fx.yml and add the new symbol
 
 #Create synthetic data for each natural timeframe
-~/fx/synthetics.pl --timeframe=300 --verbose --symbols=CHFJPY
+$TRADER_HOME/synthetics.pl --timeframe=300 --verbose --symbols=CHFJPY
 
 #Create synthetic timeframes
-~/fx/updateTf.pl --start="0001-01-01" --timeframes=900,1800,7200,10800,14400 --available-timeframe=5min --symbols=CHFJPY --verbose
+$TRADER_HOME/updateTf.pl --start="0001-01-01" --timeframes=900,1800,7200,10800,14400 --available-timeframe=5min --symbols=CHFJPY --verbose

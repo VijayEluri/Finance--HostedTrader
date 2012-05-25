@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RUNDIR=~/fx/data/fxcm/servers/Trader
+RUNDIR=$TRADER_HOME/data/fxcm/servers/Trader
 CONFIG_FILE=$1
 
 . $CONFIG_FILE

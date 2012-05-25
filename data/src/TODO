@@ -3,7 +3,7 @@ find ./ -name "*.zip" -exec unzip {} \;
 
 #Process data in db ready format
 for file in ZIP_OUTPUT_FILES; do
-~/fx/data/updates/process.forexite.sh $file
+$TRADER_HOME/data/updates/process.forexite.sh $file
 done
 
 #import it to db

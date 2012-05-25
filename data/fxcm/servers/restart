@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-BASE_DIR=~/fx/data/fxcm/servers
+BASE_DIR=$TRADER_HOME/data/fxcm/servers
 SERVERS="Trader Server Datafeed"
 
 
