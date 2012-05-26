@@ -5,23 +5,8 @@ Packages:
     mysql
     maven
 Perl modules
-	Parse::RecDescent
-    Inline::Java
-	Config::Any
-	Hash::Merge
-	Test::Exception
-	Data::Compare
-	YAML::Tiny
-    YAML::XS
-	List::Compare::Functional
-	MIME::Lite
-	Text::ASCIITable
-	Devel::Cover
-	Date::Manip
-	Date::Calc
-	Devel::NYTProf
-        Pod::Coverage
-    Test::MockModule
+    Install Finance::HostedTrader from
+      $TRADER_HOME/perl_modules/Finance-HostedTrader/Finance-HostedTrader*.tar.gz
 
 HostedTrader
     Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Hosted--Trader
