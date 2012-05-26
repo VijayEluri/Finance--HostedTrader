@@ -66,6 +66,15 @@ my $tfs = $cfg->timeframes->all();
 $tfs = [ split( ',', $tfs_txt ) ] if ($tfs_txt);
 my $symbols = $cfg->symbols->all();
 $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
+my $dbname = $cfg->db->dbname;
+my $dbuser = $cfg->db->dbuser;
+my $dbpasswd = $cfg->db->dbpasswd;
+my $userhost = 'localhost'; #Unlikely to be anything else
+
+print qq{
+    CREATE DATABASE $dbname;
+    use $dbname;
+};
 
 foreach my $symbol (@$symbols) {
     foreach my $tf (@$tfs) {
@@ -82,4 +91,6 @@ PRIMARY KEY ( `datetime` )
 /;
 
     }
+
+print "GRANT ALL ON `$dbname`.* TO `$dbuser`@`$userhost`" . ($dbpasswd ? " IDENTIFIED BY `$dbpasswd`": '') . ";\n";
 }
