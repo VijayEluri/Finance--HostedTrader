@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+package Finance::HostedTrader::DataManager;
+# ABSTRACT: Test dataset for error conditions
 
 use strict;
 use warnings;
