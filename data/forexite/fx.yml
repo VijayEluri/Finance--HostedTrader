@@ -55,10 +55,12 @@ timeframes:
         - 1800
         - 3600
         - 7200
+        - 10800
         - 14400
         - 86400
         - 604800
 db:
+    dbhost: localhost
     dbname: fx
     dbuser: fxhistor
     dbpasswd:
