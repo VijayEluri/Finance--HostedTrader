@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Test::More tests => 25;
 use Data::Dumper;
+use File::Basename;
 
 BEGIN {
 use_ok ('Finance::HostedTrader::Config');
@@ -12,10 +13,13 @@ use_ok ('Finance::HostedTrader::Config::Symbols');
 use_ok ('Finance::HostedTrader::Config::Timeframes');
 }
 
+
+my $t_path = dirname($0);
+
 my $merge_files = Finance::HostedTrader::Config->new(
 		'files' => [
-			'cfg1.yml',
-			'cfg2.yml', ]);
+			"$t_path/cfg1.yml",
+			"$t_path/cfg2.yml", ]);
 
 isa_ok($merge_files,'Finance::HostedTrader::Config');
 is($merge_files->db->dbhost, 'dbhost', 'Key missing in file cfg2');

@@ -42,6 +42,13 @@ has symbolUpdateInterval => (
     required=>1,
 );
 
+has pathToSystems => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'systems',
+    required=> 1,
+);
+
 =back
 
 =head2 Constructor
@@ -91,9 +98,9 @@ sub _loadSystem {
     my $self = shift;
     my $self_name = $self->name;
 
-    my $file = "systems/".$self_name.".yml";
+    my $file = $self->pathToSystems."/".$self_name.".yml";
     die("Cannot read system file from '$file'") if ( ! -r $file);
-    my $tradeable_filter = "systems/".$self_name.".tradeable.yml";
+    my $tradeable_filter = $self->pathToSystems."/".$self_name.".tradeable.yml";
     my @files = ($file, $tradeable_filter);
     my $system_all = Config::Any->load_files(
         {
@@ -146,7 +153,7 @@ sub _loadSymbols {
 sub _getSymbolFileName {
     my ($self) = @_;
 
-    return 'systems/'.$self->name.'.symbols.yml';
+    return $self->pathToSystems.'/'.$self->name.'.symbols.yml';
 }
 1;
 
