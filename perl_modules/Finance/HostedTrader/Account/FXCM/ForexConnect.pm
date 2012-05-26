@@ -36,7 +36,7 @@ use Moose;
 extends 'Finance::HostedTrader::Account';
 
 use Inline  Java    => 'STUDY',
-            STUDY   => [ qw(org.zonalivre.ForexConnect) ],
+            STUDY   => [ qw(org.zonalivre.FXConnect.ForexConnect) ],
             AUTOSTUDY=> 1;
 
 use Moose::Util::TypeConstraints;
