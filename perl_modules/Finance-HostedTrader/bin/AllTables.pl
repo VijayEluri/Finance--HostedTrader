@@ -1,6 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+package Finance::HostedTrader;
 
 use strict;
+use warnings;
 use Getopt::Long;
 use Finance::HostedTrader::Datasource;
 use Data::Dumper;

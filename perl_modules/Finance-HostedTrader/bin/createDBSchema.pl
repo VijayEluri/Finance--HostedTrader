@@ -1,4 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+package Finance::HostedTrader;
+
 =head1 createTables.pl
 
 Outputs SQL suitable to create tables to store symbol historical data in various timeframes
@@ -50,6 +52,7 @@ L<Finance::HostedTrader::Config>
 =cut
 
 use strict;
+use warnings;
 use Getopt::Long;
 use Finance::HostedTrader::Config;
 use Pod::Usage;

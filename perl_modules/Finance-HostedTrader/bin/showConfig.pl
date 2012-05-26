@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+package Finance::HostedTrader;
 
 use strict;
 use warnings;

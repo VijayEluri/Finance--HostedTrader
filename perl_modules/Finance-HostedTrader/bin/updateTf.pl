@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+package Finance::HostedTrader;
 =head1 updateTf.pl
 
 Generates synthetic timeframes

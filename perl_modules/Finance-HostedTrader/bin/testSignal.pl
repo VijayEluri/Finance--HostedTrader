@@ -1,21 +1,17 @@
 #!/usr/bin/perl
-=head1 NAME
-
-Outputs the value of an indicator against all known symbols
-
+package Finance::HostedTrader;
+# ABSTRACT: Outputs the value of a signal against all known symbols
 
 =head1 SYNOPSIS
 
-    eval.pl [--timeframe=tf] [--verbose] [--symbols=s] [--debug] [--maxLoadedItems=i] [--numItems=i] expr
+    testSignal.pl [--timeframe=tf] [--verbose] [--symbols=s] [--debug] [--maxLoadedItems=i] [--numItems=i] expr
 
 
 =head1 DESCRIPTION
 
 Sample expressions:
 
-rsi(close,14)
-
-ema(close,21)
+close > ema(close,21)
 
 
 =head2 OPTIONS
@@ -73,40 +69,49 @@ use Finance::HostedTrader::Config;
 use Finance::HostedTrader::ExpressionParser;
 
 use Data::Dumper;
+use Date::Manip;
 use Getopt::Long;
 use Pod::Usage;
 
-my ( $timeframe, $max_loaded_items, $max_display_items, $symbols_txt, $debug, $help ) =
-  ( 'day', 1000, 1, '', 0, 0 );
+my ( $timeframe, $max_loaded_items, $symbols_txt, $debug, $help, $startPeriod, $endPeriod, $numItems, $verbose ) =
+  ( 'day', undef, '', 0, 0, '90 days ago', 'today', undef, 0 );
 
 GetOptions(
     "timeframe=s"         => \$timeframe,
+    "numItems=i"         => \$numItems,
     "debug"               => \$debug,
+    "verbose"               => \$verbose,
     "symbols=s"           => \$symbols_txt,
     "maxLoadedItems=i"  => \$max_loaded_items,
-    "numItems=i" => \$max_display_items,
+    "start=s" => \$startPeriod,
+    "end=s" => \$endPeriod,
 ) || pod2usage(2);
 pod2usage(1) if ($help);
 
 my $cfg               = Finance::HostedTrader::Config->new();
 my $signal_processor = Finance::HostedTrader::ExpressionParser->new();
 
-my $symbols = $cfg->symbols->all;
+my $symbols = $cfg->symbols->natural;
 
 $symbols = [ split( ',', $symbols_txt ) ] if ($symbols_txt);
+
+
+foreach my $signal (@ARGV) {
+print "$signal\n----------------------\n" if ($verbose);
 foreach my $symbol ( @{$symbols} ) {
-    my $data = $signal_processor->getIndicatorData(
+    print "Testing $symbol\n" if ($verbose);
+    my $data = $signal_processor->getSignalData(
         {
-            'fields'           => $ARGV[0],
+            'expr'            => $signal,
+            'numItems'        => $numItems,
             'symbol'          => $symbol,
             'tf'              => $timeframe,
             'maxLoadedItems'  => $max_loaded_items,
-            'numItems' => $max_display_items,
-            'debug'         => $debug,
+            'startPeriod'     => UnixDate($startPeriod, '%Y-%m-%d %H:%M:%S'),
+            'endPeriod'       => UnixDate($endPeriod, '%Y-%m-%d %H:%M:%S'),
+            'debug'           => $debug,
         }
     );
-    foreach my $item (@$data) {
-        print "$symbol\t" . join( "\t", @$item ) . "\n";
-    }
-    print "$symbol\t" . Dumper( \$data ) if ($debug);
+    print $symbol, ' - ', Dumper(\$data) if (scalar(@$data));
+}
 }
