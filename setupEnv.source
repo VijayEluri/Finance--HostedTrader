@@ -4,9 +4,8 @@ export PERL5LIB=$TRADER_HOME/perl_modules:$PERL5LIB
 export PATH=$TRADER_HOME:$PATH
 
 
-FXCONNECT_HOME=~/ForexConnectAPI-0.4.0-Linux-x86_64
-export LD_LIBRARY_PATH=$FXCONNECT_HOME/lib:$LD_LIBRARY_PATH
-export CLASSPATH=$TRADER_HOME/data/fxcm/src/FXConnect/bin:$FXCONNECT_HOME/lib/java/fxcore2.jar:$CLASSPATH
+export LD_LIBRARY_PATH=$FXCONNECT_HOME/lib:$FXCONNECT_HOME/lib/java:$LD_LIBRARY_PATH
+export CLASSPATH=$TRADER_HOME/data/fxcm/src/FXConnect/target/*:$FXCONNECT_HOME/lib/java/*:$CLASSPATH
 
 
 export JAVA_TOOL_OPTIONS="-Xms32M -Xmx64M -XX:MaxPermSize=32m"
