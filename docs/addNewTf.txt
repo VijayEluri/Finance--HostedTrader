@@ -4,7 +4,7 @@ Creating a new timeframe
 vi ~/.fx.yml
 
 #Create MySQL tables
-$TRADER_HOME/createTables.pl | mysql -u root fx
+createDBSchema.pl | mysql -u root fx
 
 #Populate by deriving data from existing timeframes
 updateTf.pl --verbose --timeframes=7200 --available-timeframe=hour
