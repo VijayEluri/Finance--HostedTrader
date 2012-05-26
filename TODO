@@ -4,6 +4,7 @@ Some files make assumptions in this regard:
     $TRADER_HOME/data/fxcm/servers/Trader/report.pl (base currency)
     $TRADER_HOME/data/fxcm/src/cpp/Server/Server/basic-server.cpp ( convertSymbolToFXCM )
     $TRADER_HOME/perl_modules/Finance/HostedTrader/Datasource.pm (createSynthetic)
+Add volume
 
 
 .tidyrc
