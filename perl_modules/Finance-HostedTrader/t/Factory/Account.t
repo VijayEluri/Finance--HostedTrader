@@ -13,7 +13,7 @@ BEGIN {
 use_ok ('Finance::HostedTrader::Factory::Account');
 }
 
-my $t_path = dirname($0);
+my $t_path = dirname(dirname($0));
 
 my $acc;
 
@@ -30,7 +30,7 @@ throws_ok {
     	)->create_instance();
 } qr/Attribute \(system\) is required/, 'UnitTest dies without system argument';
 
-my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => $t_path );
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => "$t_path/systems" );
 
 $acc = Finance::HostedTrader::Factory::Account->new(
         SUBCLASS    => 'UnitTest',
