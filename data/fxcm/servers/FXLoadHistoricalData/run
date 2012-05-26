@@ -3,8 +3,8 @@
 set -e
 
 echo `date`     START
-./loaddata.sh -t m5 -n 6600 -d "0001-01-01" -v
-./loaddata.sh -t H1 -n 4420 -d "0001-01-01" -v
-./loaddata.sh -t D1 -n 1065 -d "0001-01-01" -v
-./loaddata.sh -t W1 -n 320 -d "0001-01-01" -v
+./loaddata.sh -t m5 -n 6600 -d "1900-01-01" -v
+./loaddata.sh -t H1 -n 4420 -d "1900-01-01" -v
+./loaddata.sh -t D1 -n 1065 -d "1900-01-01" -v
+./loaddata.sh -t W1 -n 320 -d "1900-01-01" -v
 echo `date`     DONE
