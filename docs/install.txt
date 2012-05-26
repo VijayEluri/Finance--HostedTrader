@@ -9,6 +9,7 @@ Perl modules
 	Test::Exception
 	Data::Compare
 	YAML::Tiny
+    YAML::XS
 	List::Compare::Functional
 	MIME::Lite
 	Text::ASCIITable
@@ -20,9 +21,12 @@ Perl modules
     Test::MockModule
 HostedTrader
     Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Hosted--Trader
-    Setup JAVA_HOME
-	Need a config file, eg: ~/.fx.yml
+    source $TRADER_HOME/setupEnv.source
+	Need a config file, eg: /etc/fx.yml
+    Need a FXCM config file, $TRADER_HOME/data/fxcm/servers/config_real.sh
 MySQL
+    to generate db/user/tables corresponding to config file, run:
+      $TRADER_HOME/createDBSchema.pl | mysql -u root
 	If using partitioned tables (eg, minutes timeframe tables can be very large and it makes sense to partition them)
 	may need to set this in my.cnf (mysqld section)
 	open-files-limit=10000
