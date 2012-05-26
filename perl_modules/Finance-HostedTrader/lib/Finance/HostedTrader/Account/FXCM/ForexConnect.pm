@@ -169,7 +169,7 @@ sub refreshPositions {
     my ($self) = @_;
 
     $self->{_positions} = {};
-    my $yml = $self->{_fx}->getTrades();
+    my $yml = $self->_fx->getTrades();
 
     return if (!$yml);
     my $trades = YAML::Syck::Load( $yml );
@@ -204,7 +204,7 @@ sub getAsk {
     my ($self, $symbol) = @_;
 
     $symbol = $self->_convertSymbolToFXCM($symbol);
-    return $self->{_fx}->getAsk($symbol);
+    return $self->_fx->getAsk($symbol);
 }
 
 =method C<getBid($symbol)>
@@ -217,7 +217,7 @@ sub getBid {
     my ($self, $symbol) = @_;
 
     $symbol = $self->_convertSymbolToFXCM($symbol);
-    return $self->{_fx}->getBid($symbol);
+    return $self->_fx->getBid($symbol);
 }
 
 =method C<openMarket($symbol, $direction, $amount>
@@ -246,7 +246,7 @@ augment 'openMarket' => sub {
     #to quickly, so try it 3 times until it succeeds
     TRY_OPENTRADE: foreach my $try (1..3) {
         eval {
-            $data = $self->{_fx}->openMarket($fxcm_symbol,$fxcm_direction,$amount);
+            $data = $self->_fx->openMarket($fxcm_symbol,$fxcm_direction,$amount);
             1;
         } or do {
             #TODO would be preferable to log something here
@@ -281,7 +281,7 @@ Returns $closedTradeID
 sub closeMarket {
     my ($self, $tradeID, $amount) = @_;
 
-    return $self->{_fx}->closeMarket($tradeID,$amount);
+    return $self->_fx->closeMarket($tradeID,$amount);
 }
 
 =method C<getBaseUnit($symbol)>
@@ -307,7 +307,7 @@ Return the current net asset value in the account
 sub getNav {
     my ($self) = @_;
 
-    return $self->{_fx}->getNav;
+    return $self->_fx->getNav;
 }
 
 =method C<getBaseCurrency>
