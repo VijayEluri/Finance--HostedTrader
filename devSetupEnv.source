@@ -1,4 +1,4 @@
 #!/bin/sh
 
-export PATH=$TRADER_HOME/perl_modules/Finance-HostedTrader/bin
-export PERL5LIB=$TRADER_HOME/perl_modules/Finance-HostedTrader/lib
+export PATH=$TRADER_HOME/perl_modules/Finance-HostedTrader/bin:$PATH
+export PERL5LIB=$TRADER_HOME/perl_modules/Finance-HostedTrader/lib:$PERL5LIB
