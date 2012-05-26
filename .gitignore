@@ -19,3 +19,4 @@ config_real.sh
 _Inline
 *.class
 nytprof.out
+.build
