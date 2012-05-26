@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 package Finance::HostedTrader;
-=head1 updateTf.pl
-
-Generates synthetic timeframes
+# ABSTRACT: Generates synthetic timeframes
 
 =head1 SYNOPSIS
 

@@ -1,13 +1,10 @@
 #!/usr/bin/perl
 package Finance::HostedTrader;
-
-=head1 createTables.pl
-
-Outputs SQL suitable to create tables to store symbol historical data in various timeframes
+# ABSTRACT: Outputs SQL suitable to create db, mysql users and tables to store symbol historical data in various timeframes
 
 =head1 SYNOPSIS
 
-    createTables.pl [--timeframes=tfs] [--help] [--symbols=s]
+    createDBSchema.pl [--timeframes=tfs] [--help] [--symbols=s]
 
 =head1 DESCRIPTION
 

@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 package Finance::HostedTrader;
+# ABSTRACT: Generates SQL statments which can be used against all symbols/timeframes
 
 use strict;
 use warnings;

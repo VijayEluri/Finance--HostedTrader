@@ -1,8 +1,6 @@
 #!/usr/bin/perl 
 package Finance::HostedTrader;
-=head1 synthetics.pl
-
-Create synthetic data for FX pairs based on existing USD pairs
+# ABSTRACT: Create synthetic data for FX pairs based on existing USD pairs
 
 =head1 SYNOPSIS
 
