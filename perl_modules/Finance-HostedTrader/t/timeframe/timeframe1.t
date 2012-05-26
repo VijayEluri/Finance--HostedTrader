@@ -18,15 +18,17 @@ my $syntheticTFs = $cfg->timeframes->synthetic;
 
 
 throws_ok {
-    $ds->convertOHLCTimeSeries('SOME',
-                               300,
-                               60,
-                               '0000-00-00',
-                               '9999-99-99' ) } qr/Cannot convert to a smaller timeframe/, 'Convert from larger to smaller exception';
+    $ds->convertOHLCTimeSeries(
+                        symbol      => 'SOME',
+                        tf_src      => 300,
+                        tf_dst      => 60,
+                        start_date  => '0000-00-00',
+                        end_date    =>'9999-99-99' ) } qr/Cannot convert to a smaller timeframe/, 'Convert from larger to smaller exception';
 
 throws_ok {
-    $ds->convertOHLCTimeSeries('SOME',
-                               -2,
-                               -1,
-                               '0000-00-00',
-                               '9999-99-99' ) } qr/timeframe not supported \(-1\)/, 'Convert to invalid timeframe exception';
+    $ds->convertOHLCTimeSeries(
+                        symbol      => 'SOME',
+                        tf_src      => -2,
+                        tf_dst      => -1,
+                        start_date  => '0000-00-00',
+                        end_date    => '9999-99-99' ) } qr/timeframe not supported \(-1\)/, 'Convert to invalid timeframe exception';

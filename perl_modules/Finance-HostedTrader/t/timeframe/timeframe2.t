@@ -40,17 +40,19 @@ foreach my $tf (@{$naturalTFs}) {
 			$dbh->do("CREATE TABLE $TEST_TABLE\_$stf LIKE $BASE_SYMBOL\_$stf") || die($DBI::errstr);
 		}
 
-        $ds->convertOHLCTimeSeries($TEST_TABLE_ONE,
-                                  $tf,
-                                  $stf,
-                                  '0000-00-00',
-                                  '9999-99-99' );
+        $ds->convertOHLCTimeSeries(
+                                symbol      => $TEST_TABLE_ONE,
+                                tf_src      => $tf,
+                                tf_dst      => $stf,
+                                start_date  =>  '0000-00-00',
+                                end_date    =>  '9999-99-99' );
 
-        $ds->convertOHLCTimeSeries($TEST_TABLE_TWO,
-                                  $available_timeframe,
-                                  $stf,
-                                  '0000-00-00',
-                                  '9999-99-99' );
+        $ds->convertOHLCTimeSeries(
+                                symbol      => $TEST_TABLE_TWO,
+                                tf_src      => $available_timeframe,
+                                tf_dst      => $stf,
+                                start_date  => '0000-00-00',
+                                end_date    => '9999-99-99' );
 
 		my @data;
 		foreach my $TEST_TABLE ($TEST_TABLE_ONE, $TEST_TABLE_TWO) {

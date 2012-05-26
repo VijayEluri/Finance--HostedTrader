@@ -143,8 +143,8 @@ foreach my $tf ( @{$tfs} ) {
     foreach my $symbol ( @{$symbols} ) {
         print "$symbol\t$available_timeframe\t$tf\t$start_date\t$end_date\n"
           if ($verbose);
-        $db->convertOHLCTimeSeries( $symbol, $available_timeframe, $tf,
-            $start_date, $end_date );
+        $db->convertOHLCTimeSeries( symbol => $symbol, tf_src => $available_timeframe, tf_dst => $tf,
+            start_date => $start_date, end_date => $end_date );
     }
 #    $available_timeframe = $tf; #This won't work in some cases, eg: if timeframes = 7200,10800
 }

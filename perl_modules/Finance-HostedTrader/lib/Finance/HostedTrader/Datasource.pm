@@ -23,6 +23,7 @@ use DBI;
 use Finance::HostedTrader::Config;
 use Data::Dumper;
 use Moose;
+use Params::Validate qw(:all);
 
 =item C<debug>
 
@@ -92,7 +93,15 @@ Returns a new Finance::HostedTrader::Datasource object.
 
 =cut
 sub convertOHLCTimeSeries {
-    my ( $self, $symbol, $tf_src, $tf_dst, $start_date, $end_date ) = @_;
+    my $self = shift;
+    my %args = validate( @_, {
+        symbol      => 1,
+        tf_src      => 1,
+        tf_dst      => 1,
+        start_date  => 1,
+        end_date    => 1,
+    });
+    my ( $symbol, $tf_src, $tf_dst, $start_date, $end_date ) = ( $args{symbol}, $args{tf_src}, $args{tf_dst}, $args{start_date}, $args{end_date} );
     my ( $where_clause, $start, $end, $limit ) = ( '', '', '', -1 );
     die("Cannot convert to a smaller timeframe: from $tf_src to $tf_dst") if ( $tf_dst < $tf_src );
 
