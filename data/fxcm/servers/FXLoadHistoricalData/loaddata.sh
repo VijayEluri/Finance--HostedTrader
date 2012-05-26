@@ -52,6 +52,6 @@ cd $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData
 SYMBOLS=`perl -MFinance::HostedTrader::Config -e 'print join(" ", map {substr($_,0,3)."/".substr($_,3)} @{Finance::HostedTrader::Config->new()->symbols->all})'`
 sleep $(expr $RANDOM % 5 + 5)
 set +e
-java org.zonalivre.DownloadAll $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE $FXCM_TIMEFRAME $NUM_ITEMS $SYMBOLS
+java org.zonalivre.FXConnect.DownloadAll $FXCM_USER $FXCM_PASSWORD $FXCM_TYPE $FXCM_TIMEFRAME $NUM_ITEMS $SYMBOLS
 set -e
 ./load $TIMEFRAME . "$CALC_SYNTHETICS_FROM_DATE"
