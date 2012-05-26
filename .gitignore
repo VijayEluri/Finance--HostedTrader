@@ -20,3 +20,4 @@ _Inline
 *.class
 nytprof.out
 .build
+target
