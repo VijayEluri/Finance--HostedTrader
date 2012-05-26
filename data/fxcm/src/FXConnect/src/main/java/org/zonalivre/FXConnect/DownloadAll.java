@@ -14,6 +14,6 @@ public class DownloadAll {
         for (int i=5; i<args.length; i++) {
 	    	d.getData(args[i], numItemsToDownload);
         }
-    	//d.disconnect(); Disconnect sometimes fails and doesn't return due to ForexConnect API bug
+    	d.disconnect();
 	}
 }
