@@ -5,6 +5,7 @@ use warnings;
 use Test::More tests => 6;
 use Test::Exception;
 use Data::Dumper;
+use File::Basename;
 
 BEGIN {
 use_ok ('Finance::HostedTrader::Trader');
@@ -12,7 +13,9 @@ use_ok ('Finance::HostedTrader::Trader');
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Factory::Account;
 
-my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
+my $t_path = dirname($0);
+
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => "$t_path/systems" );
 my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => 'UnitTest', system => $trendfollow, startDate=> '2005-01-01' )->create_instance();
 my $trader = Finance::HostedTrader::Trader->new( system => $trendfollow, account => $account );
 isa_ok($trader, 'Finance::HostedTrader::Trader');
