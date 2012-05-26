@@ -17,7 +17,7 @@ Generates synthetic timeframes
 =item C<--start=s>
 
 The starting date to convert from. See L<Date::Manip> for acceptable date formats.
-Defaults to 0001-01-01.
+Defaults to 1900-01-01.
 
 =item C<--end=s>
 
@@ -91,7 +91,7 @@ use Pod::Usage;
 
 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
   localtime( time - 24 * 60 * 60 );
-my ( $start_date, $end_date ) = ( '0001-01-01', '9998-12-31' );
+my ( $start_date, $end_date ) = ( '1900-01-01', '9998-12-31' );
 my ( $symbols_txt, $timeframe_txt );
 my $available_timeframe = '';
 my $verbose             = 0;
