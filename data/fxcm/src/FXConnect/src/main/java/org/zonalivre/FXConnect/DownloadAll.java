@@ -1,4 +1,4 @@
-package org.zonalivre;
+package org.zonalivre.FXConnect;
 import java.text.ParseException;
 
 public class DownloadAll {

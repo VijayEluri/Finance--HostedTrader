@@ -1,7 +1,7 @@
-package org.zonalivre;
+package org.zonalivre.FXConnect;
 
-import org.zonalivre.utils.DateUtils;
-import org.zonalivre.utils.Log;
+import org.zonalivre.FXConnect.utils.DateUtils;
+import org.zonalivre.FXConnect.utils.Log;
 
 import com.fxcore2.Constants;
 import com.fxcore2.IO2GResponseListener;
@@ -10,7 +10,6 @@ import com.fxcore2.O2GAccountRow;
 import com.fxcore2.O2GAccountsTableResponseReader;
 import com.fxcore2.O2GOfferRow;
 import com.fxcore2.O2GOffersTableResponseReader;
-import com.fxcore2.O2GOrderResponseReader;
 import com.fxcore2.O2GRequest;
 import com.fxcore2.O2GRequestFactory;
 import com.fxcore2.O2GRequestParamsEnum;
@@ -120,7 +119,15 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 			O2GTradeRow trade = tradesTable.getRow(i);
 			O2GOfferRow offer = getOfferRow(Integer.parseInt(trade.getOfferID()));
 			Boolean isLong = trade.getBuySell().equals(Constants.Buy);
-			double baseCurrencyPL = ( (isLong ?  offer.getBid() - trade.getOpenRate() : trade.getOpenRate() - offer.getAsk()) * trade.getAmount() ); 
+			double baseCurrencyPL = ( (isLong ?  offer.getBid() - trade.getOpenRate() : trade.getOpenRate() - offer.getAsk()) * trade.getAmount() );
+			
+			String baseCurrency = offer.getInstrument().substring(4);
+			
+			if (!baseCurrency.equals("GBP")) {
+				double conversionFactor = this.getAsk("GBP/" + baseCurrency);
+				baseCurrencyPL = baseCurrencyPL / conversionFactor;
+			}
+			
 			output +=
 					"- symbol: " + offer.getInstrument() + "\n" +
 					"  id: " + trade.getTradeID() + "\n" +
@@ -128,7 +135,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 					"  openPrice: " + trade.getOpenRate() + "\n" +
 					"  size: " + trade.getAmount() +  "\n" +
 					"  openDate: " + DateUtils.calendarToString(trade.getOpenTime()) + "\n" +
-					"  pl: 0" + "\n"
+					"  pl: " + baseCurrencyPL + "\n"
 					;
 		}
 		return output;
@@ -145,25 +152,11 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 			O2GTradeRow trade = tradesTable.getRow(i);
 			if (tradeID.equals(trade.getTradeID())) {
 				return trade;
+			} else {
+				Log.log(trade.getTradeID() + " != " + tradeID);
 			}
 		}
 		throw new Exception("TradeID = " + tradeID + " not found");
-	}
-	
-	public O2GTradeRow getTradeByOrderID(String orderID) throws Exception {
-		O2GRequestFactory requestBuilder = session.getRequestFactory();
-		O2GRequest request = requestBuilder.createRefreshTableRequest(O2GTableType.TRADES);
-		O2GResponse response = sendRequest(request);
-		O2GResponseReaderFactory responseReaderFactory = session.getResponseReaderFactory();
-		O2GTradesTableResponseReader tradesTable = responseReaderFactory.createTradesTableReader(response);
-
-		for (int i = 0; i < tradesTable.size(); i++) {
-			O2GTradeRow trade = tradesTable.getRow(i);
-			if (orderID.equals(trade.getOpenOrderID())) {
-				return trade;
-			}
-		}
-		throw new Exception("OrderID = " + orderID + " not found");
 	}
 	
 	private O2GOfferRow getOfferRow(int offerID) throws Exception {
@@ -204,7 +197,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 	}
 	
 	private O2GAccountRow getAccountRow(int accountIndex) throws Exception {
-		O2GResponse response = session.getLoginRules().getTableRefeshResponse(O2GTableType.ACCOUNTS);
+		O2GResponse response = session.getLoginRules().getTableRefreshResponse(O2GTableType.ACCOUNTS);
 		O2GResponseReaderFactory responseReaderFactory = session.getResponseReaderFactory();
 		O2GAccountsTableResponseReader accountsTable = responseReaderFactory.createAccountsTableReader(response);
 
@@ -221,11 +214,6 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		return offer.getBid();
 	}
 	
-	public int getContractMultiplier(String symbol) throws Exception {
-		O2GOfferRow offer = getOfferRow(symbol);
-		return offer.getContractMultiplier();
-	}
-	
 	public String getContractCurrency(String symbol) throws Exception {
 		O2GOfferRow offer = getOfferRow(symbol);
 		return offer.getContractCurrency();
@@ -239,7 +227,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		return session.getResponseReaderFactory();
 	}
 	
-	@Override
+	//@Override
 	public void onRequestCompleted(String requestID, O2GResponse rsp) {
 		completedRequestID = requestID;
 		if (logLevel > 1) {
@@ -249,7 +237,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		requestInProgress = false;
 	}
 
-	@Override
+	//@Override
 	public void onRequestFailed(String requestID, String reason) {
 		Log.log("Request ID = " + requestID + " complete fail");
 		response = null;
@@ -257,18 +245,18 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		requestInProgress = false;
 	}
 
-	@Override
+	//@Override
 	public void onTablesUpdates(O2GResponse arg0) {
 		//Log.log("onTablesUpdates");
 	}
 
-	@Override
+	//@Override
 	public void onLoginFailed(String reason) {
 		loginFailed = true;
 		loginFailedMessage = reason;
 	}
 
-	@Override
+	//@Override
 	public void onSessionStatusChanged(O2GSessionStatusCode status) {
 		if (logLevel > 1) {
 			Log.log("Got session status = " + status.toString());
@@ -303,14 +291,14 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		return logLevel;
 	}
 	
-	public String openMarket(String symbol, String Direction, int amount) throws Exception {
+	public void openMarket(String symbol, String Direction, int amount) throws Exception {
 		O2GAccountRow account = getAccountRow();
 		O2GOfferRow offer = getOfferRow(symbol);
 
 		O2GRequestFactory requestBuilder = session.getRequestFactory();
 		O2GValueMap valueMap = requestBuilder.createValueMap();
 		valueMap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.CreateOrder);
-		valueMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Order.TrueMarketOpen);
+		valueMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.TrueMarketOpen);
 		valueMap.setString(O2GRequestParamsEnum.ACCOUNT_ID, account.getAccountID());
 		valueMap.setString(O2GRequestParamsEnum.OFFER_ID, offer.getOfferID());
 		valueMap.setString(O2GRequestParamsEnum.BUY_SELL, Direction);
@@ -319,24 +307,17 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		
 		O2GRequest orderRequest = requestBuilder.createOrderRequest(valueMap);
 		O2GResponse orderResponse = sendRequest(orderRequest);
-		O2GResponseReaderFactory responseReaderFactory = session.getResponseReaderFactory();
-		O2GOrderResponseReader orderResponseReader = responseReaderFactory.createOrderResponseReader(orderResponse);
-		if (!orderResponseReader.isSuccessful()) {
-			throw new RuntimeException(orderResponseReader.getErrorDescription());
-		}
-		
-		O2GTradeRow trade = getTradeByOrderID(orderResponseReader.getOrderID());
-		return trade.getTradeID() + " " + trade.getOpenRate();
+        Log.log(orderResponse.toString());
 	}
 	
-	public String closeMarket(String sTradeID, int amount) throws Exception {
+	public void closeMarket(String sTradeID, int amount) throws Exception {
 		O2GAccountRow account = getAccountRow();
 		O2GTradeRow trade = getTrade(sTradeID);
 
 		O2GRequestFactory requestBuilder = session.getRequestFactory();
 		O2GValueMap valueMap = requestBuilder.createValueMap();
 		valueMap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.CreateOrder);
-		valueMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Order.TrueMarketClose);
+		valueMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.TrueMarketClose);
 		valueMap.setString(O2GRequestParamsEnum.ACCOUNT_ID, account.getAccountID());
 		valueMap.setString(O2GRequestParamsEnum.OFFER_ID, trade.getOfferID());
 		valueMap.setString(O2GRequestParamsEnum.TRADE_ID, sTradeID);
@@ -345,13 +326,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		valueMap.setString(O2GRequestParamsEnum.CUSTOM_ID, "FXConnect CloseMarket");
 		
 		O2GRequest orderRequest = requestBuilder.createOrderRequest(valueMap);
-		O2GResponse orderResponse = sendRequest(orderRequest);
-		O2GResponseReaderFactory responseReaderFactory = session.getResponseReaderFactory();
-		O2GOrderResponseReader orderResponseReader = responseReaderFactory.createOrderResponseReader(orderResponse);
-		if (!orderResponseReader.isSuccessful()) {
-			throw new RuntimeException(orderResponseReader.getErrorDescription());
-		}
-		return orderResponseReader.getOrderID();
+		sendRequest(orderRequest);
 	}
 	
 	public double getNav() throws Exception {
@@ -363,24 +338,22 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String username = args[0];
-		String password = args[1];
-		String type = args[2];
-
-/*
-        username    = "7510107448";
-        password    = "4^Real";
-        type        = "Real";
-*/
-
+		/*String username = "7510107448";
+		String password = "4^Real";*/
+		String username = "GBD118836001";
+		String password = "5358";
+		//String username = "GBD82697001";
+		//String password = "2406";
+		String type = "Demo";
+		//String type = "Real";
 		ForexConnect tradeStation = new ForexConnect(username, password, type);
-		String id = tradeStation.openMarket("XAG/USD", Constants.Sell, 50);
-//		String rv = tradeStation.closeMarket("8134655", 50);
+		//tradeStation.openMarket("EUR/USD", Constants.Buy, 10000);
+		//tradeStation.closeMarket("7984420", 2);
+		tradeStation.openMarket("USD/CHF", Constants.Buy, 10000);
 		System.out.println(tradeStation.getTrades());
-//		System.out.println(tradeStation.getNav() + " " + tradeStation.getBid("EUR/USD") + " " + tradeStation.getBid("EUR/JPY"));
-		Log.log("" + tradeStation.getNav());
 		Log.log("" + tradeStation.getBalance());
-		/*Log.log(
+		/*Log.log("" + tradeStation.getBalance());
+		Log.log(
 				tradeStation.getAsk("XAU/USD") + "\n" +
 				tradeStation.getBid("USD/JPY") + "\n" + 
 				"");*/

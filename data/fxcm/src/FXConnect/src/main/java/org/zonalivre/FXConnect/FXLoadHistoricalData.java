@@ -1,4 +1,4 @@
-package org.zonalivre;
+package org.zonalivre.FXConnect;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.zonalivre.utils.DateUtils;
+import org.zonalivre.FXConnect.utils.DateUtils;
 
 import com.fxcore2.O2GMarketDataSnapshotResponseReader;
 import com.fxcore2.O2GRequest;

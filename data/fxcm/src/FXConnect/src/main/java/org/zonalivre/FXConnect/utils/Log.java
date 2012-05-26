@@ -1,4 +1,4 @@
-package org.zonalivre.utils;
+package org.zonalivre.FXConnect.utils;
 
 
 public class Log {

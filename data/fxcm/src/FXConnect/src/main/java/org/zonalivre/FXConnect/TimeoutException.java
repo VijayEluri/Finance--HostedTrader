@@ -1,4 +1,4 @@
-package org.zonalivre;
+package org.zonalivre.FXConnect;
 
 public class TimeoutException extends Exception {
 
