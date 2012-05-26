@@ -22,8 +22,8 @@ Perl modules
 HostedTrader
     Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Hosted--Trader
     source $TRADER_HOME/setupEnv.source
-	Need a config file, eg: /etc/fx.yml
-    Need a FXCM config file, $TRADER_HOME/data/fxcm/servers/config_real.sh
+	Need a HostedTrader config file, eg: /etc/fx.yml
+    Compile the Java bits
 MySQL
     to generate db/user/tables corresponding to config file, run:
       $TRADER_HOME/createDBSchema.pl | mysql -u root
