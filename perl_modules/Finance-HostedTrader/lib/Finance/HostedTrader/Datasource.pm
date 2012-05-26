@@ -94,7 +94,7 @@ Returns a new Finance::HostedTrader::Datasource object.
 sub convertOHLCTimeSeries {
     my ( $self, $symbol, $tf_src, $tf_dst, $start_date, $end_date ) = @_;
     my ( $where_clause, $start, $end, $limit ) = ( '', '', '', -1 );
-    die('Cannot convert to a smaller timeframe') if ( $tf_dst < $tf_src );
+    die("Cannot convert to a smaller timeframe: from $tf_src to $tf_dst") if ( $tf_dst < $tf_src );
 
     my ( $date_select, $date_group );
 
