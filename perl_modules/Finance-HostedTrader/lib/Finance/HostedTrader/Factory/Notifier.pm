@@ -33,7 +33,7 @@ Supported values are:
 has [qw(SUBCLASS)] => ( is => 'ro', required => 1);
 
 
-=item C<BUILD>
+=method C<BUILD>
 
 The constructor takes all arguments passed onto Factory::Notifier
 and passes them to the target class defined by SUBCLASS.

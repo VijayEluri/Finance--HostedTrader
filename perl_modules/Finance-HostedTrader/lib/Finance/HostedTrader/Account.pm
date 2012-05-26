@@ -173,7 +173,7 @@ sub closeMarket {
     die("overrideme");
 }
 
-=item C<getBaseUnit($symbol)>
+=method C<getBaseUnit($symbol)>
 
 This method must be overriden. Returns the base unit at which the symbol trades.
 
@@ -184,7 +184,7 @@ sub getBaseUnit {
     die("overrideme");
 }
 
-=item C<getNav()>
+=method C<getNav()>
 
 This method must be overriden. Return the current net asset value in the account.
 
@@ -193,7 +193,7 @@ sub getNav {
     die("overrideme");
 }
 
-=item C<getBaseCurrency()>
+=method C<getBaseCurrency()>
 
 This method must be overriden. Returns the currency in which funds are held in this account. Useful to calculate profit/loss.
 
@@ -202,7 +202,7 @@ sub getBaseCurrency {
     die("overrideme");
 }
 
-=item C<getServerEpoch()>
+=method C<getServerEpoch()>
 
 This method must be overriden. Returns the current unix epoch time on the account server.
 
@@ -211,7 +211,7 @@ sub getServerEpoch {
     die("overrideme");
 }
 
-=item C<getServerDateTime()>
+=method C<getServerDateTime()>
 
 This method must be overriden. Returns the current date/time on the account server in '%Y-%m-%d %H:%M:%S' format.
 
@@ -240,7 +240,7 @@ sub checkSignal {
     );
 }
 
-=method C<getIndicatorValue($symbol, $indicator, $args)
+=method C<getIndicatorValue($symbol, $indicator, $args)>
 
 Returns the indicator value of $indicator/$args on $symbol.
 
@@ -482,17 +482,6 @@ sub getSymbolBase {
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 
