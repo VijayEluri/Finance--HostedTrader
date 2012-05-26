@@ -152,7 +152,7 @@ has '_fx' => (
     builder => '_build_fx',
 );
 
-sub build_fx {
+sub _build_fx {
     my $self = shift;
 
     eval q{use Inline  Java    => 'STUDY',
