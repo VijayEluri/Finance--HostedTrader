@@ -1,6 +1,9 @@
 Eclipse plugins
 	http://download.eclipse.org/egit/updates
 	http://e-p-i-c.sf.net/updates/testing
+Packages:
+    mysql
+    maven
 Perl modules
 	Parse::RecDescent
     Inline::Java
@@ -28,6 +31,7 @@ HostedTrader
     Compile the Java bits in $TRADER_HOME/data/fxcm/src/FXConnect using "mvn package"
 
 MySQL
+    Install lib_mysqludf_ta ( https://github.com/joaocosta/lib_mysqludf_ta )
     to generate db/user/tables corresponding to config file, run:
       $TRADER_HOME/createDBSchema.pl | mysql -u root
 	If using partitioned tables (eg, minutes timeframe tables can be very large and it makes sense to partition them)
