@@ -56,7 +56,7 @@ sub run {
 
     $yml->write($self->pathToSystems."/$systemName.tradeable.yml") || die($!);
     if (-e $self->pathToSystems."/$systemName.symbols.yml" ) { unlink($self->pathToSystems."/$systemName.symbols.yml") || die($!); }
-    system('perl '.$ENV.' ' . $ENV{TRADER_HOME} . '/data/fxcm/servers/Trader/Trader.pl '.$args.' --class=UnitTest --startDate="'.$self->startDate.'" --endDate="'.$self->endDate.'" --expectedTradesFile=' . $self->resultsFile);
+    system('perl '.$ENV.' ' . $ENV{TRADER_HOME} . '/data/fxcm/servers/Trader/Trader.pl '.$args.' --class=UnitTest --startDate="'.$self->startDate.'" --endDate="'.$self->endDate.'" --expectedTradesFile=' . $self->resultsFile . ' --pathToSystems="'.$self->pathToSystems.'"');
 }
 
 1;

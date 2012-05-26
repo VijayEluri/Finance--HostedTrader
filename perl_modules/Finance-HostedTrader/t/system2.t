@@ -17,7 +17,7 @@ my $test = Finance::HostedTrader::Test::TestSystem->new(
                                     long  => [ 'XAGUSD' ],
                                     short => [],
                                 },
-                resultsFile => 'trader/trades.xag',
+                resultsFile => "$t_path/trader/trades.jpy",
                 startDate   => '2010-08-18 06:00:00',
                 endDate     => '2010-10-17 00:00:00',
                 pathToSystems   => "$t_path/systems",

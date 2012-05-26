@@ -14,7 +14,7 @@ use Finance::HostedTrader::Trader;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $accountClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates) = (0, 0, 'FXConnect', undef, 'now', '10 years', 0);
+my ($verbose, $help, $accountClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates, $pathToSystems) = (0, 0, 'FXConnect', undef, 'now', '10 years', 0, 'systems');
 
 my $result = GetOptions(
     "class=s",  \$accountClass,
@@ -24,11 +24,12 @@ my $result = GetOptions(
     "help",     \$help,
     "startDate=s",\$startDate,
     "endDate=s",  \$endDate,
+    "pathToSystems=s", \$pathToSystems,
 ) || pod2usage(2);
 
 pod2usage(1) if ($help);
 
-my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => $pathToSystems );
 
 my $account = Finance::HostedTrader::Factory::Account->new(
                 SUBCLASS => $accountClass,
