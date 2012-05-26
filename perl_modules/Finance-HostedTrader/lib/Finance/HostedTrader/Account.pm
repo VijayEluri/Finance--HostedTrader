@@ -21,11 +21,7 @@ use Date::Manip;
 
 ##These should exist everywhere, regardless of broker
 
-=head2 Properties
-
-=over 12
-
-=item C<startDate>
+=attr C<startDate>
 
 The time the trading system starts trading
 
@@ -37,7 +33,7 @@ has startDate => (
     default => 'now',
 );
 
-=item C<endDate>
+=attr C<endDate>
 
 The time the trading system stops trading
 
@@ -49,7 +45,7 @@ has endDate => (
     default => '-10 years ago',
 );
 
-=item C<notifier>
+=attr C<notifier>
 =cut
 has 'notifier' => (
     is     => 'ro',
@@ -67,17 +63,15 @@ has '_signal_processor' => (
 sub _build_signal_processor {
     return Finance::HostedTrader::ExpressionParser->new();
 }
-=back
 
-=head2 Constructor
 
-=over 12
 
-=item C<BUILD>
+=method C<BUILD>
 
 Constructor.
 
-Converts {start,end}Date to 'YYYY-MM-DD hh:mm:ss' format.
+Converts {start,end}Date to 'YYYY-MM-DD hh:mm:ss' format using L<Date::Manip> UnixDate.
+
 Validates dates.
 =cut
 sub BUILD {
@@ -92,8 +86,6 @@ sub BUILD {
     $self->endDate($endDate);
     $self->{_positions} = {};
 }
-
-=back
 
 =method C<refreshPositions()>
 
@@ -199,7 +191,7 @@ This method must be overriden. Return the current net asset value in the account
 =cut
 sub getNav {
     die("overrideme");
-}r
+}
 
 =item C<getBaseCurrency()>
 
@@ -208,7 +200,7 @@ This method must be overriden. Returns the currency in which funds are held in t
 =cut
 sub getBaseCurrency {
     die("overrideme");
-}r
+}
 
 =item C<getServerEpoch()>
 
