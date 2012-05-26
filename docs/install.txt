@@ -19,14 +19,21 @@ Perl modules
 	Devel::NYTProf
         Pod::Coverage
     Test::MockModule
+
 HostedTrader
     Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Hosted--Trader
     source $TRADER_HOME/setupEnv.source
 	Need a HostedTrader config file, eg: /etc/fx.yml
-    Compile the Java bits
+    Download ForexConnect (http://forexforums.dailyfx.com/forexconnect/392705-forexconnect-api-subscribe-updates.html) and unpack somewhere, then set FXCONNECT_HOME to point to that directory
+    Compile the Java bits in $TRADER_HOME/data/fxcm/src/FXConnect using "mvn package"
+
 MySQL
     to generate db/user/tables corresponding to config file, run:
       $TRADER_HOME/createDBSchema.pl | mysql -u root
 	If using partitioned tables (eg, minutes timeframe tables can be very large and it makes sense to partition them)
 	may need to set this in my.cnf (mysqld section)
 	open-files-limit=10000
+
+    To populate with data:
+      cd $TRADER_HOME/data/fxcm/servers/FXLoadHistoricalData
+      ./run
