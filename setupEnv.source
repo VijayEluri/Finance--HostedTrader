@@ -1,11 +1,9 @@
 #!/bin/sh
 
-export PATH=$TRADER_HOME:$PATH
-
-
+FXCONNECT_JAR=`ls -1 $TRADER_HOME/data/fxcm/src/FXConnect/target/FXConnect*jar`
+FXCORE_JAR=`ls -1 $FXCONNECT_HOME/lib/java/fxcore2.jar`
+export CLASSPATH=$FXCONNECT_JAR:$FXCORE_JAR:$CLASSPATH
 export LD_LIBRARY_PATH=$FXCONNECT_HOME/lib:$FXCONNECT_HOME/lib/java:$LD_LIBRARY_PATH
-export CLASSPATH=$TRADER_HOME/data/fxcm/src/FXConnect/target/*:$FXCONNECT_HOME/lib/java/*:$CLASSPATH
-
 
 export JAVA_TOOL_OPTIONS="-Xms32M -Xmx64M -XX:MaxPermSize=32m"
 export PERL_INLINE_JAVA_JNI=1
