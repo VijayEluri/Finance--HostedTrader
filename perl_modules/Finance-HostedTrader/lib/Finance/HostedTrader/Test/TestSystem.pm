@@ -1,4 +1,4 @@
-package TestSystem;
+package Finance::HostedTrader::Test::TestSystem;
 
 use Moose;
 
@@ -32,6 +32,13 @@ has resultsFile => (
     required    => 1,
 );
 
+has pathToSystems => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'systems',
+    required=> 1,
+);
+
 sub run {
     my $self = shift;
     my $args = shift || '';
@@ -47,9 +54,9 @@ sub run {
         }
     };
 
-    $yml->write("systems/$systemName.tradeable.yml") || die($!);
-    if (-e "systems/$systemName.symbols.yml" ) { unlink("systems/$systemName.symbols.yml") || die($!); }
-    system('perl '.$ENV.' ../data/fxcm/servers/Trader/Trader.pl '.$args.' --class=UnitTest --startDate="'.$self->startDate.'" --endDate="'.$self->endDate.'" --expectedTradesFile=' . $self->resultsFile);
+    $yml->write($self->pathToSystems."/$systemName.tradeable.yml") || die($!);
+    if (-e $self->pathToSystems."/$systemName.symbols.yml" ) { unlink($self->pathToSystems."/$systemName.symbols.yml") || die($!); }
+    system('perl '.$ENV.' ' . $ENV{TRADER_HOME} . '/data/fxcm/servers/Trader/Trader.pl '.$args.' --class=UnitTest --startDate="'.$self->startDate.'" --endDate="'.$self->endDate.'" --expectedTradesFile=' . $self->resultsFile);
 }
 
 1;
