@@ -188,7 +188,7 @@ sub getBid {
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
-=method C<openMarket($symbol, $direction, $amount)
+=method C<openMarket($symbol, $direction, $amount)>
 
 Creates a new position in $symbol if one does not exist yet.
 Adds a new trade to the position in $symbol.
@@ -289,7 +289,7 @@ sub balance {
 #    );
 #}
 
-=method C<checkSignal($symbol, $signal_definition, $signal_args)>a
+=method C<checkSignal($symbol, $signal_definition, $signal_args)>
 
 =cut
 sub checkSignal {
