@@ -18,7 +18,7 @@ HostedTrader
 MySQL
     Install lib_mysqludf_ta ( https://github.com/joaocosta/lib_mysqludf_ta )
     to generate db/user/tables corresponding to config file, run:
-      $TRADER_HOME/createDBSchema.pl | mysql -u root
+      createDBSchema.pl | mysql -u root
 	If using partitioned tables (eg, minutes timeframe tables can be very large and it makes sense to partition them)
 	may need to set this in my.cnf (mysqld section)
 	open-files-limit=10000
