@@ -24,7 +24,6 @@ package Finance::HostedTrader::Account::FXCM::ForexConnect;
 =head1 DESCRIPTION
 
 Interfaces with the FXCM ForexConnect API.
-The Order2GO API is available as a Java binding.
 
 =head2 Properties
 
@@ -34,10 +33,6 @@ The Order2GO API is available as a Java binding.
 
 use Moose;
 extends 'Finance::HostedTrader::Account';
-
-use Inline  Java    => 'STUDY',
-            STUDY   => [ qw(org.zonalivre.FXConnect.ForexConnect) ],
-            AUTOSTUDY=> 1;
 
 use Moose::Util::TypeConstraints;
 use YAML::Syck;
@@ -176,6 +171,10 @@ has '_fx' => (
 
 sub build_fx {
     my $self = shift;
+
+    eval q{use Inline  Java    => 'STUDY',
+            STUDY   => [ qw(org.zonalivre.FXConnect.ForexConnect) ];};
+
     return Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect->new($self->username, $self->password, $self->accountType);
 }
 
@@ -392,6 +391,5 @@ Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 
-L<Server.exe>
 
 =cut
