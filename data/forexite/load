@@ -7,12 +7,12 @@ mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='
 rm -Rf *_$TF
 
 # Create synthetic pairs
-$TRADER_HOME/synthetics.pl --timeframe=$TF
+synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
-$TRADER_HOME/updateTf.pl --start="4 days ago at midnight" --available-timeframe=min
+updateTf.pl --start="4 days ago at midnight" --available-timeframe=min
 ./TruncateWeekly.pl | mysql -ufx fx
-$TRADER_HOME/updateTf.pl --timeframes=604800 --available-timeframe=day
+updateTf.pl --timeframes=604800 --available-timeframe=day
 
 # Dump downloadable rates
 ./dumpFiles.pl --timeframes=3600,86400

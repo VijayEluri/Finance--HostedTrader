@@ -9,16 +9,16 @@ mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='
 rm -Rf $DATADIR/*_$TF
 
 # Create synthetic pairs
-$TRADER_HOME/synthetics.pl --timeframe=$TF
+synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
 if [[ "$TF" == "300" ]]; then
-$TRADER_HOME/updateTf.pl --start="$STARTDATE" --timeframes=900 --available-timeframe=5min --symbols=all
-$TRADER_HOME/updateTf.pl --start="$STARTDATE" --timeframes=1800 --available-timeframe=15min --symbols=all
+updateTf.pl --start="$STARTDATE" --timeframes=900 --available-timeframe=5min --symbols=all
+updateTf.pl --start="$STARTDATE" --timeframes=1800 --available-timeframe=15min --symbols=all
 fi
 
 if [[ "$TF" == "3600" ]]; then
-$TRADER_HOME/updateTf.pl --start="$STARTDATE" --timeframes=7200 --available-timeframe=hour --symbols=all
-$TRADER_HOME/updateTf.pl --start="$STARTDATE" --timeframes=10800 --available-timeframe=hour --symbols=all
-$TRADER_HOME/updateTf.pl --start="$STARTDATE" --timeframes=14400 --available-timeframe=2hour --symbols=all
+updateTf.pl --start="$STARTDATE" --timeframes=7200 --available-timeframe=hour --symbols=all
+updateTf.pl --start="$STARTDATE" --timeframes=10800 --available-timeframe=hour --symbols=all
+updateTf.pl --start="$STARTDATE" --timeframes=14400 --available-timeframe=2hour --symbols=all
 fi

@@ -13,12 +13,12 @@ rm -f *.1min
 
 
 #echo CREATING SYNTHETIC PAIRS
-#../synthetics.pl --timeframe=60
+#synthetics.pl --timeframe=60
 #find ./free_forex_quotes/ -name "*.txt" -exec rm {} \;
 #echo MOVE NEWLY DOWNLOADED DATA INTO STORAGE DIRECTORY
 #find ./free_forex_quotes/ -name "*.zip" -exec mv {} data_done/ \;
 #echo UPDATE TIMEFRAMES IN DATABASE
 #cd ~/data/
-#./updateTf.sh
+#updateTf.sh
 #echo CREATE NEW DOWNLOADABLE FILES
 #rm *.csv
