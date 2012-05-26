@@ -1,16 +1,11 @@
 package Finance::HostedTrader::Trader::Notifier::Production;
-=head1 NAME
-
-    Finance::HostedTrader::Notifier - Notifier object
+# ABSTRACT: Finance::HostedTrader::Notifier - Notifier object
 
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Notifier::Production;
     my $obj = Finance::HostedTrader::Notifier::Production->new(
                 );
-
-=head1 DESCRIPTION
-
 
 =cut
 
@@ -22,36 +17,11 @@ use Moose;
 extends 'Finance::HostedTrader::Trader::Notifier';
 use MIME::Lite;
 
-=head2 Properties
+=method C<open($trade)>
 
-=over 12
+open trade notifier. Receives a L<Finance::HostedTrader::Trade> object representing the trade that was opened.
 
-=back
-
-=head2 Constructor
-
-=over 12
-
-=item C<BUILD>
-
-Constructor.
-
-=cut
-sub BUILD {
-    my $self = shift;
-
-}
-
-=back
-
-
-=head2 METHODS
-
-
-=over 12
-
-
-=item C<open($trade)>
+Sends an email with information about the trade.
 
 =cut
 sub open {
@@ -74,7 +44,7 @@ Stop Loss: $stopLoss
             });
 }
 
-=item C<close()>
+=method C<close()>
 
 =cut
 sub close {
@@ -102,7 +72,7 @@ use MIME::Lite;
     ### Create a new single-part message, to send a GIF file:
     my $msg = MIME::Lite->new(
         From     => 'fxhistor@fxhistoricaldata.com',
-        To       => 'joaocosta@zonalivre.org',
+        To       => 'joaocosta@zonalivre.org', #TODO: Hardcoded, needs to be parameterized as a class attribute
         Subject  => $subject,
         Data     => $content
     );
@@ -111,20 +81,3 @@ use MIME::Lite;
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
-
-=head1 SEE ALSO
-
-L<Finance::HostedTrader::Trader>
-
-=cut

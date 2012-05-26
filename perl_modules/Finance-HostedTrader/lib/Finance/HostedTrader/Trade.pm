@@ -1,21 +1,11 @@
 package Finance::HostedTrader::Trade;
-=head1 NAME
-
-    Finance::HostedTrader::Config::Trade - Trade object
+# ABSTRACT: Finance::HostedTrader::Config::Trade - Trade object
 
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Trade;
     my $obj = Finance::HostedTrader::Trade->new(
                 );
-
-=head1 DESCRIPTION
-
-
-=head2 Properties
-
-=over 12
-
 =cut
 
 use strict;
@@ -30,7 +20,7 @@ subtype 'positiveNum'
     => message { "The number provided ($_) must be positive" };
 
 
-=item C<id>
+=attr C<id>
 
 
 =cut
@@ -40,7 +30,7 @@ has id => (
     required=>1,
 );
 
-=item C<symbol>
+=attr C<symbol>
 
 
 =cut
@@ -50,7 +40,7 @@ has symbol => (
     required=>1,
 );
 
-=item C<direction>
+=attr C<direction>
 
 long or short
 
@@ -63,7 +53,7 @@ has direction => (
 );
 
 
-=item C<openDate>
+=attr C<openDate>
 
 
 =cut
@@ -74,7 +64,7 @@ has openDate => (
 );
 
 
-=item C<openPrice>
+=attr C<openPrice>
 
 
 =cut
@@ -84,7 +74,7 @@ has openPrice => (
     required=>1,
 );
 
-=item C<size>
+=attr C<size>
 
 
 =cut
@@ -95,7 +85,7 @@ has size => (
 );
 
 
-=item C<closeDate>
+=attr C<closeDate>
 
 
 =cut
@@ -105,7 +95,7 @@ has closeDate => (
     required=>0,
 );
 
-=item C<closePrice>
+=attr C<closePrice>
 
 
 =cut
@@ -115,7 +105,7 @@ has closePrice => (
     required=>0,
 );
 
-=item C<pl>
+=attr C<pl>
 
 
 =cut
@@ -125,10 +115,11 @@ has pl => (
     required=>0,
 );
 
-=back
+=method BUILD
+
+Constructor. Validates that short positions have negative sizes, and long positions have positive sizes.
 
 =cut
-
 sub BUILD {
     my $self = shift;
     my $self_direction = $self->direction;
@@ -141,15 +132,10 @@ sub BUILD {
     }
 } 
 
-=head2 Methods
-
-=over 12
-
-
-=item C<profit>
-
-
-=cut
+#=method C<profit>
+#
+#
+#=cut
 # this method is not really used, so commenting out for now
 #sub profit {
 #    my ($self) = @_;
@@ -164,7 +150,6 @@ sub BUILD {
 __PACKAGE__->meta->make_immutable;
 1;
 
-=back
 
 
 =head1 LICENSE

@@ -1,4 +1,5 @@
 package Finance::HostedTrader::ExpressionParser;
+# ABSTRACT: Finance::HostedTrader::ExpressionParser - Utility object to calculate indicators/signals based on complex expressions
 use strict;
 use warnings;
 use Date::Manip;
@@ -108,6 +109,21 @@ function:
     return bless( $self, $class );
 }
 
+=method C<getIndicatorData>
+
+args
+
+tf
+fields
+symbol
+maxLoadedItems
+startPeriod
+endPeriod
+numItems
+debug
+cacheResults
+
+=cut
 sub getIndicatorData {
     my ( $self, $args ) = @_;
 
@@ -206,6 +222,9 @@ ORDER BY datetime $order_ext
     return $data;
 }
 
+=method C<getSignalData>
+See L</getIndicatorData> for list of arguments.
+=cut
 sub getSignalData {
     my ( $self, $args ) = @_;
     my $sql = $self->_getSignalSql($args);
@@ -216,6 +235,8 @@ sub getSignalData {
     return $data;
 }
 
+=method C<getSystemData>
+=cut
 sub getSystemData {
     my ( $self, $a ) = @_;
 
@@ -299,8 +320,9 @@ return $sql;
 
 }
 
-
-#Check wether a given signal occurred in a given period of time
+=method C<checkSignal>
+Check wether a given signal occurred in a given period of time
+=cut
 sub checkSignal {
     my ( $self, $args ) = @_;
 

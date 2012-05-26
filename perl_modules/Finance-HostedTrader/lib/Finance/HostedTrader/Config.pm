@@ -1,7 +1,6 @@
 package Finance::HostedTrader::Config;
-=head1 NAME
 
-    Finance::HostedTrader::Config - Configuration for the Finance::HostedTrader platform
+# ABSTRACT: Finance::HostedTrader::Config - Configuration for the Finance::HostedTrader platform
 
 =head1 SYNOPSIS
 
@@ -37,13 +36,6 @@ package Finance::HostedTrader::Config;
 	);
 
     $obj = Finance::HostedTrader::Config->new( 'db' => $db, 'symbols' => $symbols, 'timeframes' => $timeframes );
-
-=head1 DESCRIPTION
-
-
-=head2 Properties
-
-=over 12
 
 =cut
 
@@ -82,7 +74,7 @@ BEGIN {
 }
 
 
-=item C<db>
+=attr C<db>
 <L><Finance::HostedTrader::Config::DB> object containing db config information
 =cut
 has db => (
@@ -91,7 +83,7 @@ has db => (
     required => 1,
 );
 
-=item C<symbols>
+=attr C<symbols>
 <L><Finance::HostedTrader::Config::Symbols> object containing available symbols
 =cut
 has symbols => (
@@ -100,7 +92,7 @@ has symbols => (
     required => 1,
 );
 
-=item C<timeframes>
+=attr C<timeframes>
 <L><Finance::HostedTrader::Config::Timeframes> object containing available timeframes
 =cut
 has timeframes => (
@@ -109,13 +101,7 @@ has timeframes => (
     required => 1,
 );
 
-=back 
-
-=head2 Constructor
-
-=over 12
-
-=item C<BUILDARGS>
+=method C<BUILDARGS>
 
 See SYNOPSIS for available options.
 
@@ -161,17 +147,6 @@ around BUILDARGS => sub {
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 

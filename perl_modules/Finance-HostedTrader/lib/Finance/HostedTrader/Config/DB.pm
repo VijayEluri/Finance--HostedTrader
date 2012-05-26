@@ -1,7 +1,5 @@
 package Finance::HostedTrader::Config::DB;
-=head1 NAME
-
-    Finance::HostedTrader::Config::DB - DB Configuration for the Finance::HostedTrader platform
+# ABSTRACT: Finance::HostedTrader::Config::DB - DB Configuration for the Finance::HostedTrader platform
 
 =head1 SYNOPSIS
 
@@ -13,20 +11,13 @@ package Finance::HostedTrader::Config::DB;
                     'dbpasswd' => dbpasswd
                 );
 
-=head1 DESCRIPTION
-
-
-=head2 METHODS
-
-=over 12
-
 =cut
 
 use strict;
 use warnings;
 use Moose;
 
-=item C<dbhost>
+=attr C<dbhost>
 
 MySQL database server to connect to
 
@@ -38,7 +29,7 @@ has dbhost => (
 );
 
 
-=item C<dbname>
+=attr C<dbname>
 
 database name where data is stored
 
@@ -50,7 +41,7 @@ has dbname => (
 );
 
 
-=item C<dbuser>
+=attr C<dbuser>
 
 database user name used to connect
 
@@ -62,7 +53,7 @@ has dbuser => (
 );
 
 
-=item C<dbpasswd>
+=attr C<dbpasswd>
 
 database password used to connect
 
@@ -76,16 +67,7 @@ has dbpasswd => (
 __PACKAGE__->meta->make_immutable;
 1;
 
-=back
 
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 

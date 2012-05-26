@@ -1,19 +1,10 @@
 package Finance::HostedTrader::Datasource;
-=head1 NAME
-
-    Finance::HostedTrader::Datasource - Database access for the HostedTrader platform
+# ABSTRACT: Finance::HostedTrader::Datasource - Database access for the HostedTrader platform
 
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Datasource;
     my $db = Datasource->new();
-
-=head1 DESCRIPTION
-
-
-=head2 Methods
-
-=over
 
 =cut
 
@@ -25,7 +16,7 @@ use Data::Dumper;
 use Moose;
 use Params::Validate qw(:all);
 
-=item C<debug>
+=attr C<debug>
 
 Optional If set to a true value, prints SQL queries to stdout.
 
@@ -38,7 +29,7 @@ has debug => (
     required => 0,
 );
 
-=item C<dbh>
+=attr C<dbh>
 
 Optional DBI handle to the MySQL datasource.
 
@@ -66,7 +57,7 @@ sub _build_dbh {
 }
 
 
-=item C<cfg>
+=attr C<cfg>
 
 Returns the L<Finance::HostedTrader::Config> object associated with this datasource.
 
@@ -83,13 +74,9 @@ sub _build_cfg {
     return Finance::HostedTrader::Config->new();
 }
 
-=item C<new>
+=method C<convertOHLCTimeSeries>
 
-Returns a new Finance::HostedTrader::Datasource object.
-
-=cut
-
-=item C<convertOHLCTimeSeries>
+Converts data between timeframes
 
 =cut
 sub convertOHLCTimeSeries {
@@ -161,7 +148,11 @@ ON DUPLICATE KEY UPDATE open=values(open), low=values(low), high=values(high), c
     $self->dbh->do($sql);
 }
 
-=item C<createSynthetic>
+=method C<createSynthetic>
+
+Creates data for synthetic pairs, based on existing pairs.
+
+For example, GBPJPY can be derived from GBPUSD AND USDJPY.
 
 =cut
 sub createSynthetic {
@@ -218,18 +209,6 @@ sub createSynthetic {
 }
 
 1;
-
-=back
-
-=head1 LICENSE
-
-This file is licensed under the MIT X11 License:
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 

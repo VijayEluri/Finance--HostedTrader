@@ -1,20 +1,12 @@
 package Finance::HostedTrader::Position;
-=head1 NAME
 
-    Finance::HostedTrader::Position - Trade object
+# ABSTRACT: Finance::HostedTrader::Position - Trade object
 
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Position;
     my $obj = Finance::HostedTrader::Position->new(
                 );
-
-=head1 DESCRIPTION
-
-
-=head2 Properties
-
-=over 12
 
 =cut
 
@@ -23,7 +15,7 @@ use warnings;
 use Moose;
 use Moose::Util::TypeConstraints;
 
-=item C<symbol>
+=attr C<symbol>
 
 
 =cut
@@ -33,7 +25,7 @@ has symbol => (
     required=>1,
 );
 
-=item C<trades>
+=attr C<trades>
 
 
 =cut
@@ -44,13 +36,7 @@ has trades => (
     required=>0,
 );
 
-=back
-
-=head2 Methods
-
-=over 12
-
-=item C<addTrade($trade)>
+=method C<addTrade($trade)>
 
 Adds the L<Finance::HostedTrader::Trade> object to this position.
 
@@ -70,7 +56,7 @@ sub addTrade {
     $self_trades->{$trade_id} = $trade;
 }
 
-=item C<deleteTrade($id)>
+=method C<deleteTrade($id)>
 =cut
 sub deleteTrade {
     my $self = shift;
@@ -79,7 +65,7 @@ sub deleteTrade {
     delete $self->trades->{$tradeID};    
 }
 
-=item C<getTrade($id)>
+=method C<getTrade($id)>
 =cut
 sub getTrade {
     my $self = shift;
@@ -88,7 +74,7 @@ sub getTrade {
     return $self->trades->{$id};
 }
 
-=item C<getOpenTradeList()>
+=method C<getOpenTradeList()>
     Returns a reference to a list of trades in this position.
     There is no particular order in the returned data.
 =cut
@@ -99,7 +85,7 @@ sub getOpenTradeList {
     return \@trades;
 }
 
-=item C<size()>
+=method C<size()>
 
 Returns the aggregate size of all trades in this position.
 
@@ -127,7 +113,7 @@ sub size {
     return $size;
 }
 
-=item C<averagePrice>
+=method C<averagePrice>
 
 =cut
 sub averagePrice {
@@ -145,7 +131,7 @@ sub averagePrice {
     return $price / $size;
 }
 
-=item C<pl>
+=method C<pl>
 
 Calculate total profit/loss of a given position
 
@@ -165,17 +151,6 @@ sub _empty_hash {
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 

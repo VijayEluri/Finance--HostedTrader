@@ -1,4 +1,5 @@
 package Finance::HostedTrader::Trader;
+# ABSTRACT: Finance::HostedTrader::Trader - 
 
 use strict;
 use warnings;
@@ -11,18 +12,24 @@ use Finance::HostedTrader::System;
 use Moose;
 use List::Compare::Functional qw( get_intersection );
 
+=attr C<system>
+=cut
 has 'system' => (
     is     => 'ro',
     isa    => 'Finance::HostedTrader::System',
     required=>1,
 );
 
+=attr C<account>
+=cut
 has 'account' => (
     is     => 'ro',
     isa    => 'Finance::HostedTrader::Account',
     required=>1,
 );
 
+=method C<updateSymbols>
+=cut
 sub updateSymbols {
     my $self = shift;
     my $account = $self->account;
@@ -69,7 +76,9 @@ sub updateSymbols {
     $self->system->{_symbolsLastUpdated} = $account->getServerEpoch();
 }
 
-#Return list of symbols to add to the system
+=method C<getSymbolsSignalFilter>
+Return list of symbols to add to the system
+=cut
 sub getSymbolsSignalFilter {
     my $self = shift;
     my $filters = shift;
@@ -105,12 +114,16 @@ sub getSymbolsSignalFilter {
     return $rv;
 }
 
+=method C<getEntryValue>
+=cut
 sub getEntryValue {
     my $self = shift;
 
     return $self->_getSignalValue('enter', @_);
 }
 
+=method C<getExitValue>
+=cut
 sub getExitValue {
     my $self = shift;
 
@@ -129,18 +142,24 @@ sub _getSignalValue {
     );
 }
 
+=method C<checkEntrySignal>
+=cut
 sub checkEntrySignal {
     my $self = shift;
 
     return $self->_checkSignalWithAction('enter', @_);
 }
 
+=method C<checkAddUpSignal>
+=cut
 sub checkAddUpSignal {
     my $self = shift;
 
     return $self->_checkSignalWithAction('add', @_);
 }
 
+=method C<checkExitSignal>
+=cut
 sub checkExitSignal {
     my $self = shift;
 
@@ -163,7 +182,7 @@ sub _checkSignalWithAction {
 }
 
 
-=item C<amountAtRisk($position)
+=method C<amountAtRisk($position)>
 
 How much capital will be lost/gained if $ position closes at the stop loss
 level defined by this system.
@@ -195,6 +214,8 @@ sub amountAtRisk {
     return $pl; #TODO this is not working for net short positions
 }
 
+=method C<getTradeSize>
+=cut
 sub getTradeSize {
 my $self = shift;
 my $symbol = shift;

@@ -1,7 +1,6 @@
 package Finance::HostedTrader::Account::FXCM::ForexConnect;
-=head1 NAME
 
-    Finance::HostedTrader::Account::FXCM::ForexConnect - Interface to the FXCM broker
+# ABSTRACT: Finance::HostedTrader::Account::FXCM::ForexConnect - Interface to the FXCM broker
 
 =head1 SYNOPSIS
 
@@ -21,14 +20,6 @@ package Finance::HostedTrader::Account::FXCM::ForexConnect;
     my $tradeID = $trades->[0]->{ID};
     my $closeOrderID = $account->closeMarket($tradeID, 100000);
 
-=head1 DESCRIPTION
-
-Interfaces with the FXCM ForexConnect API.
-
-=head2 Properties
-
-=over 12
-
 =cut
 
 use Moose;
@@ -38,15 +29,7 @@ use Moose::Util::TypeConstraints;
 use YAML::Syck;
 use Finance::HostedTrader::Trade;
 
-=back
-
-=head2 Methods
-
-=over 12
-
-=cut
-
-=item C<username>
+=attr C<username>
 
 Account username
 
@@ -57,7 +40,7 @@ has username => (
     required=> 1,
 );
 
-=item C<password>
+=attr C<password>
 
 Account password
 
@@ -68,7 +51,7 @@ has password => (
     required=> 1,
 );
 
-=item C<accountType>
+=attr C<accountType>
 
 
 =cut
@@ -79,7 +62,7 @@ has accountType => (
     required=>1,
 );
 
-=item <notifier>
+=attr <notifier>
 =cut
 has notifier => (
     is     => 'ro',
@@ -178,7 +161,7 @@ sub build_fx {
     return Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect->new($self->username, $self->password, $self->accountType);
 }
 
-=item C<refreshPositions()>
+=method C<refreshPositions()>
 
 
 =cut
@@ -211,7 +194,7 @@ sub refreshPositions {
     }
 }
 
-=item C<getAsk($symbol)>
+=method C<getAsk($symbol)>
 
 Returns the current ask(long) price for $symbol
 
@@ -224,7 +207,7 @@ sub getAsk {
     return $self->{_fx}->getAsk($symbol);
 }
 
-=item C<getBid($symbol)>
+=method C<getBid($symbol)>
 
 Returns the current bid(short) price for $symbol
 
@@ -237,7 +220,7 @@ sub getBid {
     return $self->{_fx}->getBid($symbol);
 }
 
-=item C<openMarket($symbol, $direction, $amount>
+=method C<openMarket($symbol, $direction, $amount>
 
 Opens a trade in $symbol at current market price.
 
@@ -285,7 +268,7 @@ augment 'openMarket' => sub {
     die("Could not find trade just opened. Return from _sendCmd was: '$data'");
 };
 
-=item C<closeMarket($tradeID, $amount)>
+=method C<closeMarket($tradeID, $amount)>
 
 Closes a trade at current market price.
 
@@ -301,7 +284,7 @@ sub closeMarket {
     return $self->{_fx}->closeMarket($tradeID,$amount);
 }
 
-=item C<getBaseUnit($symbol)>
+=method C<getBaseUnit($symbol)>
 
 Returns the base unit at which the symbol trades.
 
@@ -315,7 +298,7 @@ sub getBaseUnit {
     return $self->_sendCmd("baseunit $symbol");
 }
 
-=item C<getNav()>
+=method C<getNav()>
 
 Return the current net asset value in the account
 
@@ -327,7 +310,7 @@ sub getNav {
     return $self->{_fx}->getNav;
 }
 
-=item C<getBaseCurrency>
+=method C<getBaseCurrency>
 
 =cut
 sub getBaseCurrency {
@@ -364,7 +347,7 @@ sub getServerDateTime {
     return sprintf('%d-%02d-%02d %02d:%02d:%02d', $v[5]+1900,$v[4]+1,$v[3],$v[2],$v[1],$v[0]);
 }
 
-=item C<waitForNextTrade($system)>
+=method C<waitForNextTrade($system)>
 
 Sleeps for 20 seconds. $system is ignored.
 
@@ -378,18 +361,3 @@ sub waitForNextTrade {
 }
 
 1;
-
-=back
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
-
-=head1 SEE ALSO
-
-
-=cut

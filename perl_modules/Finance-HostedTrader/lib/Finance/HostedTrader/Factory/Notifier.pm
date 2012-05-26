@@ -1,7 +1,5 @@
 package Finance::HostedTrader::Factory::Notifier;
-=head1 NAME
-
-    Finance::HostedTrader::Factory::Notifier - Interface to the Factory broker
+# ABSTRACT: Finance::HostedTrader::Factory::Notifier - Interface to the Factory broker
 
 =head1 SYNOPSIS
 
@@ -15,20 +13,13 @@ package Finance::HostedTrader::Factory::Notifier;
                         SUBCLASS    => 'UnitTest',
                   )->create_instance();
 
-=head1 DESCRIPTION
-
-
 =cut
 
 use Moose;
 
 use Moose::Util::TypeConstraints;
 
-=head2 Properties
-
-=over 12
-
-=item C<SUBCLASS>
+=attr C<SUBCLASS>
 
 Readonly. Required.
 
@@ -41,9 +32,6 @@ Supported values are:
 =cut
 has [qw(SUBCLASS)] => ( is => 'ro', required => 1);
 
-=back
-
-=head2 Constructor
 
 =item C<BUILD>
 
@@ -58,15 +46,8 @@ sub BUILD {
     delete $args->{SUBCLASS};
     $self->{_args} = $args;
 }
-=back
 
-=head2 Methods
-
-=over 12
-
-=cut
-
-=item C<create_instance()>
+=method C<create_instance()>
 
 Return an account instance of type SUBCLASS
 
@@ -93,20 +74,12 @@ __PACKAGE__->meta->make_immutable;
 
 1;
 
-=back
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 
-L<Finance::HostedTrader::Notifier>,
-L<Finance::HostedTrader::Notifier::Production>
-L<Finance::HostedTrader::Notifier::UnitTest>
+=for :list
+* L<Finance::HostedTrader::Notifier>,
+* L<Finance::HostedTrader::Notifier::Production>
+* L<Finance::HostedTrader::Notifier::UnitTest>
 
 =cut

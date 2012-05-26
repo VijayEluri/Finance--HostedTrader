@@ -1,17 +1,12 @@
 package Finance::HostedTrader::Trader::Notifier::UnitTest;
-=head1 NAME
 
-    Finance::HostedTrader::Notifier - Notifier object
+# ABSTRACT: Finance::HostedTrader::Notifier - Notifier object
 
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Notifier::UnitTest;
     my $obj = Finance::HostedTrader::Notifier::UnitTest->new(
                 );
-
-=head1 DESCRIPTION
-
-
 =cut
 
 
@@ -24,11 +19,7 @@ use Test::More;
 use YAML::Tiny;
 use Data::Dumper;
 
-=head2 Properties
-
-=over 12
-
-=item C<expectedTradesFile>
+=attr C<expectedTradesFile>
 =cut
 
 has 'expectedTradesFile' => (
@@ -37,7 +28,7 @@ has 'expectedTradesFile' => (
     required=>1,
 );
 
-=item C<skipTests>
+=attr C<skipTests>
 
 =cut
 
@@ -49,13 +40,7 @@ has 'skipTests' => (
 );
 
 
-=back
-
-=head2 Constructor
-
-=over 12
-
-=item C<BUILD>
+=attr C<BUILD>
 
 Constructor.
 
@@ -88,16 +73,7 @@ sub _load {
     }
 }
 
-=back
-
-
-=head2 METHODS
-
-
-=over 12
-
-
-=item C<open($trade)>
+=method C<open($trade)>
 
 =cut
 sub open {
@@ -125,7 +101,7 @@ sub open {
     is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
 }
 
-=item C<close()>
+=method C<close()>
 
 =cut
 sub close {
@@ -154,17 +130,6 @@ sub close {
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 

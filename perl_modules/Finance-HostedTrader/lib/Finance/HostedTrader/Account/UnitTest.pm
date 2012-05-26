@@ -12,9 +12,8 @@ use Date::Calc qw (Add_Delta_DHMS Delta_DHMS Date_to_Time);
 use Time::HiRes;
 
 
-=head1 NAME
 
-    Finance::HostedTrader::Account::UnitTest - Interface to the UnitTest broker
+# ABSTRACT: Finance::HostedTrader::Account::UnitTest - Interface to the UnitTest broker
 
 =head1 SYNOPSIS
 
@@ -26,15 +25,7 @@ use Time::HiRes;
     my ($openOrderID, $price) = $s->openMarket('EURUSD', 'long', 100000);
     my $closeOrderID = $s->closeMarket($openOrderID, 100000);
 
-=head1 DESCRIPTION
-
-
-
-=head2 Properties
-
-=over 12
-
-=item C<interval>
+=attr C<interval>
 
 Number of seconds (in simulated time) to sleep between trades
 
@@ -46,10 +37,10 @@ has interval => (
     default => 240,
 );
 
-=item C<system>
-
-System being traded by this instance of the unit test account.
-This is needed to optimize test runs.
+=attr C<system>
+An instance of the L<Finance::HostedTrader::System> object
+being traded by this instance of the unit test account.
+Used to optimize test runs.
 =cut
 has system => (
     is     => 'ro',
@@ -57,7 +48,7 @@ has system => (
     required=>1,
 ); 
 
-=item C<skipToDatesWithSignal>
+=attr C<skipToDatesWithSignal>
 
 If set to true, system testing calculations only happen for periods
 during which there are open/close signals.
@@ -77,12 +68,23 @@ has skipToDatesWithSignal => (
     default=>1,
 );
 
+=attr C<expectedTradesFile>
+
+Optional. A file in YAML format representing the trades
+the system is expected to open.
+
+=cut
 has expectedTradesFile => (
     is     => 'ro',
     isa    => 'Str',
     required=>0,
 );
 
+=attr C<notifier>
+Optional. An instance L<Finance::HostedTrader::Notifier>.
+
+Defaults to L<Finance::HostedTrader::Trader::Notifier::UnitTest>.
+=cut
 has notifier => (
     is     => 'ro',
     isa    => 'Finance::HostedTrader::Trader::Notifier',
@@ -94,11 +96,7 @@ has notifier => (
                   },
 );
 
-=back
-
-=head2 Constructor
-
-=item C<BUILD>
+=method C<BUILD>
 
 Initializes internal structures
 =cut
@@ -116,24 +114,25 @@ sub BUILD {
 }
 
 
-=head2 Methods
-
-=over 12
-
-=item C<refreshPositions()>
+=method C<refreshPositions()>
 
 Positions are kept in memory.
-This method calculates profit/loss of existing trades to keep data consistent
+This method should calculate profit/loss of existing trades to keep data consistent
+however that slows down unit testing considerably.
+
+Instead, this module only calculates profit/loss in L</getNav()> which is called much
+less often than refreshPositions and is enough to make the unit tests pass.
+
+The drawback is that the UnitTest Account module will only have updated PL when getNav is called.  This will break anything that calls Finance::HostedTrader::Trade::pl, like L<Finance::HostedTrader::Report>
+
 =cut
 sub refreshPositions {
-    # positions are kept in memory
+# positions are kept in memory
+
+
+
 }
 
-# Profit/loss on trades needs to be updated somehow
-# To be 100% correct, this needs to be called in "sub refreshPositions"
-# however that slows down things considerably
-# Alternatively, it can be called only in "sub getNav", which gets called much less often than refreshPositions and is enough to make the unit tests pass
-# but means the UnitTest module will only have updated PL when getNav is called.  This will break anything that calls Finance::HostedTrader::Trade::pl, like Report.pm 
 sub _updatePL {
     my $self = shift;
 
@@ -169,7 +168,7 @@ sub _calculatePL {
     return $pl;
 }
 
-=item C<getAsk($symbol)>
+=method C<getAsk($symbol)>
 
 Reads the close of $symbol in the 5min timeframe. For the UnitTest class, getBid and getAsk return the same value.
 =cut
@@ -179,7 +178,7 @@ sub getAsk {
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
-=item C<getBid($symbol)>
+=method C<getBid($symbol)>
 
 Reads the close of $symbol in the 5min timeframe. For the UnitTest class, getBid and getAsk return the same value.
 =cut
@@ -189,7 +188,7 @@ sub getBid {
     return $self->getIndicatorValue($symbol, 'close', { timeframe => '5min', maxLoadedItems => 1 });
 }
 
-=item C<openMarket($symbol, $direction, $amount)
+=method C<openMarket($symbol, $direction, $amount)
 
 Creates a new position in $symbol if one does not exist yet.
 Adds a new trade to the position in $symbol.
@@ -216,7 +215,7 @@ augment 'openMarket' => sub {
     return $trade;
 };
 
-=item C<closeMarket($tradeID, $amount)>
+=method C<closeMarket($tradeID, $amount)>
 
 =cut
 sub closeMarket {
@@ -240,7 +239,7 @@ sub closeMarket {
     }
 }
 
-=item C<getBaseUnit($symbol)>
+=method C<getBaseUnit($symbol)>
 
 TODO. Set base unit for other symbols.
 =cut
@@ -255,7 +254,7 @@ sub getBaseUnit {
     return 10000;
 }
 
-=item C<getNav()>
+=method C<getNav()>
 
     Returns account balance + account profit/loss
 =cut
@@ -266,7 +265,7 @@ sub getNav {
     return sprintf("%.4f", $self->balance() + $self->pl());
 }
 
-=item C<balance>
+=method C<balance>
 
 =cut
 sub balance {
@@ -290,7 +289,7 @@ sub balance {
 #    );
 #}
 
-=item C<checkSignal($symbol, $signal_definition, $signal_args)>a
+=method C<checkSignal($symbol, $signal_definition, $signal_args)>a
 
 =cut
 sub checkSignal {
@@ -449,7 +448,7 @@ sub getServerDateTime {
 }
 
 
-=item C<delta_add($date, $delta)>
+=method C<delta_add($date, $delta)>
 Add $delta seconds to $date and returns the new date
 =cut
 sub delta_add {
@@ -468,7 +467,7 @@ sub delta_add {
     
 }
 
-=item C<delta_dates($date1,$date2)>
+=method C<delta_dates($date1,$date2)>
     Returns the number of seconds between $date1 and $date2
 =cut
 sub delta_dates {
@@ -498,7 +497,7 @@ my $v = ($r[0]*86400 + $r[1]*3600 + $r[2]*60 + $r[3]);
 return $v;
 }
 
-=item C<epoch_to_date()>
+=method C<epoch_to_date()>
 =cut
 sub epoch_to_date {
     my $epoch = shift;
@@ -514,7 +513,7 @@ sub epoch_to_date {
                   );
 }
 
-=item C<date_to_epoch()>
+=method C<date_to_epoch()>
 =cut
 sub date_to_epoch {
     my $date = shift;
@@ -532,19 +531,3 @@ sub date_to_epoch {
 
 
 1;
-
-=back
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
-
-=head1 SEE ALSO
-
-L<Server.exe>
-
-=cut

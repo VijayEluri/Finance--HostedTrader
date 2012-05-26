@@ -1,7 +1,5 @@
 package Finance::HostedTrader::Report;
-=head1 NAME
-
-    Finance::HostedTrader::Report - Report object
+# ABSTRACT: Finance::HostedTrader::Report - Report object
 
 =head1 SYNOPSIS
 
@@ -13,13 +11,6 @@ package Finance::HostedTrader::Report;
     print $report->openPositions;
     print $report->systemEntryExit;
 
-=head1 DESCRIPTION
-
-
-=head2 METHODS
-
-=over 12
-
 =cut
 
 use strict;
@@ -29,8 +20,9 @@ use Moose::Util::TypeConstraints;
 
 use Params::Validate qw(:all);
 
-=item C<account>
+=attr C<account>
 
+An instance of L<Finance::HostedTrader::Account>
 
 =cut
 has account => (
@@ -39,7 +31,9 @@ has account => (
     required=>1,
 );
 
-=item C<systemTrader>
+=attr C<systemTrader>
+
+An instance of L<Finance::HostedTrader::Trader>
 
 =cut
 has systemTrader => (
@@ -48,7 +42,7 @@ has systemTrader => (
     required=> 1,
 );
 
-=item C<format>
+=attr C<format>
 
 =cut
 enum 'enumFormat' => qw(text html);
@@ -60,7 +54,7 @@ has format => (
 );
 
 
-=item C<openPositions>
+=method C<openPositions>
 
 
 =cut
@@ -97,6 +91,8 @@ sub openPositions {
     return $t;
 }
 
+=method C<systemEntryExit>
+=cut
 sub systemEntryExit {
     my $self = shift;
     my $account = $self->account;
@@ -150,19 +146,9 @@ sub _table_factory {
 __PACKAGE__->meta->make_immutable;
 1;
 
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
-
 =head1 SEE ALSO
 
+L<Finance::HostedTrader::Account>
 L<Finance::HostedTrader::Trade>
 
 =cut

@@ -1,7 +1,6 @@
 package Finance::HostedTrader::Config::Timeframes;
-=head1 NAME
 
-    Finance::HostedTrader::Config::Timeframes - DB Configuration for the Finance::HostedTrader platform
+# ABSTRACT: Finance::HostedTrader::Config::Timeframes - DB Configuration for the Finance::HostedTrader platform
 
 =head1 SYNOPSIS
 
@@ -9,14 +8,6 @@ package Finance::HostedTrader::Config::Timeframes;
     my $obj = Finance::HostedTrader::Config::Timeframes->new(
                     natural => [60, 300],
                 );
-
-=head1 DESCRIPTION
-
-
-=head2 METHODS
-
-=over 12
-
 =cut
 
 use strict;
@@ -75,7 +66,7 @@ my $values =shift;
 return \@sorted;
 }
 
-=item C<natural>
+=attr C<natural>
 
 Returns a list of natural timeframes.
 Natural timeframes originate from the datasource, as opposed to synthetic timeframes which are calculated based on natural timeframes
@@ -91,7 +82,7 @@ has natural => (
 #register method modifier so the passed timeframe values can be sorted
 around 'natural' => \&_around_timeframes;   
 
-=item C<synthetic>
+=attr C<synthetic>
 
 Returns a list of synthetic timeframes.  If not defined (either by omission or by explicitly setting it to undef), returns an empty list when accessed.
 
@@ -112,7 +103,7 @@ sub _build_synthetic {
     return [];
 }
 
-=item C<all>
+=method C<all>
 
 Returns a list of all timeframes, natural and synthetic, sorted by granularity.
 
@@ -125,7 +116,7 @@ sub all {
    return $self->_sort_timeframes( [ @{ $self->natural }, @{ $self->synthetic } ] );
 }
 
-=item C<getTimeframeID>
+=method C<getTimeframeID>
 
 Returns the numeric timeframe id from the stringified timeframe
 eg: 
@@ -137,7 +128,7 @@ sub getTimeframeID {
     return $timeframes{$name}->[0];
 }
 
-=item C<getTimeframeName>
+=method C<getTimeframeName>
 
 Returns the stringified timeframe name for the given
 timeframe ID
@@ -150,7 +141,7 @@ sub getTimeframeName {
     grep { return $_ if $timeframes{$_}->[0] == $id } keys(%timeframes);
 }
 
-=item C<getTimeframeFormat>
+=method C<getTimeframeFormat>
 =cut
 sub getTimeframeFormat {
     my ($self, $name) = @_;
@@ -160,17 +151,6 @@ sub getTimeframeFormat {
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 

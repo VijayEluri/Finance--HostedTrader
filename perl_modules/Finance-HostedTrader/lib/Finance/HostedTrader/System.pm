@@ -11,22 +11,14 @@ use Moose::Util::TypeConstraints;
 use Finance::HostedTrader::Config;
 
 
-=head1 NAME
 
-    Finance::HostedTrader::System - System definition class
+# ABSTRACT: Finance::HostedTrader::System - System definition class
 
 =head1 SYNOPSIS
 
+=cut
 
-=head1 DESCRIPTION
-
-
-
-=head2 Properties
-
-=over 12
-
-=item C<name>
+=attr C<name>
 
 =cut
 has 'name' => (
@@ -35,6 +27,8 @@ has 'name' => (
     required=>1,
 );
 
+=attr C<symbolUpdateInterval>
+=cut
 has symbolUpdateInterval => (
     is     => 'ro',
     isa    => 'Int',
@@ -42,6 +36,8 @@ has symbolUpdateInterval => (
     required=>1,
 );
 
+=attr C<pathToSystems>
+=cut
 has pathToSystems => (
     is      => 'rw',
     isa     => 'Str',
@@ -49,11 +45,8 @@ has pathToSystems => (
     required=> 1,
 );
 
-=back
 
-=head2 Constructor
-
-=item C<BUILD>
+=method C<BUILD>
 
 
 =cut
@@ -65,6 +58,8 @@ sub BUILD {
     $self->{_symbolsLastUpdated} = 0;
 }
 
+=method C<getSymbolsNextUpdate>
+=cut
 sub getSymbolsNextUpdate {
     my $self = shift;
     
@@ -81,11 +76,7 @@ sub getSymbolsNextUpdate {
     
 }
 
-=head2 Methods
-
-=over 12
-
-=item C<symbols()>
+=method C<symbols()>
 
 =cut
 sub symbols {
@@ -156,18 +147,3 @@ sub _getSymbolFileName {
     return $self->pathToSystems.'/'.$self->name.'.symbols.yml';
 }
 1;
-
-=back
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
-
-=head1 SEE ALSO
-
-
-=cut

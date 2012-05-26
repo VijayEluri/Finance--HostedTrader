@@ -1,16 +1,11 @@
 package Finance::HostedTrader::Trader::Notifier;
-=head1 NAME
-
-    Finance::HostedTrader::Notifier - Notifier object
+# ABSTRACT: Finance::HostedTrader::Notifier - Notifier object
 
 =head1 SYNOPSIS
 
     use Finance::HostedTrader::Notifier;
     my $obj = Finance::HostedTrader::Notifier->new(
                 );
-
-=head1 DESCRIPTION
-
 
 =cut
 
@@ -22,32 +17,7 @@ use Moose;
 use Params::Validate qw(:all);
 use Scalar::Util;
 
-=head2 Properties
-
-=over 12
-
-=back
-
-=head2 Constructor
-
-=over 12
-
-=item C<BUILD>
-
-Constructor.
-
-=cut
-
-=back
-
-
-=head2 METHODS
-
-
-=over 12
-
-
-=item C<open()>
+=method C<open()>
 
 =cut
 
@@ -85,7 +55,7 @@ sub open {
     die("overrideme");
 }
 
-=item C<close()>
+=method C<close()>
 
 =cut
 
@@ -114,17 +84,6 @@ sub close {
 
 __PACKAGE__->meta->make_immutable;
 1;
-
-=back
-
-
-=head1 LICENSE
-
-This is released under the MIT license. See L<http://www.opensource.org/licenses/mit-license.php>.
-
-=head1 AUTHOR
-
-Joao Costa - L<http://zonalivre.org/>
 
 =head1 SEE ALSO
 
