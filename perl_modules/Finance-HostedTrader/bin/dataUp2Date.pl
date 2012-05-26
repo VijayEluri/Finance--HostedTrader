@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+package Finance::HostedTrader::DataManager;
+# ABSTRACT: Monitor if data is up to date for real time trading
 
 use strict;
 use warnings;
