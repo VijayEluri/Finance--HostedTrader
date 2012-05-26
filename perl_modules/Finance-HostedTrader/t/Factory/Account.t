@@ -5,12 +5,15 @@ use warnings;
 use Test::More tests => 13;
 use Test::Exception;
 use Data::Dumper;
+use File::Basename;
 
 use Finance::HostedTrader::System;
 
 BEGIN {
 use_ok ('Finance::HostedTrader::Factory::Account');
 }
+
+my $t_path = dirname($0);
 
 my $acc;
 
@@ -27,7 +30,7 @@ throws_ok {
     	)->create_instance();
 } qr/Attribute \(system\) is required/, 'UnitTest dies without system argument';
 
-my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => $t_path );
 
 $acc = Finance::HostedTrader::Factory::Account->new(
         SUBCLASS    => 'UnitTest',

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use YAML::Tiny;
 
-use TestSystem;
+use Finance::HostedTrader::Test::TestSystem;
 
 my $args;
 $args = '--dontSkipDates' if ($0 =~ /noskip/);
