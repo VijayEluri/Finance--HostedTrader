@@ -1,0 +1,4 @@
+Revision history for Finance::HostedTrader
+
+0.001 2012-05-26 22:48:37 BST
+      Convert Finance::HostedTrader to a CPAN distribution
