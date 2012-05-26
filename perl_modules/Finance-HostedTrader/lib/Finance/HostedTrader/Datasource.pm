@@ -140,8 +140,8 @@ sub convertOHLCTimeSeries {
     $date_group = $date_select unless ( defined($date_group) );
 
     my $sql = qq|
-INSERT INTO $symbol\_$tf_dst
-SELECT $date_select, SUBSTRING_INDEX(GROUP_CONCAT(CAST(open AS CHAR) ORDER BY datetime), ',', 1) as open, MIN(low) as low, MAX(high) as high, SUBSTRING_INDEX(GROUP_CONCAT(CAST(close AS CHAR) ORDER BY datetime DESC), ',', 1) as close
+INSERT INTO $symbol\_$tf_dst(datetime, open, high, low, close)
+SELECT $date_select, SUBSTRING_INDEX(GROUP_CONCAT(CAST(open AS CHAR) ORDER BY datetime), ',', 1) as open, MAX(high) as high, MIN(low) as low, SUBSTRING_INDEX(GROUP_CONCAT(CAST(close AS CHAR) ORDER BY datetime DESC), ',', 1) as close
 FROM $symbol\_$tf_src
 WHERE datetime >= '$start_date' AND datetime < '$end_date'
 GROUP BY $date_group
