@@ -56,7 +56,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 				throw new TimeoutException("Login");
 			}
 			if (loginFailed) {
-				throw new RuntimeException(loginFailedMessage);
+				throw new RuntimeException("Login failed with message:" + loginFailedMessage);
 			}
 		}
 	}

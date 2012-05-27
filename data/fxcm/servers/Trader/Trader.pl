@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 $| = 1;
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 use Data::Dumper;
 use Data::Compare;
 use Pod::Usage;
@@ -14,30 +14,25 @@ use Finance::HostedTrader::Trader;
 use Finance::HostedTrader::System;
 use Finance::HostedTrader::Report;
 
-my ($verbose, $help, $accountClass, $expectedTradesFile, $startDate, $endDate, $dontSkipDates, $pathToSystems) = (0, 0, 'FXConnect', undef, 'now', '10 years', 0, 'systems');
+my ($verbose, $help, $accountClass, $pathToSystems) = (0, 0, 'ForexConnect', 'systems');
 
 my $result = GetOptions(
-    "class=s",  \$accountClass,
-    "expectedTradesFile=s", \$expectedTradesFile,
-    "dontSkipDates",  \$dontSkipDates,
-    "verbose",  \$verbose,
-    "help",     \$help,
-    "startDate=s",\$startDate,
-    "endDate=s",  \$endDate,
-    "pathToSystems=s", \$pathToSystems,
+    "class=s",          \$accountClass,
+    "verbose",          \$verbose,
+    "help",             \$help,
+    "pathToSystems=s",  \$pathToSystems,
 ) || pod2usage(2);
 
 pod2usage(1) if ($help);
 
+
 my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => $pathToSystems );
 
+my %classArgs = map { s/^--//; split(/=/) } @ARGV;
 my $account = Finance::HostedTrader::Factory::Account->new(
                 SUBCLASS => $accountClass,
-                startDate => $startDate,
-                endDate => $endDate,
                 system => $trendfollow,
-                skipToDatesWithSignal => !$dontSkipDates,
-                expectedTradesFile => $expectedTradesFile,
+                %classArgs,
             )->create_instance();
 
 my @systems =   (   
@@ -53,7 +48,6 @@ foreach my $system (@systems) {
     logger("Loaded system " . $system->system->name) if ($verbose);
 }
 
-my $debug = 0;
 my $symbolsLastUpdated = 0;
 while (1) {
     my $systemTrader = $systems[0];

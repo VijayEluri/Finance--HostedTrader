@@ -147,7 +147,7 @@ my %symbolMap = (
 
 has '_fx' => (
     is      => 'ro',
-    isa     => 'Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect',
+    isa     => 'Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::FXConnect::ForexConnect',
     lazy    => 1,
     builder => '_build_fx',
 );
@@ -156,9 +156,9 @@ sub _build_fx {
     my $self = shift;
 
     eval q{use Inline  Java    => 'STUDY',
-            STUDY   => [ qw(org.zonalivre.FXConnect.ForexConnect) ];};
+            STUDY   => [ qw(org.zonalivre.FXConnect.ForexConnect) ]; };
 
-    return Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::ForexConnect->new($self->username, $self->password, $self->accountType);
+    return Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::FXConnect::ForexConnect->new($self->username, $self->password, $self->accountType);
 }
 
 =method C<refreshPositions()>
