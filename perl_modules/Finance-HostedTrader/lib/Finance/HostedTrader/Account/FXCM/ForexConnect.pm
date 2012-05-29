@@ -295,7 +295,7 @@ sub getBaseUnit {
     my ($self, $symbol) = @_;
 
     $symbol = $self->_convertSymbolToFXCM($symbol);
-    return $self->_sendCmd("baseunit $symbol");
+    return $self->_fx->getBaseUnit($symbol);
 }
 
 =method C<getNav()>

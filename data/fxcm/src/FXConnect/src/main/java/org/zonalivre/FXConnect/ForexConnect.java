@@ -20,6 +20,7 @@ import com.fxcore2.O2GSessionStatusCode;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTradeRow;
 import com.fxcore2.O2GTradesTableResponseReader;
+import com.fxcore2.O2GTradingSettingsProvider;
 import com.fxcore2.O2GTransport;
 import com.fxcore2.O2GValueMap;
 
@@ -219,6 +220,12 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		return offer.getContractCurrency();
 	}
 	
+	public int getBaseUnitSize(String symbol) throws Exception {
+		O2GTradingSettingsProvider settings = session.getLoginRules().getTradingSettingsProvider();
+		
+		return settings.getBaseUnitSize(symbol, getAccountRow());
+	}
+	
 	public O2GRequestFactory getRequestFactory() {
 		return session.getRequestFactory();
 	}
@@ -347,11 +354,12 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		String type = "Demo";
 		//String type = "Real";
 		ForexConnect tradeStation = new ForexConnect(username, password, type);
-		//tradeStation.openMarket("EUR/USD", Constants.Buy, 10000);
+		//tradeStation.openMarket("AUD/USD", Constants.Sell, 1000);
 		//tradeStation.closeMarket("7984420", 2);
-		tradeStation.openMarket("USD/CHF", Constants.Buy, 10000);
+		//tradeStation.openMarket("XAG/USD", Constants.Buy, 20);
+		System.out.println(tradeStation.getBaseUnitSize("AUD/USD"));
 		System.out.println(tradeStation.getTrades());
-		Log.log("" + tradeStation.getBalance());
+		Log.log("" + tradeStation.getNav());
 		/*Log.log("" + tradeStation.getBalance());
 		Log.log(
 				tradeStation.getAsk("XAU/USD") + "\n" +
