@@ -1,6 +1,7 @@
 Revision history for Finance::HostedTrader
 
-Sun May 27 01:46:56 BST 2012
+0.003 2012-05-29 22:31:21 BST
+      Implement getBaseUnit
 0.002 2012-05-27 01:46:56 BST
       Fix FXConnect class name
 0.001 2012-05-26 22:48:37 BST
