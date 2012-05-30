@@ -1,5 +1,7 @@
 Revision history for Finance::HostedTrader
 
+0.004 2012-05-29 20:44:16 BST
+      Fix openMarket which is not returning the order just opened
 0.003 2012-05-29 22:31:21 BST
       Implement getBaseUnit
 0.002 2012-05-27 01:46:56 BST
