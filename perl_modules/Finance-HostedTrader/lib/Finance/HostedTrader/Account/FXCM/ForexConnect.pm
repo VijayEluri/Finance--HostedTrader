@@ -240,13 +240,13 @@ augment 'openMarket' => sub {
 
     my $fxcm_symbol = $self->_convertSymbolToFXCM($symbol);
     my $fxcm_direction = ($direction eq 'long' ? 'B' : 'S');
-    my $data;
+    my $orderID;
 
     #the openmarket call can fail if price moves
     #to quickly, so try it 3 times until it succeeds
     TRY_OPENTRADE: foreach my $try (1..3) {
         eval {
-            $data = $self->_fx->openMarket($fxcm_symbol,$fxcm_direction,$amount);
+            $orderID = $self->_fx->openMarket($fxcm_symbol,$fxcm_direction,$amount);
             1;
         } or do {
             #TODO would be preferable to log something here
@@ -254,18 +254,18 @@ augment 'openMarket' => sub {
         };
         last TRY_OPENTRADE;
     }
-    my ($orderID, $rate) = split(/ /, $data); #TODO don't need to return rate here
+    die("Failed to open order ($symbol, $direction,$amount,$stopLoss)") if(!defined($orderID));
 
     #Try to fetch the trade object for the trade just opened
     #Try up to 5 times because getPosition implicitly sends a call to the FXCM API to retrieve existing
     #trades which usually doesn't imediatelly return the open trade 
     my $tries = 5;
     while ($tries--) {
+        sleep(1); #Sleep a bit because FXCM server doesn't usually imediatelly return the trade just opened #TODO use Time::HiRes and sleep less time
         my $trade = $self->getPosition($symbol)->getTrade($orderID);
         return $trade if (defined($trade));
-        sleep(1); #Sleep a bit because FXCM server may not imediatelly return the trade just opened #TODO use Zefram's module and sleep less time
     }
-    die("Could not find trade just opened. Return from _sendCmd was: '$data'");
+    die("Could not find trade just opened. orderID = '$orderID'");
 };
 
 =method C<closeMarket($tradeID, $amount)>

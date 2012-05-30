@@ -10,6 +10,7 @@ import com.fxcore2.O2GAccountRow;
 import com.fxcore2.O2GAccountsTableResponseReader;
 import com.fxcore2.O2GOfferRow;
 import com.fxcore2.O2GOffersTableResponseReader;
+import com.fxcore2.O2GOrderResponseReader;
 import com.fxcore2.O2GRequest;
 import com.fxcore2.O2GRequestFactory;
 import com.fxcore2.O2GRequestParamsEnum;
@@ -131,7 +132,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 			
 			output +=
 					"- symbol: " + offer.getInstrument() + "\n" +
-					"  id: " + trade.getTradeID() + "\n" +
+					"  id: " + trade.getOpenOrderID() + "\n" +
 					"  direction: " + (isLong ? "long" : "short") + "\n" +
 					"  openPrice: " + trade.getOpenRate() + "\n" +
 					"  size: " + trade.getAmount() +  "\n" +
@@ -298,7 +299,7 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		return logLevel;
 	}
 	
-	public void openMarket(String symbol, String Direction, int amount) throws Exception {
+	public String openMarket(String symbol, String Direction, int amount) throws Exception {
 		O2GAccountRow account = getAccountRow();
 		O2GOfferRow offer = getOfferRow(symbol);
 
@@ -311,10 +312,12 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		valueMap.setString(O2GRequestParamsEnum.BUY_SELL, Direction);
 		valueMap.setInt(O2GRequestParamsEnum.AMOUNT, amount);
 		valueMap.setString(O2GRequestParamsEnum.CUSTOM_ID, "FXConnect OpenMarket");
-		
+
 		O2GRequest orderRequest = requestBuilder.createOrderRequest(valueMap);
 		O2GResponse orderResponse = sendRequest(orderRequest);
-        Log.log(orderResponse.toString());
+		O2GResponseReaderFactory responseReaderFactory = session.getResponseReaderFactory();
+		O2GOrderResponseReader orderResponseReader = responseReaderFactory.createOrderResponseReader(orderResponse);
+		return orderResponseReader.getOrderID();
 	}
 	
 	public void closeMarket(String sTradeID, int amount) throws Exception {
@@ -354,12 +357,12 @@ public class ForexConnect implements IO2GSessionStatus, IO2GResponseListener {
 		String type = "Demo";
 		//String type = "Real";
 		ForexConnect tradeStation = new ForexConnect(username, password, type);
-		//tradeStation.openMarket("AUD/USD", Constants.Sell, 1000);
+		//System.out.println(tradeStation.openMarket("AUD/USD", Constants.Sell, 1000));
 		//tradeStation.closeMarket("7984420", 2);
 		//tradeStation.openMarket("XAG/USD", Constants.Buy, 20);
-		System.out.println(tradeStation.getBaseUnitSize("AUD/USD"));
+		//System.out.println(tradeStation.getBaseUnitSize("AUD/USD"));
 		System.out.println(tradeStation.getTrades());
-		Log.log("" + tradeStation.getNav());
+		//Log.log("" + tradeStation.getNav());
 		/*Log.log("" + tradeStation.getBalance());
 		Log.log(
 				tradeStation.getAsk("XAU/USD") + "\n" +
