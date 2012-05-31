@@ -27,6 +27,7 @@ extends 'Finance::HostedTrader::Account';
 
 use Moose::Util::TypeConstraints;
 use YAML::Syck;
+use Time::HiRes qw (usleep);
 use Finance::HostedTrader::Trade;
 
 =attr C<username>
@@ -261,7 +262,7 @@ augment 'openMarket' => sub {
     #trades which usually doesn't imediatelly return the open trade 
     my $tries = 5;
     while ($tries--) {
-        sleep(1); #Sleep a bit because FXCM server doesn't usually imediatelly return the trade just opened #TODO use Time::HiRes and sleep less time
+        usleep(500000); #Sleep a bit because FXCM server doesn't usually imediatelly return the trade just opened
         my $trade = $self->getPosition($symbol)->getTrade($orderID);
         return $trade if (defined($trade));
     }
