@@ -148,7 +148,7 @@ my %symbolMap = (
 
 has '_fx' => (
     is      => 'ro',
-    isa     => 'Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::FXConnect::ForexConnect',
+    isa     => 'Finance::FXCM::Simple',
     lazy    => 1,
     builder => '_build_fx',
 );
