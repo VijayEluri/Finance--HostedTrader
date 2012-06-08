@@ -156,10 +156,8 @@ has '_fx' => (
 sub _build_fx {
     my $self = shift;
 
-    eval q{use Inline  Java    => 'STUDY',
-            STUDY   => [ qw(org.zonalivre.FXConnect.ForexConnect) ]; };
-
-    return Finance::HostedTrader::Account::FXCM::ForexConnect::org::zonalivre::FXConnect::ForexConnect->new($self->username, $self->password, $self->accountType);
+    require Finance::FXCM::Simple;
+    return Finance::FXCM::Simple->new($self->username, $self->password, $self->accountType, 'http://www.fxcorporate.com/Hosts.jsp');
 }
 
 =method C<refreshPositions()>
