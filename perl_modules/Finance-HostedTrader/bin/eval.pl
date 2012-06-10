@@ -75,7 +75,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 my ( $timeframe, $max_loaded_items, $max_display_items, $symbols_txt, $debug, $help ) =
-  ( 'day', 1000, 1, '', 0, 0 );
+  ( 'day', 5000, 1, '', 0, 0 );
 
 GetOptions(
     "timeframe=s"         => \$timeframe,
