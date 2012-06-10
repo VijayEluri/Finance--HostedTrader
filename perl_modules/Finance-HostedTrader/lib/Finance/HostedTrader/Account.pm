@@ -85,6 +85,7 @@ sub BUILD {
     $self->startDate($startDate);
     $self->endDate($endDate);
     $self->{_positions} = {};
+    $self->{_lastRefreshPositions} = 0;
 }
 
 =method C<refreshPositions()>
@@ -313,10 +314,9 @@ This object will contain information about all open trades in $symbol.
 
 =cut
 sub getPosition {
-    my ($self, $symbol) = @_;
+    my ($self, $symbol, $forceRefresh) = @_;
 
-    $self->refreshPositions();
-    my $positions = $self->{_positions};
+    my $positions = $self->getPositions($forceRefresh);
     return Finance::HostedTrader::Position->new(symbol=>$symbol) if (!defined($positions->{$symbol}));
     return $positions->{$symbol};
 }
@@ -327,9 +327,17 @@ Returns a hashref whose key is a "trading symbol" and value a L<Finance::HostedT
 
 =cut
 sub getPositions {
-    my ($self) = @_;
+    my ($self, $forceRefresh) = @_;
 
-    $self->refreshPositions();
+    # Clients call getPositions() all the time to get list of current positions
+    # Avoid going to the server every single time. This improves performance (less network traffic)
+    # at a cost of the positions not being necessarly up to date (eg: a position might have been opened/closed via manual trading)
+    # Also, this is necessary because some APIs limit the number of requests one can make. Eg: ForexConnect only allow this request
+    # 50 time per hour.
+    if ($forceRefresh || time() - $self->{_lastRefreshPositions} > 150) {
+        $self->refreshPositions();
+        $self->{_lastRefreshPositions} = time();
+    }
     return $self->{_positions};
 }
 
@@ -342,7 +350,7 @@ sub closeTrades {
     my ($self, $symbol, $directionToClose) = @_;
 
     my $posSize = 0;
-    my $position = $self->getPosition($symbol);
+    my $position = $self->getPosition($symbol,1);
     foreach my $trade (@{ $position->getOpenTradeList }) {
         my $trade_direction = $trade->direction;
         next if ($trade_direction ne $directionToClose);

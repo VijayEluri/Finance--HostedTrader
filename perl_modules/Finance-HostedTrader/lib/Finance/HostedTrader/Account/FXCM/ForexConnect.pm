@@ -261,7 +261,7 @@ augment 'openMarket' => sub {
     my $tries = 5;
     while ($tries--) {
         usleep(500000); #Sleep a bit because FXCM server doesn't usually imediatelly return the trade just opened
-        my $trade = $self->getPosition($symbol)->getTrade($orderID);
+        my $trade = $self->getPosition($symbol, 1)->getTrade($orderID);
         return $trade if (defined($trade));
     }
     die("Could not find trade just opened. orderID = '$orderID'");
