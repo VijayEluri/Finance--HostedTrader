@@ -31,5 +31,5 @@ foreach my $symbol (@symbols) {
     $filename =~ s|/||g;
     $filename .= "_$timeframe";
 
-    $fxcm->saveHistoricalDataToFile("/tmp/$filename", $symbol, $fxcmTimeframe, $numItemsToDownload);
+    $fxcm->saveHistoricalDataToFile($filename, $symbol, $fxcmTimeframe, $numItemsToDownload);
 }
