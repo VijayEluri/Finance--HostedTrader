@@ -287,16 +287,16 @@ sub getBaseUnit {
     return $self->_fx->getBaseUnitSize($symbol);
 }
 
-=method C<getNav()>
+=method C<balance()>
 
-Return the current net asset value in the account
+Return the current balance in the account (before profit/loss of existing positions)
 
 =cut
 
-sub getNav {
+sub balance {
     my ($self) = @_;
 
-    return $self->_fx->getNav;
+    return $self->_fx->getBalance();
 }
 
 =method C<getBaseCurrency>

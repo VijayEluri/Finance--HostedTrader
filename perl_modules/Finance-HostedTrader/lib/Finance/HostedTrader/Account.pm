@@ -185,12 +185,12 @@ sub getBaseUnit {
     die("overrideme");
 }
 
-=method C<getNav()>
+=method C<balance()>
 
-This method must be overriden. Return the current net asset value in the account.
+This method must be overriden to return the current balance in the account ( before p/l of open positions )
 
 =cut
-sub getNav {
+sub balance {
     die("overrideme");
 }
 
@@ -391,15 +391,15 @@ sub pl {
     return $pl;
 }
 
-=method C<balance()>
+=method C<getNav()>
 
-Current account balance, excluding profit/loss of open positions
+Returns current Net Asset Value ( including p/l of open positions )
 
 =cut
-sub balance {
+sub getNav {
     my $self = shift;
 
-    return $self->getNav() - $self->pl();
+    return $self->balance() + $self->pl();
 }
 
 my %symbolBaseMap = (

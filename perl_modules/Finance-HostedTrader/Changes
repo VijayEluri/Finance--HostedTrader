@@ -1,5 +1,7 @@
 Revision history for Finance::HostedTrader
 
+0.008 2012-06-11 19:58:54 BST
+      Refactor getNav/balance to reflect change in underlying API
 0.007 2012-06-11 19:21:23 BST
       Finance::HostedTrader::Account::openMarket method signature was changed, it no longer returns an orderID. Fix caller.
 0.006 2012-06-10 17:46:25 BST
