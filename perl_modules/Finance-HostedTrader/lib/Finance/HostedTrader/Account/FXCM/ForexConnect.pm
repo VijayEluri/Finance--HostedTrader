@@ -27,7 +27,6 @@ extends 'Finance::HostedTrader::Account';
 
 use Moose::Util::TypeConstraints;
 use YAML::Syck;
-use Time::HiRes qw (usleep);
 use Finance::HostedTrader::Trade;
 
 =attr C<username>
@@ -239,13 +238,15 @@ augment 'openMarket' => sub {
 
     my $fxcm_symbol = $self->_convertSymbolToFXCM($symbol);
     my $fxcm_direction = ($direction eq 'long' ? 'B' : 'S');
-    my $orderID;
+    my $isSuccess;
 
     #the openmarket call can fail if price moves
     #to quickly, so try it 3 times until it succeeds
+    # TODO: not sure if this is still true, also, trying 3 times is tricky, because if the order was actually opened and what failed was checking that the open is successfull, we end up with multiple orders opened when we only wanted one. 
     TRY_OPENTRADE: foreach my $try (1..3) {
         eval {
-            $orderID = $self->_fx->openMarket($fxcm_symbol,$fxcm_direction,$amount);
+            $self->_fx->openMarket($fxcm_symbol,$fxcm_direction,$amount);
+            $isSuccess = 1;
             1;
         } or do {
             #TODO would be preferable to log something here
@@ -253,18 +254,7 @@ augment 'openMarket' => sub {
         };
         last TRY_OPENTRADE;
     }
-    die("Failed to open order ($symbol, $direction,$amount,$stopLoss)") if(!defined($orderID));
-
-    #Try to fetch the trade object for the trade just opened
-    #Try up to 5 times because getPosition implicitly sends a call to the FXCM API to retrieve existing
-    #trades which usually doesn't imediatelly return the open trade 
-    my $tries = 5;
-    while ($tries--) {
-        usleep(500000); #Sleep a bit because FXCM server doesn't usually imediatelly return the trade just opened
-        my $trade = $self->getPosition($symbol, 1)->getTrade($orderID);
-        return $trade if (defined($trade));
-    }
-    die("Could not find trade just opened. orderID = '$orderID'");
+    die("Failed to open order ($symbol, $direction,$amount,$stopLoss)") if(!$isSuccess);
 };
 
 =method C<closeMarket($tradeID, $amount)>
