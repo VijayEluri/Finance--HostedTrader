@@ -137,7 +137,7 @@ If a notifier has been defined, the L<Finance::HostedTrader::Notifier> open meth
 =cut
 sub openMarket {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
-    my $trade = inner();
+    inner();
     
     if (!$trade) {
         die("openMarket did not return a trade object\nParameters were: $symbol $direction $amount $stopLoss");
@@ -150,8 +150,6 @@ sub openMarket {
             direction   => $direction,
             amount      => $amount, 
             stopLoss    => $stopLoss,
-            orderID     => $trade->id,
-            rate        => $trade->openPrice,
             now         => $self->getServerDateTime(),
             nav         => $self->getNav(),
             balance     => $self->balance(),

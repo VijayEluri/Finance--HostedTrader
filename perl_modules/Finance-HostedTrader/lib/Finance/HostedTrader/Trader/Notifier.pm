@@ -41,8 +41,6 @@ around 'open' => sub {
                 direction   =>  { type => SCALAR, callbacks => { v => \&_isDirection } },
                 amount      =>  { type => SCALAR, regex => qr/^\d+$/ },
                 stopLoss    =>  { type => SCALAR, callbacks => { v => \&_isPositiveNum } },
-                orderID     =>  { type => SCALAR },
-                rate        =>  { type => SCALAR, callbacks => { v => \&_isPositiveNum } },
                 now         =>  { type => SCALAR },
                 nav         =>  { type => SCALAR, callbacks => { v => \&_isPositiveNum } },
                 balance     =>  { type => SCALAR, callbacks => { v => \&_isPositiveNum } },

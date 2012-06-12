@@ -87,8 +87,6 @@ sub open {
         direction   => $args{direction},
         amount      => $args{amount},
         stopLoss    => $args{stopLoss},
-        orderID     => $args{orderID},
-        rate        => $args{rate},       
         now         => $args{now},
         nav         => $args{nav},
         balance     => $args{balance},

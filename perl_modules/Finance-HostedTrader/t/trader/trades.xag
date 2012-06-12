@@ -2,8 +2,6 @@
   direction: long
   amount: 1950
   stopLoss: 17.3100
-  orderID: XAGUSD|long|1950|2010-08-18 06:08:00
-  rate: 18.5000
   now: 2010-08-18 06:08:00
   nav: 50000.0000
   balance: 50000.0000
@@ -11,8 +9,6 @@
   direction: long
   amount: 650
   stopLoss: 18.8100
-  orderID: XAGUSD|long|650|2010-09-22 08:00:00
-  rate: 20.9400
   now: 2010-09-22 08:00:00
   nav: 53036.7628
   balance: 50000.0000

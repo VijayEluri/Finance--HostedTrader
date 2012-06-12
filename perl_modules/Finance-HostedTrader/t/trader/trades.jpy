@@ -2,8 +2,6 @@
   direction: short
   amount: 60000
   stopLoss: 88.0900
-  orderID: USDJPY|short|60000|2010-08-18 11:08:00
-  rate: 85.2100
   now: 2010-08-18 11:08:00
   nav: 50000.0000
   balance: 50000.0000
@@ -11,8 +9,6 @@
   direction: short
   amount: 10000
   stopLoss: 85.8900
-  orderID: USDJPY|short|10000|2010-09-09 08:00:00
-  rate: 83.6400
   now: 2010-09-09 08:00:00
   nav: 50728.8201
   balance: 50000.0000
