@@ -139,10 +139,6 @@ sub openMarket {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
     inner();
     
-    if (!$trade) {
-        die("openMarket did not return a trade object\nParameters were: $symbol $direction $amount $stopLoss");
-    }
-    
     my $notifier = $self->notifier();
     if ($notifier) {
         $notifier->open(
@@ -155,8 +151,6 @@ sub openMarket {
             balance     => $self->balance(),
         );
     }
-    
-    return $trade;
 }
 
 =method C<closeMarket($tradeID, $amount)>
