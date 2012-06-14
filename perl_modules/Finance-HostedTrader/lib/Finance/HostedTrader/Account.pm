@@ -18,6 +18,8 @@ use Finance::HostedTrader::Position;
 
 use Date::Manip;
 
+extends "Finance::HostedTrader::Logger";
+
 
 ##These should exist everywhere, regardless of broker
 
@@ -61,9 +63,10 @@ has '_signal_processor' => (
 );
 
 sub _build_signal_processor {
+    my $self = shift;
+    $self->logger->info("Lazy build ExpressionParser");
     return Finance::HostedTrader::ExpressionParser->new();
 }
-
 
 
 =method C<BUILD>
@@ -77,6 +80,8 @@ Validates dates.
 sub BUILD {
     my $self = shift;
 
+    $self->logger->info("Build new " . __PACKAGE__);
+
     my $startDate = UnixDate($self->startDate, '%Y-%m-%d %H:%M:%S');
     die("Invalid date format: " . $self->startDate) if (!$startDate);
     my $endDate = UnixDate($self->endDate, '%Y-%m-%d %H:%M:%S');
@@ -84,6 +89,8 @@ sub BUILD {
     die("End date cannot be earlier than start date") if ( $endDate lt $startDate);
     $self->startDate($startDate);
     $self->endDate($endDate);
+    $self->logger->info("startDate = $startDate");
+    $self->logger->info("endDate = $endDate");
     $self->{_positions} = {};
     $self->{_lastRefreshPositions} = 0;
 }
@@ -100,7 +107,8 @@ It gets called by getPosition and getPositions
 
 =cut
 sub refreshPositions {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("refreshPositions must be overriden");
 }
 
 =method C<getAsk($symbol)>
@@ -109,7 +117,8 @@ This method must be overriden. Returns the current ask price for $symbol.
 
 =cut
 sub getAsk {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("getAsk must be overriden");
 }
 
 =method C<getBid>
@@ -118,7 +127,8 @@ This method must be overriden. Returns the current bid price for $symbol.
 
 =cut
 sub getBid {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("getBid must be overriden");
 }
 
 =method C<openMarket($symbol, $direction, $amount>
@@ -137,6 +147,7 @@ If a notifier has been defined, the L<Finance::HostedTrader::Notifier> open meth
 =cut
 sub openMarket {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
+    $self->logger->info("openMarket $symbol $direction $amount $stopLoss");
     inner();
     
     my $notifier = $self->notifier();
@@ -163,7 +174,8 @@ Returns $closedTradeID
 
 =cut
 sub closeMarket {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("closeMarket must be overriden");
 }
 
 =method C<getBaseUnit($symbol)>
@@ -174,7 +186,8 @@ Eg, if baseUnit=10000, the symbol can only trade in multiples of 10000 (15000 wo
 
 =cut
 sub getBaseUnit {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("getBaseUnit must be overriden");
 }
 
 =method C<balance()>
@@ -183,7 +196,8 @@ This method must be overriden to return the current balance in the account ( bef
 
 =cut
 sub balance {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("balance must be overriden");
 }
 
 =method C<getBaseCurrency()>
@@ -192,7 +206,8 @@ This method must be overriden. Returns the currency in which funds are held in t
 
 =cut
 sub getBaseCurrency {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("getBaseCurrency must be overriden");
 }
 
 =method C<getServerEpoch()>
@@ -201,7 +216,8 @@ This method must be overriden. Returns the current unix epoch time on the accoun
 
 =cut
 sub getServerEpoch {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("getServerEpoch must be overriden");
 }
 
 =method C<getServerDateTime()>
@@ -210,7 +226,8 @@ This method must be overriden. Returns the current date/time on the account serv
 
 =cut
 sub getServerDateTime {
-    die("overrideme");
+    my $self = shift;
+    $self->logger->logcroak("getServerDateTime must be overriden");
 }
 
 =method C<checkSignal($symbol, $signal, $args)>
@@ -220,6 +237,8 @@ Returns true if the given $signal/$args occurs in $symbol
 =cut
 sub checkSignal {
     my ($self, $symbol, $signal_definition, $signal_args) = @_;
+
+    $self->logger->info("checkSignal $symbol $signal_definition $signal_args");
 
     return $self->_signal_processor->checkSignal(
         {
@@ -241,6 +260,8 @@ Returns the indicator value of $indicator/$args on $symbol.
 sub getIndicatorValue {
     my ($self, $symbol, $indicator, $args) = @_;
 
+    $self->logger->info("getIndicatorValue $symbol $indicator $args");
+
     my $value = $self->_signal_processor->getIndicatorData( {
                 symbol  => $symbol,
                 tf      => $args->{timeframe},
@@ -259,7 +280,7 @@ sub getIndicatorValue {
 sub waitForNextTrade {
     my ($self, $system) = @_;
 
-    die('overrideme');
+    $self->logger->logcroak("waitForNextTrade must be overriden");
 }
 
 #=method C<convertToBaseCurrency($amount, $currentCurrency, $bidask>
@@ -293,6 +314,9 @@ See the L</getBaseUnit($symbol)> method.
 =cut
 sub convertBaseUnit {
     my ($self, $symbol, $amount) = @_;
+
+    $self->logger->info("convertBaseUnit $symbol $amount");
+
     my $baseUnit = $self->getBaseUnit($symbol);
 
     return int($amount / $baseUnit) * $baseUnit;
@@ -307,6 +331,8 @@ This object will contain information about all open trades in $symbol.
 =cut
 sub getPosition {
     my ($self, $symbol, $forceRefresh) = @_;
+
+    $self->logger->info("getPosition $symbol $forceRefresh");
 
     my $positions = $self->getPositions($forceRefresh);
     return Finance::HostedTrader::Position->new(symbol=>$symbol) if (!defined($positions->{$symbol}));
@@ -327,6 +353,7 @@ sub getPositions {
     # Also, this is necessary because some APIs limit the number of requests one can make. Eg: ForexConnect only allow this request
     # 50 time per hour.
     if ($forceRefresh || time() - $self->{_lastRefreshPositions} > 150) {
+        $self->logger->info("fresh getPositions $forceRefresh");
         $self->refreshPositions();
         $self->{_lastRefreshPositions} = time();
     }
@@ -340,6 +367,8 @@ Closes all trades in the given $symbol/$direction at market.
 =cut
 sub closeTrades {
     my ($self, $symbol, $directionToClose) = @_;
+
+    $self->logger->info("closeTrades $symbol $directionToClose");
 
     my $posSize = 0;
     my $position = $self->getPosition($symbol,1);
@@ -374,6 +403,8 @@ sub pl {
     my $self = shift;
     my $pl = 0;
 
+    $self->logger->info("pl");
+
     my $positions = $self->getPositions();
     foreach my $symbol (keys %{$positions}) {
         my $position = $positions->{$symbol};
@@ -390,6 +421,8 @@ Returns current Net Asset Value ( including p/l of open positions )
 =cut
 sub getNav {
     my $self = shift;
+
+    $self->logger->info("getNav");
 
     return $self->balance() + $self->pl();
 }
@@ -475,8 +508,12 @@ Eg:
 =cut
 sub getSymbolBase {
     my ($self, $symbol) = @_;
+    $self->logger->info("getSymbolBase $symbol");
 
-    die("Unsupported symbol '$symbol'") if (!exists($symbolBaseMap{$symbol}));
+    if (!exists($symbolBaseMap{$symbol})) {
+        $self->logger->logcroak("Unsupported symbol '$symbol'");
+    }
+
     return $symbolBaseMap{$symbol};
 }
 
