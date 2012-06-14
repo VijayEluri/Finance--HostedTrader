@@ -1,5 +1,8 @@
 Revision history for Finance::HostedTrader
 
+0.009 2012-06-14 22:06:34 BST
+      Initial attempt at logging
+      Fixes related to openMarket method signature having changed
 0.008 2012-06-11 19:58:54 BST
       Refactor getNav/balance to reflect change in underlying API
 0.007 2012-06-11 19:21:23 BST
