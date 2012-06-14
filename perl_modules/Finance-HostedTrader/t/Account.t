@@ -44,7 +44,7 @@ is($acc->endDate, '3001-01-01 00:00:00', 'end date defined');
 can_ok($acc, qw/refreshPositions getAsk getBid openMarket closeMarket getBaseUnit getNav balance getBaseCurrency checkSignal getIndicatorValue waitForNextTrade convertBaseUnit getPosition getPositions closeTrades pl getServerEpoch getServerDateTime getSymbolBase/);
 
 foreach my $method (qw/refreshPositions getBid getAsk closeMarket getBaseUnit getNav getBaseCurrency getServerEpoch getServerDateTime waitForNextTrade balance/) {
-throws_ok { $acc->$method } qr/overrideme/, "$method must be implemented by child class";
+throws_ok { $acc->$method } qr/must be overriden/, "$method must be implemented by child class";
 }
 
 throws_ok { $acc->getSymbolBase('invalid') } qr/Unsupported symbol 'invalid'/, 'Unsupported symbol';
