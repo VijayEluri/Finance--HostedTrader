@@ -33,6 +33,7 @@ git checkout $(git rev-list -n 1 HEAD -- "$file")^ -- "$file"
 
 # Remove a deleted file from branch history
 https://help.github.com/articles/remove-sensitive-data
+http://www.ducea.com/2012/02/07/howto-completely-remove-a-file-from-git-history/
 #git repack -Ad # If need to recreate packs
 git verify-pack -v .git/objects/pack/pack-*.idx | sort -k3n # sort history objects by size
 SHA1=`git verify-pack -v .git/objects/pack/pack-*.idx | sort -k3n | tail -n 1 | cut -f 1 -d \ `
