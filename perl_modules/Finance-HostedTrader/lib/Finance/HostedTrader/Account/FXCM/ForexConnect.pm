@@ -267,11 +267,11 @@ Returns $closedTradeID
 
 =cut
 
-sub closeMarket {
+augment closeMarket => sub {
     my ($self, $tradeID, $amount) = @_;
 
     return $self->_fx->closeMarket($tradeID,$amount);
-}
+};
 
 =method C<getBaseUnit($symbol)>
 

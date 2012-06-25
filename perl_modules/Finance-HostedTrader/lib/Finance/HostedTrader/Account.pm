@@ -137,11 +137,6 @@ This method must be overriden. Opens a trade in $symbol at current market price.
 
 $direction can be either 'long' or 'short'
 
-Returns a list containing two elements:
-
-$tradeID - This can be passed to closeMarket. It can also be retrieved via getTrades
-$price   - The price at which the trade was executed.
-
 If a notifier has been defined, the L<Finance::HostedTrader::Notifier> open method is called after the trade is open.
 
 =cut
@@ -149,6 +144,7 @@ sub openMarket {
     my ($self, $symbol, $direction, $amount, $stopLoss) = @_;
     $self->logger->info("openMarket $symbol $direction $amount $stopLoss");
     inner();
+    $self->{_lastRefreshPositions} = 0; # Force retrieving fresh position list from server on next call to getPositions
     
     my $notifier = $self->notifier();
     if ($notifier) {
@@ -174,8 +170,11 @@ Returns $closedTradeID
 
 =cut
 sub closeMarket {
-    my $self = shift;
-    $self->logger->logcroak("closeMarket must be overriden");
+    my ($self, $tradeID, $amount) = @_;
+    $self->logger->info("closeMarket $tradeID $amount");
+    my $rv = inner();
+    $self->{_lastRefreshPositions} = 0; # Force retrieving fresh position list from server on next call to getPositions
+    return $rv;
 }
 
 =method C<getBaseUnit($symbol)>
@@ -378,6 +377,7 @@ sub closeTrades {
         $self->closeMarket($trade->id, abs($trade->size));
         $posSize += $trade->size;
     }
+    $self->{_lastRefreshPositions} = 0; # Force retrieving fresh position list from server on next call to getPositions
     
     my $notifier = $self->notifier;
     if ($notifier) {
