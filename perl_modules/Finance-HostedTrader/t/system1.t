@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use Test::More skip_all => 'Flaky';
 use YAML::Tiny;
 use File::Basename;
 
@@ -19,8 +18,8 @@ my $test = Finance::HostedTrader::Test::TestSystem->new(
                                     short => [ 'USDJPY' ],
                                 },
                 resultsFile => "$t_path/trader/trades.jpy",
-                startDate   => '2010-08-18 06:00:00',
-                endDate     => '2010-09-17 00:00:00',
+                startDate   => '2012-03-05 06:00:00',
+                endDate     => '2012-04-23 00:00:00',
                 pathToSystems   => "$t_path/systems",
 );
 
