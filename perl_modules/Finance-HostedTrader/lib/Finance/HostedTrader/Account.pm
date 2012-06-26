@@ -331,7 +331,7 @@ This object will contain information about all open trades in $symbol.
 sub getPosition {
     my ($self, $symbol, $forceRefresh) = @_;
 
-    $self->logger->info("getPosition $symbol $forceRefresh");
+    $self->logger->info("getPosition $symbol" . ($forceRefresh ? ' with force refresh' : ''));
 
     my $positions = $self->getPositions($forceRefresh);
     return Finance::HostedTrader::Position->new(symbol=>$symbol) if (!defined($positions->{$symbol}));
@@ -352,7 +352,7 @@ sub getPositions {
     # Also, this is necessary because some APIs limit the number of requests one can make. Eg: ForexConnect only allow this request
     # 50 time per hour.
     if ($forceRefresh || time() - $self->{_lastRefreshPositions} > 150) {
-        $self->logger->info("fresh getPositions $forceRefresh");
+        $self->logger->info("fresh getPositions" . ($forceRefresh ? ' with force refresh' : ''));
         $self->refreshPositions();
         $self->{_lastRefreshPositions} = time();
     }
