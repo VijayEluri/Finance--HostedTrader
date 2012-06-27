@@ -5,7 +5,6 @@ use warnings;
 use Test::More skip_all => 'Flaky tests';#tests => 3;
 use Test::Exception;
 use Data::Dumper;
-use Inline::Java qw(caught);
 
 BEGIN {
     use_ok ('Finance::HostedTrader::Account::FXCM::ForexConnect');
@@ -14,18 +13,11 @@ BEGIN {
 my $acc;
 
 throws_ok {
-    eval {
-        $acc = Finance::HostedTrader::Account::FXCM::ForexConnect->new(
-            username => 'bad',
-            password => 'reallybad',
-            accountType => 'Demo',
-        );
-    };
-    if ($@) {
-        if (caught("java.lang.RuntimeException")) {
-            die($@->getMessage());
-        }
-    }
+    $acc = Finance::HostedTrader::Account::FXCM::ForexConnect->new(
+        username => 'bad',
+        password => 'reallybad',
+        accountType => 'Demo',
+    );
 } qr /User or connection doesn't exist./, 'Login failed';
 
     $acc = Finance::HostedTrader::Account::FXCM::ForexConnect->new(
