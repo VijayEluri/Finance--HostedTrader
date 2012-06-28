@@ -3,8 +3,10 @@
 
 set -e
 
+TEST_DATA_DIR=${1:-.}
+
 rm -fR testdata
-tar xf testdata.tar
+tar xf ${TEST_DATA_DIR}/testdata.tar
 cd testdata
 
 for file in *gz; do

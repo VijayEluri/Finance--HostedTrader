@@ -3,11 +3,14 @@
 
 set -e
 
+TEST_DATA_DIR=${1:-.}
+
 SYMS="XAGUSD EURUSD USDJPY"
 TFS="300 900 3600 7200 14400 86400"
 
+cd "$(dirname "$0")"
+
 rm -fR testdata
-rm -f testdata.tar
 mkdir testdata
 cd testdata
 
@@ -18,5 +21,5 @@ for sym in $SYMS; do
 done
 
 cd ..
-tar cPf testdata.tar testdata
+tar cPf ${TEST_DATA_DIR}/testdata.tar testdata
 rm -fR testdata
