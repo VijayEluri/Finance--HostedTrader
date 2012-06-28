@@ -16,7 +16,7 @@ cd testdata
 
 for sym in $SYMS; do
   for tf in $TFS; do
-    mysql -ufxcm -e "SELECT * FROM ${sym}_${tf} WHERE datetime between '2011-10-01 00:00:00' AND '2012-06-25 00:00:00'" fxcm | gzip > ${sym}_${tf}.gz
+    mysql -ufxcm -e "SELECT * FROM ${sym}_${tf} WHERE datetime between '2011-01-01 00:00:00' AND '2012-06-28 00:00:00'" fxcm | gzip > ${sym}_${tf}.gz
   done
 done
 
