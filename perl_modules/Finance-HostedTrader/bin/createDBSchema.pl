@@ -72,7 +72,6 @@ my $dbpasswd = $cfg->db->dbpasswd;
 my $userhost = 'localhost'; #Unlikely to be anything else
 
 print qq{
-    CREATE DATABASE $dbname;
     use $dbname;
 };
 
