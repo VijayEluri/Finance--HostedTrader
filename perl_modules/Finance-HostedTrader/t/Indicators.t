@@ -45,15 +45,15 @@ sub testIndicator {
 
     my $expr = "datetime, $name($valid_args)";
     adhoc_test($expr, $expected, "$name value");
-    throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($toofew_args)", endPeriod => "2011-12-31 23:00:00" }) } qr/Syntax error in indicator/, "$name too few arguments" if (defined($toofew_args));
-    throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($toomany_args)", endPeriod => "2011-12-31 23:00:00"  }) } qr/Syntax error in indicator/, "$name too many arguments" if (defined($toomany_args));
-    throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($bad_expression)", endPeriod => "2011-12-31 23:00:00"  }) } qr/Syntax error in indicator/, "$name bad arguments expression" if (defined($bad_expression));
+    throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($toofew_args)", startPeriod => "2011-10-02 00:00:00", endPeriod => "2011-12-31 23:00:00" }) } qr/Syntax error in indicator/, "$name too few arguments" if (defined($toofew_args));
+    throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($toomany_args)", startPeriod => "2011-10-02 00:00:00", endPeriod => "2011-12-31 23:00:00"  }) } qr/Syntax error in indicator/, "$name too many arguments" if (defined($toomany_args));
+    throws_ok { $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => "datetime, $name($bad_expression)", startPeriod => "2011-10-02 00:00:00", endPeriod => "2011-12-31 23:00:00"  }) } qr/Syntax error in indicator/, "$name bad arguments expression" if (defined($bad_expression));
 }
 
 sub adhoc_test {
     my ($expr, $expected, $desc) = @_;
     
-    my $got = $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => $expr, endPeriod => "2011-12-31 23:00:00"  });
+    my $got = $e->getIndicatorData( { symbol => $symbol, tf => $tf, numItems => 1, fields => $expr, startPeriod => "2011-10-02 00:00:00", endPeriod => "2011-12-31 23:00:00"  });
     my $expect = ['2011-12-29 22:00:00', $expected];
     is_deeply($got->[0], $expect, $desc);
 }
