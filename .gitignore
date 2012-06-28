@@ -21,3 +21,4 @@ _Inline
 nytprof.out
 .build
 target
+testdata.tar
