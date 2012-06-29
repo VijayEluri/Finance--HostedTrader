@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-
+# Trade the trendfollow system during a choppy period (only open and close signals are triggered, no trades are added on to)
 use strict;
 use warnings;
 use YAML::Tiny;
