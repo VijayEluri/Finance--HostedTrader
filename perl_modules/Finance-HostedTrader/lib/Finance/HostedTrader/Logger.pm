@@ -1,4 +1,5 @@
 package Finance::HostedTrader::Logger;
+# ABSTRACT: Finance::HostedTrader::Logger - A logger object which Finance::HostedTrader classes can inherit.
 
 use strict;
 use warnings;
