@@ -19,7 +19,7 @@ my $test = Finance::HostedTrader::Test::TestSystem->new(
                                 },
                 resultsFile => "$t_path/trader/trades.jpy",
                 startDate   => '2012-03-05 06:00:00',
-                endDate     => '2012-04-23 00:00:00',
+                endDate     => '2012-03-14 00:00:00',
                 pathToSystems   => "$t_path/systems",
 );
 
