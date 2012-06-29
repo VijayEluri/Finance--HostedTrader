@@ -9,7 +9,7 @@ use Finance::HostedTrader::Test::TestSystem;
 
 my $t_path = dirname($0);
 my $args;
-$args = '--dontSkipDates' if ($0 =~ /noskip/);
+$args = '--dontSkipDates=1' if ($0 =~ /noskip/);
 
 my $test = Finance::HostedTrader::Test::TestSystem->new(
                 systemName	=> 'trendfollow',
