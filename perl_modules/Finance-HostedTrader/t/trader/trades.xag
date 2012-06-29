@@ -1,14 +1,29 @@
-- symbol: XAGUSD
-  direction: long
-  amount: 1950
-  stopLoss: 17.3100
-  now: 2010-08-18 06:08:00
+- symbol: EURUSD
+  direction: short
+  amount: 710000
+  stopLoss: 1.3274
+  now: 2012-05-01 14:08:00
   nav: 50000.0000
   balance: 50000.0000
-- symbol: XAGUSD
-  direction: long
-  amount: 650
-  stopLoss: 18.8100
-  now: 2010-09-22 08:00:00
-  nav: 53036.7628
+- symbol: EURUSD
+  direction: short
+  amount: 220000
+  stopLoss: 1.3067
+  now: 2012-05-30 00:00:00
+  nav: 84514.5196
   balance: 50000.0000
+- symbol: EURUSD
+  direction: short
+  amount: -930000
+  value: 1.2636
+  now: 2012-06-15 17:00:00
+  nav: 75205.7245
+  balance: 75205.7245
+- symbol: EURUSD
+  direction: short
+  amount: 510000
+  stopLoss: 1.2727
+  now: 2012-06-18 08:12:00
+  nav: 75205.7245
+  balance: 75205.7245
+

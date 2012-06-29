@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-
+# Trade the trendfollow system during a treding period (both open, add and close signals are triggered)
 use strict;
 use warnings;
 use YAML::Tiny;
@@ -14,12 +14,12 @@ $args = '--dontSkipDates=1' if ($0 =~ /noskip/);
 my $test = Finance::HostedTrader::Test::TestSystem->new(
                 systemName	=> 'trendfollow',
                 symbols     =>  {
-                                    long  => [ 'XAGUSD' ],
-                                    short => [],
+                                    long  => [],
+                                    short => [ 'EURUSD' ],
                                 },
-                resultsFile => "$t_path/trader/trades.jpy",
-                startDate   => '2012-03-18 06:00:00',
-                endDate     => '2012-05-17 00:00:00',
+                resultsFile => "$t_path/trader/trades.xag",
+                startDate   => '2012-05-01 00:00:00',
+                endDate     => '2012-06-20 00:00:00',
                 pathToSystems   => "$t_path/systems",
 );
 
