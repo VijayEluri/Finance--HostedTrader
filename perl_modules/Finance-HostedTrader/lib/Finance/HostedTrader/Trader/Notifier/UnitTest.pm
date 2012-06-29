@@ -16,6 +16,7 @@ use warnings;
 use Moose;
 extends 'Finance::HostedTrader::Trader::Notifier';
 use Test::More;
+use Test::Differences;
 use YAML::Tiny;
 use Data::Dumper;
 
@@ -96,7 +97,7 @@ sub open {
     
     warn("Was not expecting any more trades !") && exit if (!defined($expected_trade));
  
-    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
+    eq_or_diff($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
 }
 
 =method C<close()>
@@ -122,7 +123,7 @@ sub close {
     
     warn("Was not expecting any more trades !") && exit if (!defined($expected_trade));
  
-    is_deeply($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
+    eq_or_diff($got_trade, $expected_trade, "Open trade " . $self->{_tradeCount}) unless($self->{_skipTests});
 }
 
 
