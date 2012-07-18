@@ -4,28 +4,38 @@ use strict;
 use warnings;
 
 use Data::Dumper;
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
+use Pod::Usage;
 
 use Finance::HostedTrader::Factory::Account;
 use Finance::HostedTrader::Trader;
 use Finance::HostedTrader::System;
 
 my $positions = [
-    {   symbol => 'USDJPY', direction => 'short' },
-    {   symbol => 'XAGUSD', direction => 'long' },
+    {   symbol => 'EURCAD', direction => 'short' },
+    {   symbol => 'GBPCHF', direction => 'long' },
 ];
 
 
-my ($address, $port, $class) = ('127.0.0.1', 1500, 'FXCM');
+my ($verbose, $help, $accountClass, $pathToSystems) = (0, 0, 'ForexConnect', 'systems');
+my $result = GetOptions(
+    "class=s",          \$accountClass,
+    "verbose",          \$verbose,
+    "help",             \$help,
+    "pathToSystems=s",  \$pathToSystems,
+) || pod2usage(2);
 
-GetOptions(
-    "class=s"   => \$class,
-    "address=s" => \$address,
-    "port=i"    => \$port,
-);
+pod2usage(1) if ($help);
 
-my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow' );
-my $account = Finance::HostedTrader::Factory::Account->new( SUBCLASS => $class, address => $address, port => $port )->create_instance();
+my $trendfollow = Finance::HostedTrader::System->new( name => 'trendfollow', pathToSystems => $pathToSystems );
+my %classArgs = map { s/^--//; split(/=/) } @ARGV;
+my $account = Finance::HostedTrader::Factory::Account->new(
+                SUBCLASS => $accountClass,
+                system => $trendfollow,
+                %classArgs,
+            )->create_instance();
+
+
 
 my $system = Finance::HostedTrader::Trader->new( system => $trendfollow, account => $account );
 my $accountSize = $account->getNav();
