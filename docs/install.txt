@@ -5,15 +5,16 @@ Packages:
     mysql
     maven
 Perl modules
-    Install Finance::HostedTrader from
-      $TRADER_HOME/perl_modules/Finance-HostedTrader/Finance-HostedTrader*.tar.gz
+    Install Finance::HostedTrader
+      rpm package from packages.zonalivre.org ( source: https://github.com/joaocosta/Finance-HostedTrader )
 
 HostedTrader
-    Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Hosted--Trader
-    source $TRADER_HOME/setupEnv.source
+    Setup TRADER_HOME to point to source code, eg: TRADER_HOME=~/src/Finance--HostedTrader
 	Need a HostedTrader config file, eg: /etc/fx.yml
-    Download ForexConnect (http://forexforums.dailyfx.com/forexconnect/392705-forexconnect-api-subscribe-updates.html) and unpack somewhere, then set FXCONNECT_HOME to point to that directory
-    Compile the Java bits in $TRADER_HOME/data/fxcm/src/FXConnect using "mvn package"
+	Install ForexConnect:
+	   rpm package available from packages.zonalivre.org
+       or download source (http://forexforums.dailyfx.com/forexconnect/392705-forexconnect-api-subscribe-updates.html) and unpack somewhere, then set FXCONNECT_HOME to point to that directory
+    #This step is legacy as the java components were converted to perl, this is not needed: Compile the Java bits in $TRADER_HOME/data/fxcm/src/FXConnect using "mvn package"
 
 MySQL
     Install lib_mysqludf_ta ( https://github.com/joaocosta/lib_mysqludf_ta )
