@@ -5,7 +5,7 @@ TF=$1
 # Load natural timeframes
 DATADIR=${2:-/dev/shm}
 STARTDATE=${3:-1900-01-01}
-mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\n' -s -ufxcm fxcm $DATADIR/*_$TF
+mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='\n' -s -ufxcm -pfxcm fxcm $DATADIR/*_$TF
 rm -Rf $DATADIR/*_$TF
 
 # Create synthetic pairs
