@@ -1,6 +1,5 @@
 #!/bin/sh
 set -e
-source $TRADER_HOME/setupEnv.source
 
 FXCM_TIMEFRAME=m5
 NUM_ITEMS=10
