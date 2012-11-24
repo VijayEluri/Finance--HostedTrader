@@ -63,4 +63,4 @@ db:
     dbhost: localhost
     dbname: fx
     dbuser: fxhistor
-    dbpasswd:
+    dbpasswd: fxhistor
