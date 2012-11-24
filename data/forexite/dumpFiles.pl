@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 =head1 NAME
 
-Dumps csv files and dumps them to a fixed directory (/home/fxhistor/download)
+Dumps csv files and dumps them to a fixed directory (/home/joao/download)
 
 =head1 SYNOPSIS
 
@@ -60,7 +60,7 @@ use Data::Dumper;
 use Getopt::Long;
 use Pod::Usage;
 
-use constant BASE_PATH => '/home/fxhistor/download';
+use constant BASE_PATH => '/home/joao/download';
 my ( $verbose, $timeframes_txt, $help ) = ( 0, '', 0 );
 
 my $result =
