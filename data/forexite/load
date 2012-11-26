@@ -11,7 +11,7 @@ synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
 updateTf.pl --start="4 days ago at midnight" --available-timeframe=min
-./TruncateWeekly.pl | mysql -ufx fx
+./TruncateWeekly.pl | mysql -ufxhistor -pfxhistor fx
 updateTf.pl --timeframes=604800 --available-timeframe=day
 
 # Dump downloadable rates
