@@ -3,33 +3,34 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
+use Finance::HostedTrader::Config;
+use Finance::HostedTrader::Account::FXCM::ForexConnect;
 use Finance::FXCM::Simple;
+use Pod::Usage;
 
-my ($username, $password, $accountType, $fxcmTimeframe, $numItemsToDownload, @symbols) = @ARGV;
+my $numItemsToDownload = 10;
+my ($timeframe, $numItemsToDownload, @symbols, $symbols_txt);
 
-my $fxcm = Finance::FXCM::Simple->new($username, $password, $accountType, 'http://www.fxcorporate.com/Hosts.jsp');
+my $result = GetOptions(
+    "symbols=s", \$symbols_txt,
+    "timeframe=s", \$table_type,
+    "numItems=i", \$numItemsToDownload,
+    "help", \$help)  or pod2usage(1);
 
-#TODO Need some kind of module that maps FXCM timeframe codes to Finance::HostedTrader timeframe codes
-my $timeframe;
-if ($fxcmTimeframe eq "m1") {
-    $timeframe = 60;
-} elsif ($fxcmTimeframe eq "m5") {
-   $ timeframe = 300;
-} elsif ($fxcmTimeframe eq "H1") {
-    $timeframe = 3600;
-} elsif ($fxcmTimeframe eq "D1") {
-    $timeframe = 86400;
-} elsif ($fxcmTimeframe eq "W1") {
-    $timeframe = 604800;
+my $cfg     = Finance::HostedTrader::Config->new();
+if (!$symbols_txt) {
+    @symbols = split( ',', $symbols_txt ) if ($symbols_txt);
 } else {
-    die("Unknown timeframe '$fxcmTimeframe'");
+    @symbols = @{ $cfg->symbols->natural };
 }
 
+my $fxcmTimeframe = Finance::HostedTrader::Account::FXCM::ForexConnect::convertTimeframeToFXCM($timeframe);
+my $providerCfg = $cfg->tradingProviders->{fxcm};
+my $fxcm = Finance::FXCM::Simple->new($providerCfg->username, $providerCfg->password, $providerCfg->accountType, $providerCfg->serverURL);
 
 foreach my $symbol (@symbols) {
-    my $filename = $symbol;
-    $filename =~ s|/||g;
-    $filename .= "_$timeframe";
+    my $filename = $symbol . "_timeframe";
 
-    $fxcm->saveHistoricalDataToFile($filename, $symbol, $fxcmTimeframe, $numItemsToDownload);
+    $fxcm->saveHistoricalDataToFile($filename, Finance::HostedTrader::Account::FXCM::ForexConnect::convertSymbolToFXCM($symbol), $fxcmTimeframe, $numItemsToDownload);
 }
