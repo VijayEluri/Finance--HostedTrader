@@ -10,9 +10,9 @@ rm -Rf *_$TF
 synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
-updateTf.pl --start="4 days ago at midnight" --available-timeframe=min
+updateTf.pl --start="4 days ago at midnight" --available-timeframe=60
 ./TruncateWeekly.pl | mysql -ufxhistor -pfxhistor fx
-updateTf.pl --timeframes=604800 --available-timeframe=day
+updateTf.pl --timeframes=604800 --available-timeframe=86400
 
 # Dump downloadable rates
 ./dumpFiles.pl --timeframes=3600,86400
