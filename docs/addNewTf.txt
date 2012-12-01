@@ -7,14 +7,14 @@ vi ~/.fx.yml
 createDBSchema.pl | mysql -u root fx
 
 #Populate by deriving data from existing timeframes
-updateTf.pl --verbose --timeframes=7200 --available-timeframe=hour
-updateTf.pl --verbose --timeframes=14400 --available-timeframe=2hour
+updateTf.pl --verbose --timeframes=7200 --available-timeframe=3600
+updateTf.pl --verbose --timeframes=14400 --available-timeframe=7200
 
 #if updateTf.pl fails with die in Datasource.pm
 #update Datasource.pm to deal with new timeframe
 
 #Make sure the update script works with the new timeframes
-updateTf.pl --start="4 days ago at midnight" --verbose
+updateTf.pl --start="4 days ago at midnight" --verbose --available-timeframe=$tf_smaller_than_new_one
 echo Remember weekly timeframes are probably messed up now, rebuild them.
 
 echo issue with updateTf.pl assumes tfs are sequential and can be derived from the previous one (eg: doesn't work with 2hour to 3hour tfs)

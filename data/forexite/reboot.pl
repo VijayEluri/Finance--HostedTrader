@@ -24,8 +24,8 @@ foreach my $symbol ( @{$symbols} ) {
 }
 
 =pod
-updateTf.pl --verbose --available-timeframe=min --timeframes=300
-updateTf.pl --verbose --available-timeframe=5min --timeframes=900,1800,3600
-updateTf.pl --verbose --available-timeframe=hour --timeframes=7200,14400,86400
-updateTf.pl --verbose --available-timeframe=day --timeframes=604800
+updateTf.pl --verbose --available-timeframe=60 --timeframes=300
+updateTf.pl --verbose --available-timeframe=300 --timeframes=900,1800,3600
+updateTf.pl --verbose --available-timeframe=3600 --timeframes=7200,14400,86400
+updateTf.pl --verbose --available-timeframe=86400 --timeframes=604800
 =cut
