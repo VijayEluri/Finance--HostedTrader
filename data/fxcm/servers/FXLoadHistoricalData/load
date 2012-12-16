@@ -9,16 +9,16 @@ mysqlimport --ignore --local --fields-terminated-by='\t' --lines-terminated-by='
 rm -Rf $DATADIR/*_$TF
 
 # Create synthetic pairs
-synthetics.pl --timeframe=$TF
+fx-build-synthetics.pl --timeframe=$TF
 
 # Create synthetic timeframes
 if [[ "$TF" == "300" ]]; then
-updateTf.pl --start="$STARTDATE" --timeframes=900 --available-timeframe=300 --symbols=all
-updateTf.pl --start="$STARTDATE" --timeframes=1800 --available-timeframe=900 --symbols=all
+fx-update-tf.pl --start="$STARTDATE" --timeframes=900 --available-timeframe=300 --symbols=all
+fx-update-tf.pl --start="$STARTDATE" --timeframes=1800 --available-timeframe=900 --symbols=all
 fi
 
 if [[ "$TF" == "3600" ]]; then
-updateTf.pl --start="$STARTDATE" --timeframes=7200 --available-timeframe=3600 --symbols=all
-updateTf.pl --start="$STARTDATE" --timeframes=10800 --available-timeframe=3600 --symbols=all
-updateTf.pl --start="$STARTDATE" --timeframes=14400 --available-timeframe=7200 --symbols=all
+fx-update-tf.pl --start="$STARTDATE" --timeframes=7200 --available-timeframe=3600 --symbols=all
+fx-update-tf.pl --start="$STARTDATE" --timeframes=10800 --available-timeframe=3600 --symbols=all
+fx-update-tf.pl --start="$STARTDATE" --timeframes=14400 --available-timeframe=7200 --symbols=all
 fi
